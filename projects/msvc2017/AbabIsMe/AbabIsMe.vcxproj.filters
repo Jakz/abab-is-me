@@ -45,6 +45,9 @@
     <ClInclude Include="..\..\..\src\gfx\ViewManager.h">
       <Filter>src\gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\game\Level.h">
+      <Filter>src\game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp">
@@ -67,6 +70,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\ViewManager.cpp">
       <Filter>src\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\game\Level.cpp">
+      <Filter>src\game</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

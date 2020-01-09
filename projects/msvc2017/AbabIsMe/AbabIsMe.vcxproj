@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\Common.h" />
+    <ClInclude Include="..\..\..\src\game\Level.h" />
     <ClInclude Include="..\..\..\src\game\Types.h" />
     <ClInclude Include="..\..\..\src\gfx\MainView.h" />
     <ClInclude Include="..\..\..\src\gfx\SdlHelper.h" />
@@ -150,6 +151,7 @@
     <ClInclude Include="..\..\..\src\io\zip\unzip.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\game\Level.cpp" />
     <ClCompile Include="..\..\..\src\gfx\GameView.cpp" />
     <ClCompile Include="..\..\..\src\gfx\ViewManager.cpp" />
     <ClCompile Include="..\..\..\src\io\Loader.cpp" />

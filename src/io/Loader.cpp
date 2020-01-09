@@ -3,6 +3,7 @@
 #include "Zip.h"
 
 #include "game/Types.h"
+#include "game/Level.h"
 
 #include <cstdio>
 #include <iostream>
@@ -222,18 +223,73 @@ void ValuesParser::generateObject()
     baba::ObjectSpec object;
 
     assert(fields.find("name") != fields.end());
+    assert(fields.find("sprite") != fields.end());
     assert(fields.find("sprite_in_root") != fields.end());
+    assert(fields.find("unittype") != fields.end());
+
     assert(fields.find("tile") != fields.end());
     assert(fields.find("colour") != fields.end());
 
     object.name = sutils::trimQuotes(fields["name"]);
-    object.sprite = sutils::trimQuotes(fields["name"]);
-    
+    object.sprite = sutils::trimQuotes(fields["sprite"]);
+   
     auto tile = parseCoordinate(fields["tile"]);
     object.id = tile.first | (tile.second << 8);
 
     auto color = parseCoordinate(fields["colour"]);
     object.color = { color.first, color.second };
+
+    {
+      auto type = sutils::trimQuotes(fields["unittype"]);
+
+      if (type == "object")
+        object.isText = false;
+      else if (type == "text")
+        object.isText = true;
+      else
+        assert(false);
+    }
+
+    {
+      auto spriteInRoot = fields["sprite_in_root"];
+
+      if (spriteInRoot == "true")
+        object.spriteInRoot = true;
+      else if (spriteInRoot == "false")
+        object.spriteInRoot = false;
+      else
+        assert(false);
+
+    }
+
+    {
+      int type = std::stoi(fields["type"]);
+      using T = baba::ObjectSpec::Type;
+
+      switch (type) {
+      case 0: object.type = T::Noun; break;
+      case 1: object.type = T::Verb; break;
+      case 2: object.type = T::Property; break;
+      case 3: object.type = T::Adjective; break;
+      case 4: object.type = T::Negative; break;
+      case 6: object.type = T::Conjunction; break;
+      case 7: object.type = T::Preposition; break;
+      default: assert(false);
+      }
+    }
+
+    {
+      int tiling = std::stoi(fields["tiling"]);
+
+      switch (tiling) {
+      case -1: object.tiling = baba::ObjectSpec::Tiling::None; break;
+      case 0: object.tiling = baba::ObjectSpec::Tiling::Zero; break;
+      case 1: object.tiling = baba::ObjectSpec::Tiling::Ortho; break;
+      case 2: object.tiling = baba::ObjectSpec::Tiling::Player; break;
+      case 3: object.tiling = baba::ObjectSpec::Tiling::Belt; break;
+      default: assert(false);
+      }
+    }
 
     data.objects.push_back(object);
   }
@@ -291,7 +347,7 @@ void ValuesParser::parse()
         {
           auto objectName = parseKeyValue(line);
           assert(!objectName.first.empty() && objectName.second.empty());
-          LOGD("Parsing object %s", objectName.first.c_str());
+          //LOGD("Parsing object %s", objectName.first.c_str());
           skipLine();
           state = s::InsideObject;
           fields.clear();
@@ -311,7 +367,7 @@ void ValuesParser::parse()
           auto pair = parseKeyValue(line);
           fields.emplace(pair);
           assert(!pair.first.empty() && !pair.second.empty());
-          LOGD("  Field %s = %s", pair.first.c_str(), pair.second.c_str());
+          //LOGD("  Field %s = %s", pair.first.c_str(), pair.second.c_str());
         }
 
         break;

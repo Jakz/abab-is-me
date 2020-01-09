@@ -6,6 +6,7 @@
 #include "io/Loader.h"
 
 #include "game/Types.h"
+#include "game/Level.h"
 
 baba::GameData data;
 baba::Level* level;
@@ -15,6 +16,7 @@ int main(int argc, char* argv[])
   io::Loader loader(data);
   loader.loadGameData();
   level = loader.load("1level.l");
+  level->computeTiling();
   
   ui::ViewManager ui;
 

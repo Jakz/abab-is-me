@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include <algorithm>
 
 namespace baba
 {
@@ -14,13 +15,21 @@ namespace baba
     coord_t x, y;
   };
 
+  enum class D { UP, DOWN, LEFT, RIGHT };
   
   struct ObjectSpec
   {
+    enum class Type { Noun = 0, Verb, Property, Adjective, Negative, Unused, Conjunction, Preposition };
+    enum class Tiling { None = -1, Zero, Ortho, Player, Belt };
+
+    Type type;
     int32_t id;
     point_t color;
     std::string name;
     std::string sprite;
+    bool spriteInRoot;
+    bool isText;
+    Tiling tiling;
   };
 
   struct GameData
@@ -38,6 +47,9 @@ namespace baba
   struct Object
   {
     const ObjectSpec* spec;
+    uint32_t variant;
+
+    Object(const ObjectSpec* spec) : spec(spec), variant(0) { }
   };
 
   struct Tile
@@ -47,26 +59,12 @@ namespace baba
 
     void add(Object object) { objects.push_back(object); }
     const Object* object() const { return !objects.empty() ? &objects[0] : nullptr; }
-  };
 
-  struct Level
-  {
-  private:
-    coord_t _width, _height;
-    std::vector<Tile> _tiles;
-
-  public:
-    Level(coord_t width, coord_t height) : _width(width), _height(height)
-    {
-      _tiles.resize(width*height);
-      for (coord_t y = 0; y < height; ++y)
-        for (coord_t x = 0; x < width; ++x)
-          get(x, y)->coord = { x, y };
+    bool has(const ObjectSpec* spec) const {
+      return std::any_of(objects.begin(), objects.end(), [spec](const Object& object) { return object.spec == spec; });
     }
 
-    Tile* get(coord_t i) { return &_tiles[i]; }
-
-    Tile* get(coord_t x, coord_t y) { return &_tiles[y*_width + x]; }
-    const Tile* get(coord_t x, coord_t y) const { return &_tiles[y*_width + x]; }
+    coord_t x() const { return coord.x; }
+    coord_t y() const { return coord.y; }
   };
 }

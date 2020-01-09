@@ -1,6 +1,7 @@
 #include "MainView.h"
 
 #include "game/Types.h"
+#include "game/Level.h"
 
 using namespace ui;
 
@@ -35,7 +36,7 @@ void GameView::render()
 
       if (obj)
       {
-        path image = DATA_FOLDER + R"(Sprites\)" + obj->spec->sprite + "_0_1.png";
+        path image = DATA_FOLDER + R"(Sprites\)" + obj->spec->sprite + "_" + std::to_string(obj->variant) + "_1.png";
         SDL_Texture* texture = nullptr;
         auto tit = cache.find(image);
 
