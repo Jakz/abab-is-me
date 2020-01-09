@@ -1,14 +1,20 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "gfx/view_manager.h"
+#include "gfx/ViewManager.h"
 
 #include "io/Loader.h"
 
+#include "game/Types.h"
+
+baba::GameData data;
+baba::Level* level;
+
 int main(int argc, char* argv[])
 {
-  io::Loader loader;
+  io::Loader loader(data);
   loader.loadGameData();
+  level = loader.load("1level.l");
   
   ui::ViewManager ui;
 

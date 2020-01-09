@@ -2,19 +2,26 @@
 
 #include "Common.h"
 
+namespace baba
+{
+  struct Level;
+  struct GameData;
+}
+
 namespace io
 {
   class Loader
   {
   private:
+    baba::GameData& data;
     FILE* in;
 
-    void readLayer(uint16_t version);
+    baba::Level* readLayer(uint16_t version);
 
   public:
-    Loader();
+    Loader(baba::GameData& data);
 
-    void load(const path& path);
+    baba::Level* load(const path& path);
 
     void loadGameData();
   };

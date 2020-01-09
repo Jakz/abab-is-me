@@ -1,6 +1,6 @@
-#include "view_manager.h"
+#include "ViewManager.h"
 
-#include "main_view.h"
+#include "MainView.h"
 
 using namespace ui;
 

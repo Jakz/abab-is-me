@@ -2,6 +2,8 @@
 
 #include "Zip.h"
 
+#include "game/Types.h"
+
 #include <cstdio>
 #include <iostream>
 #include <fstream>
@@ -10,7 +12,7 @@
 
 using namespace io;
 
-Loader::Loader()
+Loader::Loader(baba::GameData& data) : data(data)
 {
 
 }
@@ -30,7 +32,7 @@ size_t flength(FILE* in) { fseek(in, 0, SEEK_END); size_t ot = ftell(in); fseek(
 
 */
 
-void Loader::load(const path& path)
+baba::Level* Loader::load(const path& path)
 {  
   in = fopen(path.c_str(), "rb");
 
@@ -53,6 +55,8 @@ void Loader::load(const path& path)
   read(version, in);
   assert(version >= MIN_VERSION && version <= MAX_VERSION);
 
+  baba::Level* level = nullptr;
+
   while (ftell(in) < length)
   {
     uint32_t header;
@@ -67,7 +71,8 @@ void Loader::load(const path& path)
     {
       uint16_t layerCount = read<uint16_t>(in);
       for (size_t i = 0; i < layerCount; ++i)
-        readLayer(version);
+        level = readLayer(version);
+      break;
     }
     else
       assert(false);
@@ -75,11 +80,12 @@ void Loader::load(const path& path)
   }
 
   fclose(in);
+  return level;
 }
 
 using object_id = uint16_t;
 
-void Loader::readLayer(uint16_t version)
+baba::Level* Loader::readLayer(uint16_t version)
 {
   uint32_t width = read<uint32_t>(in);
   uint32_t height = read<uint32_t>(in);
@@ -102,11 +108,26 @@ void Loader::readLayer(uint16_t version)
   Zip::byte* buffer = (Zip::byte*)std::calloc(compressedSize, 1);
   fread(buffer, 1, compressedSize, in);
   auto uncompressed = Zip::uncompress(buffer, compressedSize);
-
+  
   assert(uncompressed.length == (width * height * sizeof(object_id)));
 
+  baba::Level* level = new baba::Level(width, height);
 
+  /* layer data is made by 2 bytes object indices */
+  const int16_t* objects = reinterpret_cast<const int16_t*>(uncompressed.data);
+  for (uint32_t i = 0; i < width*height; ++i)
+  {
+    int16_t id = objects[i];
 
+    auto it = data.objectsByID.find(id);
+
+    if (it != data.objectsByID.end())
+    {
+      level->get(i)->add({ it->second });
+    }
+  }
+  
+  return level;
 }
 
 #include "game/Types.h"
@@ -159,6 +180,7 @@ private:
 
   void skipLine(size_t d = 1) { i += d; }
   std::pair<std::string, std::string> parseKeyValue(const std::string& v);
+  std::pair<int32_t, int32_t> parseCoordinate(const std::string& v);
 
   void generateObject();
 
@@ -183,6 +205,16 @@ std::pair<std::string, std::string> ValuesParser::parseKeyValue(const std::strin
   }
 }
 
+std::pair<int32_t, int32_t> ValuesParser::parseCoordinate(const std::string& v)
+{
+  assert(v.front() == '{' && v.back() == '}');
+  auto idx = v.find_first_of(", ");
+  assert(idx != std::string::npos);
+  int32_t f = std::stoi(v.substr(1, idx - 1));
+  int32_t s = std::stoi(v.substr(idx + 2));
+  return std::make_pair(f, s);
+}
+
 void ValuesParser::generateObject()
 {
   if (fields.find("name") != fields.end())
@@ -191,10 +223,13 @@ void ValuesParser::generateObject()
 
     assert(fields.find("name") != fields.end());
     assert(fields.find("sprite_in_root") != fields.end());
-
+    assert(fields.find("tile") != fields.end());
 
     object.name = sutils::trimQuotes(fields["name"]);
     object.sprite = sutils::trimQuotes(fields["name"]);
+    
+    auto tile = parseCoordinate(fields["tile"]);
+    object.id = tile.first | (tile.second << 8);
 
     data.objects.push_back(object);
   }
@@ -283,8 +318,8 @@ void ValuesParser::parse()
 
 void Loader::loadGameData()
 {
-  baba::GameData data;
   ValuesParser parser(data);
   parser.init();
   parser.parse();
+  data.finalize();
 }

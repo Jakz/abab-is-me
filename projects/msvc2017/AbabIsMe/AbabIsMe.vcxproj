@@ -141,17 +141,17 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\src\Common.h" />
     <ClInclude Include="..\..\..\src\game\Types.h" />
-    <ClInclude Include="..\..\..\src\gfx\main_view.h" />
-    <ClInclude Include="..\..\..\src\gfx\sdl_helper.h" />
-    <ClInclude Include="..\..\..\src\gfx\view_manager.h" />
+    <ClInclude Include="..\..\..\src\gfx\MainView.h" />
+    <ClInclude Include="..\..\..\src\gfx\SdlHelper.h" />
+    <ClInclude Include="..\..\..\src\gfx\ViewManager.h" />
     <ClInclude Include="..\..\..\src\io\Loader.h" />
     <ClInclude Include="..\..\..\src\io\Zip.h" />
     <ClInclude Include="..\..\..\src\io\zip\ioapi.h" />
     <ClInclude Include="..\..\..\src\io\zip\unzip.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\gfx\game_view.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\view_manager.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\GameView.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\ViewManager.cpp" />
     <ClCompile Include="..\..\..\src\io\Loader.cpp" />
     <ClCompile Include="..\..\..\src\io\Zips.cpp" />
     <ClCompile Include="..\..\..\src\io\zip\ioapi.cpp" />

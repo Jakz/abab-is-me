@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sdl_helper.h"
+#include "SdlHelper.h"
 
 #include <array>
 
