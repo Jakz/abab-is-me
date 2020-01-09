@@ -100,6 +100,7 @@ int Zip::inflateInternal(const byte* dataIn, size_t length, byte** dataOut, size
   
   size_t bufferSize = outLenghtHint ;
   byte *out = static_cast<unsigned char*>(malloc(bufferSize));
+  *dataOut = out;
   
   z_stream d_stream; /* decompression stream */
   d_stream.zalloc = (alloc_func)0;
@@ -109,15 +110,14 @@ int Zip::inflateInternal(const byte* dataIn, size_t length, byte** dataOut, size
   d_stream.next_in  = const_cast<byte*>(dataIn);
   d_stream.avail_in = static_cast<unsigned int>(length);
   d_stream.total_in = 0;
-  d_stream.next_out = *dataOut;
+  d_stream.next_out = out;
   d_stream.avail_out = static_cast<unsigned int>(bufferSize);
   d_stream.total_out = 0;
 
   if (!out)
     return Z_BUF_ERROR;
 
-  /* window size to hold 256k */
-  if ((err = inflateInit2(&d_stream, 15 + 32)) != Z_OK)
+  if ((err = inflateInit2(&d_stream, MAX_WBITS)) != Z_OK)
   {
     free(out);
     return err;
@@ -133,8 +133,15 @@ int Zip::inflateInternal(const byte* dataIn, size_t length, byte** dataOut, size
     switch (err)
     {
       case Z_NEED_DICT:
-        err = Z_DATA_ERROR;
+        printf("Need Dict: %s\n", d_stream.msg);
+        inflateEnd(&d_stream);
+        return err;
+        break;
       case Z_DATA_ERROR:
+        printf("Data Error: %s\n", d_stream.msg);
+        inflateEnd(&d_stream);
+        return err;
+        break;
       case Z_MEM_ERROR:
         inflateEnd(&d_stream);
         return err;
@@ -174,13 +181,13 @@ Zip::unique_cptr Zip::uncompress(const byte* data, size_t length)
   
   if (result != Z_OK || !dataOut)
   {
-    /*switch (result)
+    switch (result)
     {
-      case Z_MEM_ERROR: CCLOG("cocos2d: ZipUtils: Out of memory while decompressing map data!"); break;
-      case Z_VERSION_ERROR: CCLOG("cocos2d: ZipUtils: Incompatible zlib version!"); break;
-      case Z_DATA_ERROR: CCLOG("cocos2d: ZipUtils: Incorrect zlib compressed data!"); break;
-      default: CCLOG("cocos2d: ZipUtils: Unknown error while decompressing map data!");
-    }*/
+      case Z_MEM_ERROR: printf("cocos2d: ZipUtils: Out of memory while decompressing map data!" "\n"); break;
+      case Z_VERSION_ERROR: printf("cocos2d: ZipUtils: Incompatible zlib version!" "\n"); break;
+      case Z_DATA_ERROR: printf("cocos2d: ZipUtils: Incorrect zlib compressed data!" "\n"); break;
+      default: printf("cocos2d: ZipUtils: Unknown error while decompressing map data!" "\n");
+    }
     
     free(dataOut);
     dataOut = nullptr;

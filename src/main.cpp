@@ -6,7 +6,10 @@
 int main(int argc, char* argv[])
 {
   io::Loader loader;
-  loader.load("1level.l");
+  loader.loadGameData();
+  //loader.load("1level.l");
+
   
+  getchar();
   return 0;
 }

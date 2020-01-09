@@ -15,5 +15,7 @@ namespace io
     Loader();
 
     void load(const path& path);
+
+    void loadGameData();
   };
 }

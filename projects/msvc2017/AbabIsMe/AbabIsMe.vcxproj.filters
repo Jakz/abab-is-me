@@ -10,6 +10,9 @@
     <Filter Include="src\io\zip">
       <UniqueIdentifier>{466f99d7-c252-4e8f-b143-5a6a34dd623d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\game">
+      <UniqueIdentifier>{fbd43b84-3431-4555-8dd9-f53c4b0e9f62}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\io\Loader.h">
@@ -26,6 +29,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\io\Zip.h">
       <Filter>src\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\game\Types.h">
+      <Filter>src\game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
