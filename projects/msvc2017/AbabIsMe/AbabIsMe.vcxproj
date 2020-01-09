@@ -76,12 +76,13 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(SolutionDir)..\..\libs\zlib\lib\win_x64\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)..\..\libs\zlib\lib\win_x64\zlib.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2_image.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -90,12 +91,13 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(SolutionDir)..\..\libs\zlib\lib\win_x64\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)..\..\libs\zlib\lib\win_x64\zlib.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2_image.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -106,14 +108,15 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(SolutionDir)..\..\libs\zlib\lib\win_x64\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)..\..\libs\zlib\lib\win_x64\zlib.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2_image.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -124,25 +127,31 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(SolutionDir)..\..\libs\zlib\lib\win_x64\zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)..\..\libs\zlib\lib\win_x64\zlib.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2_image.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\Common.h" />
     <ClInclude Include="..\..\..\src\game\Types.h" />
+    <ClInclude Include="..\..\..\src\gfx\main_view.h" />
+    <ClInclude Include="..\..\..\src\gfx\sdl_helper.h" />
+    <ClInclude Include="..\..\..\src\gfx\view_manager.h" />
     <ClInclude Include="..\..\..\src\io\Loader.h" />
     <ClInclude Include="..\..\..\src\io\Zip.h" />
     <ClInclude Include="..\..\..\src\io\zip\ioapi.h" />
     <ClInclude Include="..\..\..\src\io\zip\unzip.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\gfx\game_view.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\view_manager.cpp" />
     <ClCompile Include="..\..\..\src\io\Loader.cpp" />
     <ClCompile Include="..\..\..\src\io\Zips.cpp" />
     <ClCompile Include="..\..\..\src\io\zip\ioapi.cpp" />

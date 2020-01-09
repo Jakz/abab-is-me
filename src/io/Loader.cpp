@@ -8,8 +8,6 @@
 
 #define LOGD(x, ...) printf(x ## "\n", __VA_ARGS__)
 
-static const path DATA_FOLDER = R"(E:\Games\Portable\Baba.Is.You.v01.08.2019\Data\)";
-
 using namespace io;
 
 Loader::Loader()
