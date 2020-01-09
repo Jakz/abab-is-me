@@ -8,10 +8,17 @@
 namespace baba
 {
   using coord_t = int32_t;
+
+  struct point_t
+  {
+    coord_t x, y;
+  };
+
   
   struct ObjectSpec
   {
     int32_t id;
+    point_t color;
     std::string name;
     std::string sprite;
   };
@@ -33,15 +40,10 @@ namespace baba
     const ObjectSpec* spec;
   };
 
-  struct Coordinate
-  {
-    coord_t x, y;
-  };
-
   struct Tile
   {
     std::vector<Object> objects;
-    Coordinate coord;
+    point_t coord;
 
     void add(Object object) { objects.push_back(object); }
     const Object* object() const { return !objects.empty() ? &objects[0] : nullptr; }

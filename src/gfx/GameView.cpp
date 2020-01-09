@@ -8,6 +8,7 @@ using namespace ui;
 extern baba::Level* level;
 
 std::unordered_map<std::string, SDL_Texture*> cache;
+SDL_Surface* palette = nullptr;
 
 
 GameView::GameView(ViewManager* manager) : manager(manager)
@@ -17,6 +18,11 @@ GameView::GameView(ViewManager* manager) : manager(manager)
 void GameView::render()
 {
   auto* renderer = manager->renderer();
+
+  if (!palette)
+  {
+    palette = IMG_Load((DATA_FOLDER + R"(Palettes\default.png)").c_str());
+  }
 
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
   SDL_RenderClear(renderer);
@@ -44,6 +50,11 @@ void GameView::render()
         else
           texture = tit->second;
 
+        SDL_Color color;
+        assert(palette->format->BytesPerPixel == 3);
+        Uint8 *p = (Uint8 *)palette->pixels + obj->spec->color.y * palette->pitch + obj->spec->color.x * palette->format->BytesPerPixel;
+        SDL_GetRGB(p[0] | p[1] << 8 | p[2] << 16, palette->format, &color.r, &color.g, &color.b);
+        SDL_SetTextureColorMod(texture, color.r, color.g, color.b);
         SDL_Rect dest = { x * 24, y * 24, 24, 24 };
         SDL_RenderCopy(renderer, texture, nullptr, &dest);
       }

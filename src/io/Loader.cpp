@@ -224,12 +224,16 @@ void ValuesParser::generateObject()
     assert(fields.find("name") != fields.end());
     assert(fields.find("sprite_in_root") != fields.end());
     assert(fields.find("tile") != fields.end());
+    assert(fields.find("colour") != fields.end());
 
     object.name = sutils::trimQuotes(fields["name"]);
     object.sprite = sutils::trimQuotes(fields["name"]);
     
     auto tile = parseCoordinate(fields["tile"]);
     object.id = tile.first | (tile.second << 8);
+
+    auto color = parseCoordinate(fields["colour"]);
+    object.color = { color.first, color.second };
 
     data.objects.push_back(object);
   }
