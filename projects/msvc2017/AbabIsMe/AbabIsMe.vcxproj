@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\src\Common.h" />
     <ClInclude Include="..\..\..\src\game\Level.h" />
+    <ClInclude Include="..\..\..\src\game\Rules.h" />
     <ClInclude Include="..\..\..\src\game\Types.h" />
     <ClInclude Include="..\..\..\src\gfx\MainView.h" />
     <ClInclude Include="..\..\..\src\gfx\SdlHelper.h" />

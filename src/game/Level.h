@@ -19,6 +19,12 @@ namespace baba
           get(x, y)->coord = { x, y };
     }
 
+    auto begin() const { return _tiles.begin(); }
+    auto end() const { return _tiles.end(); }
+
+    auto begin() { return _tiles.begin(); }
+    auto end() { return _tiles.end(); }
+
     Tile* get(coord_t i) { return &_tiles[i]; }
 
     Tile* get(coord_t x, coord_t y) { return x >= 0 && x < _width && y >= 0 && y < _height ? &_tiles[y*_width + x] : nullptr; }

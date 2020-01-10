@@ -234,6 +234,7 @@ void ValuesParser::generateObject()
 
     object.name = sutils::trimQuotes(fields["name"]);
     object.sprite = sutils::trimQuotes(fields["sprite"]);
+    object.layer = std::stoi(fields["layer"]);
    
     auto tile = parseCoordinate(fields["tile"]);
     object.id = tile.first | (tile.second << 8);

@@ -30,17 +30,22 @@ namespace baba
     bool spriteInRoot;
     bool isText;
     Tiling tiling;
+    int32_t layer;
   };
 
   struct GameData
   {
     std::vector<ObjectSpec> objects;
     std::unordered_map<int32_t, const ObjectSpec*> objectsByID;
+    std::unordered_map<std::string, const ObjectSpec*> objectsByName;
 
     void finalize()
     {
       for (const auto& spec : objects)
+      {
         objectsByID[spec.id] = &spec;
+        objectsByName[spec.name] = &spec;
+      }
     }
   };
 
@@ -48,8 +53,9 @@ namespace baba
   {
     const ObjectSpec* spec;
     uint32_t variant;
+    bool alreadyMoved;
 
-    Object(const ObjectSpec* spec) : spec(spec), variant(0) { }
+    Object(const ObjectSpec* spec) : spec(spec), variant(0), alreadyMoved(false) { }
   };
 
   struct Tile
@@ -63,6 +69,11 @@ namespace baba
     bool has(const ObjectSpec* spec) const {
       return std::any_of(objects.begin(), objects.end(), [spec](const Object& object) { return object.spec == spec; });
     }
+
+    auto begin() const { return objects.begin(); }
+    auto end() const { return objects.end(); }
+    auto begin() { return objects.begin(); }
+    auto end() { return objects.end(); }
 
     coord_t x() const { return coord.x; }
     coord_t y() const { return coord.y; }

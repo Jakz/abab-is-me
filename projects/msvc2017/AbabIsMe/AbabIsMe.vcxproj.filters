@@ -48,6 +48,9 @@
     <ClInclude Include="..\..\..\src\game\Level.h">
       <Filter>src\game</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\game\Rules.h">
+      <Filter>src\game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp">
