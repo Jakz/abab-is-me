@@ -33,9 +33,11 @@ size_t flength(FILE* in) { fseek(in, 0, SEEK_END); size_t ot = ftell(in); fseek(
 
 */
 
-baba::Level* Loader::load(const path& path)
+baba::Level* Loader::load(const path& p)
 {  
-  in = fopen(path.c_str(), "rb");
+  path fullPath = DATA_FOLDER + R"(Worlds\baba\)" + p;
+  in = fopen(fullPath.c_str(), "rb");
+  assert(in);
 
   //TODO: endianness
   static constexpr uint64_t ACHTUNG = 0x21474e5554484341;

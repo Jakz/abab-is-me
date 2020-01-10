@@ -87,7 +87,7 @@ bool SDL<EventHandler, Renderer>::init()
   _window = SDL_CreateWindow("AbabIsMe", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL);
 #endif
 #else
-  _window = SDL_CreateWindow("AbabIsMe", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320, 240, SDL_WINDOW_OPENGL);
+  _window = SDL_CreateWindow("AbabIsMe", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, SDL_WINDOW_OPENGL);
 #endif
   _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
 

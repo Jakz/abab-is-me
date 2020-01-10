@@ -2,12 +2,6 @@
 
 #include "Common.h"
 
-namespace baba
-{
-  struct Level;
-  struct GameData;
-}
-
 namespace io
 {
   class Loader
