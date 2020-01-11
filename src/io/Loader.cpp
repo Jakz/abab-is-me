@@ -286,9 +286,9 @@ void ValuesParser::generateObject()
 
       switch (tiling) {
       case -1: object.tiling = baba::ObjectSpec::Tiling::None; break;
-      case 0: object.tiling = baba::ObjectSpec::Tiling::Zero; break;
-      case 1: object.tiling = baba::ObjectSpec::Tiling::Ortho; break;
-      case 2: object.tiling = baba::ObjectSpec::Tiling::Player; break;
+      case 0: object.tiling = baba::ObjectSpec::Tiling::Directions; break;
+      case 1: object.tiling = baba::ObjectSpec::Tiling::Tiled; break;
+      case 2: object.tiling = baba::ObjectSpec::Tiling::Character; break;
       case 3: object.tiling = baba::ObjectSpec::Tiling::Belt; break;
       default: assert(false);
       }

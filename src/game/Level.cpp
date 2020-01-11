@@ -1,5 +1,7 @@
 #include "Level.h"
 
+#include "Tile.h"
+
 using namespace baba;
 
 Tile* Level::get(Tile* t, D d)
@@ -24,7 +26,7 @@ void Level::computeTiling()
 
       for (auto& object : tile->objects)
       {
-        if (object.spec->tiling == baba::ObjectSpec::Tiling::Ortho)
+        if (object.spec->tiling == baba::ObjectSpec::Tiling::Tiled)
         {
           object.variant = 0;
 

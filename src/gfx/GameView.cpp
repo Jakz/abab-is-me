@@ -1,14 +1,15 @@
 #include "MainView.h"
 
 #include "game/Types.h"
+#include "game/Tile.h"
 #include "game/Level.h"
 #include "game/Rules.h"
 
 using namespace ui;
 using namespace baba;
 
-Rules rules;
 extern GameData data;
+Rules rules(&data);
 extern Level* level;
 
 SDL_Surface* palette = nullptr;
@@ -18,6 +19,7 @@ struct ObjectGfx
 {
   SDL_Texture* texture;
   std::vector<SDL_Rect> sprites;
+  /* R U L D */
 };
 
 std::unordered_map<const baba::ObjectSpec*, ObjectGfx> objectGfxs;
@@ -31,20 +33,39 @@ const ObjectGfx& GameView::objectGfx(const baba::ObjectSpec* spec)
   else
   {
     path base = DATA_FOLDER + R"(Sprites\)" + spec->sprite;
-    uint32_t count = 1;
+    std::vector<uint32_t> frames;
 
-    if (spec->tiling == baba::ObjectSpec::Tiling::Ortho)
-      count = 16;
+    switch (spec->tiling)
+    {
+    case baba::ObjectSpec::Tiling::None:
+      frames.push_back(0);
+      break;
+    case baba::ObjectSpec::Tiling::Tiled:
+      for (int32_t i = 0; i < 16; ++i)
+        frames.push_back(i);
+      break;
+    case baba::ObjectSpec::Tiling::Directions:
+      frames.push_back(0);
+      frames.push_back(8);
+      frames.push_back(16);
+      frames.push_back(24);
+      break;
+    case baba::ObjectSpec::Tiling::Character:
+      int32_t f[] = { 31, 0, 1, 2, 3, 7, 8, 9, 10, 11, 15, 16, 17, 18, 19, 23, 24, 25, 26, 27 };
+      for (int32_t i : f)
+        frames.push_back(i);
+      break;
+    }
 
-    SDL_Surface* surface = SDL_CreateRGBSurface(0, 24 * 3 * count, 24, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+    SDL_Surface* surface = SDL_CreateRGBSurface(0, 24 * 3 * frames.size(), 24, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
 
     ObjectGfx gfx;
 
-    for (uint32_t i = 0; i < count; ++i)
+    for (uint32_t i = 0; i < frames.size(); ++i)
     {
       for (uint32_t f = 0; f < FRAMES; ++f)
       {
-        path path = base + "_" + std::to_string(i) + "_" + std::to_string(f+1) + ".png";
+        path path = base + "_" + std::to_string(frames[i]) + "_" + std::to_string(f+1) + ".png";
         SDL_Surface* tmp = IMG_Load(path.c_str());
         assert(tmp);
 
@@ -73,15 +94,19 @@ GameView::GameView(ViewManager* manager) : manager(manager)
 
 void GameView::render()
 {
-  auto* renderer = manager->renderer();
+  SDL_Renderer* renderer = manager->renderer();
 
   auto tick = (SDL_GetTicks() / 150) % 3;
 
   if (!palette)
   {
     palette = IMG_Load((DATA_FOLDER + R"(Palettes\default.png)").c_str());
+    SDL_Surface* tmp = SDL_ConvertSurfaceFormat(palette, SDL_PIXELFORMAT_BGRA8888, 0);
+    SDL_FreeSurface(palette);
+    palette = tmp;
 
     rules.state(data.objectsByName["baba"]).properties.set(baba::ObjectProperty::YOU);
+    rules.state(data.objectsByName["wall"]).properties.set(baba::ObjectProperty::STOP);
   }
 
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -99,9 +124,8 @@ void GameView::render()
           const auto& gfx = objectGfx(obj.spec);
 
           SDL_Color color;
-          assert(palette->format->BytesPerPixel == 3);
-          Uint8 *p = (Uint8 *)palette->pixels + obj.spec->color.y * palette->pitch + obj.spec->color.x * palette->format->BytesPerPixel;
-          SDL_GetRGB(p[0] | p[1] << 8 | p[2] << 16, palette->format, &color.r, &color.g, &color.b);
+          assert(palette->format->BytesPerPixel == 4);
+          SDL_GetRGB(*(((uint32_t*)palette->pixels) + obj.spec->color.y * palette->w + obj.spec->color.x), palette->format, &color.r, &color.g, &color.b);
           SDL_SetTextureColorMod(gfx.texture, color.r, color.g, color.b);
 
           SDL_Rect src = gfx.sprites[obj.variant];
@@ -133,7 +157,10 @@ void movement(coord_t dx, coord_t dy)
       {
         for (auto it = tile->begin(); it != tile->end(); /**/)
         {
-          if (!it->alreadyMoved && rules.state(it->spec).properties.isSet(ObjectProperty::YOU))
+          const bool canMove = !it->alreadyMoved && rules.state(it->spec).properties.isSet(ObjectProperty::YOU);
+          const bool canMoveInto = !dest->any_of([](const Object& obj) { return rules.state(obj.spec).properties.isSet(ObjectProperty::STOP); });
+          
+          if (canMove && canMoveInto)
           {
             Object object = *it;
             object.alreadyMoved = true;

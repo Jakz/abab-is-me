@@ -51,6 +51,9 @@
     <ClInclude Include="..\..\..\src\game\Rules.h">
       <Filter>src\game</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\game\Tile.h">
+      <Filter>src\game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp">
@@ -75,6 +78,12 @@
       <Filter>src\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\game\Level.cpp">
+      <Filter>src\game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\game\Tile.cpp">
+      <Filter>src\game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\game\Rules.cpp">
       <Filter>src\game</Filter>
     </ClCompile>
   </ItemGroup>

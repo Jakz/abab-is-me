@@ -1,14 +1,17 @@
 #pragma once
 
 #include "Types.h"
+#include "Tile.h"
 
 namespace baba
 {
+  using LevelState = std::vector<Tile>;
+  
   struct Level
   {
   private:
     coord_t _width, _height;
-    std::vector<Tile> _tiles;
+    LevelState _tiles;
 
   public:
     Level(coord_t width, coord_t height) : _width(width), _height(height)

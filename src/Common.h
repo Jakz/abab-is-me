@@ -9,6 +9,8 @@ struct bit_mask
   using utype = typename std::underlying_type<T>::type;
   utype value;
 
+  inline void clear() { value = 0; }
+
   inline bool isSet(T flag) const { return value & static_cast<utype>(flag); }
   inline void set(T flag) { value |= static_cast<utype>(flag); }
   inline void reset(T flag) { value &= ~static_cast<utype>(flag); }

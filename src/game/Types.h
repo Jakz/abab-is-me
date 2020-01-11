@@ -4,7 +4,6 @@
 
 #include <vector>
 #include <unordered_map>
-#include <algorithm>
 
 namespace baba
 {
@@ -20,7 +19,7 @@ namespace baba
   struct ObjectSpec
   {
     enum class Type { Noun = 0, Verb, Property, Adjective, Negative, Unused, Conjunction, Preposition };
-    enum class Tiling { None = -1, Zero, Ortho, Player, Belt };
+    enum class Tiling { None = -1, Directions, Tiled, Character, Belt };
 
     Type type;
     int32_t id;
@@ -39,6 +38,8 @@ namespace baba
     std::unordered_map<int32_t, const ObjectSpec*> objectsByID;
     std::unordered_map<std::string, const ObjectSpec*> objectsByName;
 
+    const ObjectSpec* IS = nullptr;
+
     void finalize()
     {
       for (const auto& spec : objects)
@@ -46,6 +47,8 @@ namespace baba
         objectsByID[spec.id] = &spec;
         objectsByName[spec.name] = &spec;
       }
+
+      IS = objectsByName.find("is")->second;
     }
   };
 
@@ -54,28 +57,8 @@ namespace baba
     const ObjectSpec* spec;
     uint32_t variant;
     bool alreadyMoved;
+    bool active;
 
     Object(const ObjectSpec* spec) : spec(spec), variant(0), alreadyMoved(false) { }
-  };
-
-  struct Tile
-  {
-    std::vector<Object> objects;
-    point_t coord;
-
-    void add(Object object) { objects.push_back(object); }
-    const Object* object() const { return !objects.empty() ? &objects[0] : nullptr; }
-
-    bool has(const ObjectSpec* spec) const {
-      return std::any_of(objects.begin(), objects.end(), [spec](const Object& object) { return object.spec == spec; });
-    }
-
-    auto begin() const { return objects.begin(); }
-    auto end() const { return objects.end(); }
-    auto begin() { return objects.begin(); }
-    auto end() { return objects.end(); }
-
-    coord_t x() const { return coord.x; }
-    coord_t y() const { return coord.y; }
   };
 }
