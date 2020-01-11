@@ -3,6 +3,8 @@
 #include <cassert>
 #include <string>
 
+#define LOGD(x, ...) printf(x ## "\n", __VA_ARGS__)
+
 template<typename T>
 struct bit_mask
 {

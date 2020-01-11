@@ -9,8 +9,6 @@
 #include <iostream>
 #include <fstream>
 
-#define LOGD(x, ...) printf(x ## "\n", __VA_ARGS__)
-
 using namespace io;
 
 Loader::Loader(baba::GameData& data) : data(data)
@@ -242,6 +240,9 @@ void ValuesParser::generateObject()
     auto color = parseCoordinate(fields["colour"]);
     object.color = { color.first, color.second };
 
+    auto grid = parseCoordinate(fields["grid"]);
+    object.grid = { grid.first, grid.second };
+
     {
       auto type = sutils::trimQuotes(fields["unittype"]);
 
@@ -251,6 +252,17 @@ void ValuesParser::generateObject()
         object.isText = true;
       else
         assert(false);
+    }
+
+    if (object.isText)
+    {
+      auto active = parseCoordinate(fields["active"]);
+      object.active = { active.first, active.second };
+    }
+    else
+    {
+      assert(fields.find("active") == fields.end());
+      object.active = object.color;
     }
 
     {

@@ -33,7 +33,8 @@ namespace baba
     Tile* get(coord_t x, coord_t y) { return x >= 0 && x < _width && y >= 0 && y < _height ? &_tiles[y*_width + x] : nullptr; }
     const Tile* get(coord_t x, coord_t y) const { return x >= 0 && x < _width && y >= 0 && y < _height ? &_tiles[y*_width + x] : nullptr; }
 
-    Tile* get(Tile* t, D d);
+    Tile* get(const Tile* t, D d);
+    const Tile* get(const Tile* t, D d) const;
 
     void computeTiling();
 

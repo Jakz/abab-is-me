@@ -33,7 +33,7 @@ namespace baba
     ObjectState& state(const ObjectSpec* spec) { return _state[spec]; }
 
     void clear();
-    void generate(const baba::Level* level);
+    void generate(baba::Level* level);
   };
 
 }

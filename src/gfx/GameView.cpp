@@ -105,8 +105,11 @@ void GameView::render()
     SDL_FreeSurface(palette);
     palette = tmp;
 
-    rules.state(data.objectsByName["baba"]).properties.set(baba::ObjectProperty::YOU);
-    rules.state(data.objectsByName["wall"]).properties.set(baba::ObjectProperty::STOP);
+    //rules.state(data.objectsByName["baba"]).properties.set(baba::ObjectProperty::YOU);
+    //rules.state(data.objectsByName["wall"]).properties.set(baba::ObjectProperty::STOP);
+
+    rules.clear();
+    rules.generate(level);
   }
 
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -125,7 +128,7 @@ void GameView::render()
 
           SDL_Color color;
           assert(palette->format->BytesPerPixel == 4);
-          SDL_GetRGB(*(((uint32_t*)palette->pixels) + obj.spec->color.y * palette->w + obj.spec->color.x), palette->format, &color.r, &color.g, &color.b);
+          SDL_GetRGB(*(((uint32_t*)palette->pixels) + obj.spec->active.y * palette->w + obj.spec->active.x), palette->format, &color.r, &color.g, &color.b);
           SDL_SetTextureColorMod(gfx.texture, color.r, color.g, color.b);
 
           SDL_Rect src = gfx.sprites[obj.variant];

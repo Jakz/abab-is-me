@@ -4,7 +4,19 @@
 
 using namespace baba;
 
-Tile* Level::get(Tile* t, D d)
+Tile* Level::get(const Tile* t, D d)
+{
+  switch (d)
+  {
+  case D::UP: return get(t->x(), t->y() - 1); break;
+  case D::DOWN: return get(t->x(), t->y() + 1); break;
+  case D::LEFT: return get(t->x() - 1, t->y()); break;
+  case D::RIGHT: return get(t->x() + 1, t->y()); break;
+  default: assert(false);
+  }
+}
+
+const Tile* Level::get(const Tile* t, D d) const
 {
   switch (d)
   {
