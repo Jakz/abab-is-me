@@ -21,19 +21,23 @@ namespace baba
     void clear() { properties.clear(); }
   };
 
+  using Rule = std::vector<Object*>;
+
   struct Rules
   {
   private:
-    const GameData* data;
+    const GameData* _data;
     std::unordered_map<const ObjectSpec*, ObjectState> _state;
+    std::vector<Rule> _rules;
 
   public:
-    Rules(const GameData* data) : data(data) { }
+    Rules(const GameData* data) : _data(data) { }
 
     ObjectState& state(const ObjectSpec* spec) { return _state[spec]; }
 
     void clear();
     void generate(baba::Level* level);
+    void apply();
   };
 
 }

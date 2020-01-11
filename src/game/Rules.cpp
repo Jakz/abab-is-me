@@ -8,6 +8,7 @@ using namespace baba;
 
 void Rules::clear()
 {
+  _rules.clear();
   std::for_each(_state.begin(), _state.end(), [](decltype(_state)::value_type& pair) { pair.second.clear(); });
 }
 
@@ -25,61 +26,83 @@ void Rules::generate(baba::Level* level)
       Tile* up = level->get(tile, D::UP);
       Tile* down = level->get(tile, D::DOWN);
 
-      if (tile->has(data->IS))
+      auto is = tile->find(_data->IS);
+
+      if (is)
       {
-        std::vector<const ObjectSpec*> horizontal;
-        std::vector<const ObjectSpec*> vertical;
+        std::vector<Object*> horizontal;
+        std::vector<Object*> vertical;
 
         if (left)
         {
           auto* noun = left->find([](const Object& obj) { return obj.spec->type == ObjectSpec::Type::Noun; });
           if (noun)
-            horizontal.push_back(noun->spec);
+            horizontal.push_back(noun);
         }
 
-        horizontal.push_back(data->IS);
+        horizontal.push_back(is);
 
         if (right)
         {
           auto* property = right->find([](const Object& obj) { return obj.spec->type == ObjectSpec::Type::Property; });
           if (property)
-            horizontal.push_back(property->spec);
+            horizontal.push_back(property);
         }
-
-
 
         if (up)
         {
           auto* noun = up->find([](const Object& obj) { return obj.spec->type == ObjectSpec::Type::Noun; });
           if (noun)
-            vertical.push_back(noun->spec);
+            vertical.push_back(noun);
         }
 
-        vertical.push_back(data->IS);
+        vertical.push_back(is);
 
         if (down)
         {
           auto* property = down->find([](const Object& obj) { return obj.spec->type == ObjectSpec::Type::Property; });
           if (property)
-            vertical.push_back(property->spec);
+            vertical.push_back(property);
         }
 
-        const decltype(horizontal)* rules[] = { &horizontal, &vertical };
-        
-        for (const auto* rule : rules)
-        {
-          if (rule->size() == 3)
-          {
-            std::string text = "";
-            for (const auto& term : *rule)
-              text += term->name.substr(5) + " ";
-            LOGD("Found rule: %s", text.c_str());
-          }
-            
-        }
+        if (horizontal.size() == 3)
+          _rules.push_back(horizontal);
+
+        if (vertical.size() == 3)
+          _rules.push_back(vertical);
       }
-
     }
   }
 
+  for (const auto& rule : _rules)
+  {
+    std::string text = "";
+    for (const auto& term : rule)
+    {
+      text += term->spec->name.substr(5) + " ";
+      term->active = true;
+    }
+    LOGD("Found rule: %s", text.c_str());
+  }
+}
+
+void Rules::apply()
+{
+  for (const Rule& rule : _rules)
+  {
+    auto& noun = rule[0];
+    auto& verb = rule[1];
+    auto& property = rule[2];
+
+    auto it = _data->objectsByGrid.find({ noun->spec->grid.x - 1, noun->spec->grid.y });
+    assert(it != _data->objectsByGrid.end());
+    const ObjectSpec* object = it->second;
+
+    if (property->spec->name == "text_you")
+      _state[object].properties.set(ObjectProperty::YOU);
+    else if (property->spec->name == "text_stop")
+      _state[object].properties.set(ObjectProperty::STOP);
+    else
+      assert(false);
+  }
 }

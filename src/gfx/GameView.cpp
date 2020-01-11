@@ -110,6 +110,7 @@ void GameView::render()
 
     rules.clear();
     rules.generate(level);
+    rules.apply();
   }
 
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -128,7 +129,10 @@ void GameView::render()
 
           SDL_Color color;
           assert(palette->format->BytesPerPixel == 4);
-          SDL_GetRGB(*(((uint32_t*)palette->pixels) + obj.spec->active.y * palette->w + obj.spec->active.x), palette->format, &color.r, &color.g, &color.b);
+
+          const auto& ocolor = obj.active ? obj.spec->active : obj.spec->color;
+
+          SDL_GetRGB(*(((uint32_t*)palette->pixels) + ocolor.y * palette->w + ocolor.x), palette->format, &color.r, &color.g, &color.b);
           SDL_SetTextureColorMod(gfx.texture, color.r, color.g, color.b);
 
           SDL_Rect src = gfx.sprites[obj.variant];

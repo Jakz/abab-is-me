@@ -73,6 +73,6 @@ namespace baba
     bool alreadyMoved;
     bool active;
 
-    Object(const ObjectSpec* spec) : spec(spec), variant(0), alreadyMoved(false) { }
+    Object(const ObjectSpec* spec) : spec(spec), variant(0), alreadyMoved(false), active(false) { }
   };
 }

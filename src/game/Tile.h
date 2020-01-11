@@ -18,6 +18,7 @@ namespace baba
     bool has(const ObjectSpec* spec) const;
     bool any_of(const std::function<bool(const Object&)>& predicate) const;
     Object* find(const std::function<bool(const Object&)>& predicate);
+    Object* find(const ObjectSpec* spec) { return find([spec](const Object& obj) { return obj.spec == spec; }); }
 
     auto begin() const { return objects.begin(); }
     auto end() const { return objects.end(); }
