@@ -3,7 +3,8 @@
 #include <cassert>
 #include <string>
 
-#define LOGD(x, ...) printf(x ## "\n", __VA_ARGS__)
+#define LOGD(x, ...) printf(x "\n", __VA_ARGS__)
+#define LOGDD(x) printf(x "\n")
 
 template<typename T>
 struct bit_mask
@@ -72,13 +73,17 @@ using path = std::string;
 #if _WIN32
 static const path DATA_FOLDER = R"(E:\Games\Portable\Baba.Is.You.v01.08.2019\Data\)";
 #else
-static const path DATA_FOLDER = R"(/media/SD/baba/)";
+static const path DATA_FOLDER = R"(/media/SD/baba/Data/)";
 #endif
 
 
-
+#if !_WIN32
+constexpr int32_t WIDTH = 320;
+constexpr int32_t HEIGHT = 240;
+#else
 constexpr int32_t WIDTH = 1024;
 constexpr int32_t HEIGHT = 768;
+#endif
 
 namespace baba
 {

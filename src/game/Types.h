@@ -8,7 +8,7 @@
 namespace baba
 {
   enum class D { UP, DOWN, LEFT, RIGHT };
-  
+
   struct ObjectSpec
   {
     enum class Type { Noun = 0, Verb, Property, Adjective, Negative, Unused, Conjunction, Preposition };
@@ -45,7 +45,9 @@ namespace baba
         objectsByGrid[spec.grid] = &spec;
       }
 
-      IS = objectsByName.find("text_is")->second;
+      auto it = objectsByName.find("text_is");
+      assert(it != objectsByName.end());
+      IS = it->second;
     }
   };
 

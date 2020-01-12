@@ -6,7 +6,7 @@
 namespace baba
 {
   using LevelState = std::vector<Tile>;
-  
+
   struct Level
   {
   private:
@@ -22,11 +22,11 @@ namespace baba
           get(x, y)->coord = { x, y };
     }
 
-    auto begin() const { return _tiles.begin(); }
-    auto end() const { return _tiles.end(); }
+    decltype(_tiles)::const_iterator begin() const { return _tiles.begin(); }
+    decltype(_tiles)::const_iterator end() const { return _tiles.end(); }
 
-    auto begin() { return _tiles.begin(); }
-    auto end() { return _tiles.end(); }
+    decltype(_tiles)::iterator begin() { return _tiles.begin(); }
+    decltype(_tiles)::iterator end() { return _tiles.end(); }
 
     Tile* get(coord_t i) { return &_tiles[i]; }
 

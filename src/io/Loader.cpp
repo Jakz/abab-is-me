@@ -8,6 +8,14 @@
 #include <cstdio>
 #include <iostream>
 #include <fstream>
+#include <string>
+
+#if !_WIN32
+namespace std
+{
+  int stoi(const std::string& str) { return atoi(str.c_str()); }
+}
+#endif
 
 using namespace io;
 
@@ -32,8 +40,9 @@ size_t flength(FILE* in) { fseek(in, 0, SEEK_END); size_t ot = ftell(in); fseek(
 */
 
 baba::Level* Loader::load(const path& p)
-{  
-  path fullPath = DATA_FOLDER + R"(Worlds\baba\)" + p;
+{
+  LOGD("Loading level %s", p.c_str());
+  path fullPath = DATA_FOLDER + R"(Worlds/baba/)" + p;
   in = fopen(fullPath.c_str(), "rb");
   assert(in);
 
@@ -109,7 +118,7 @@ baba::Level* Loader::readLayer(uint16_t version)
   Zip::byte* buffer = (Zip::byte*)std::calloc(compressedSize, 1);
   fread(buffer, 1, compressedSize, in);
   auto uncompressed = Zip::uncompress(buffer, compressedSize);
-  
+
   assert(uncompressed.length == (width * height * sizeof(object_id)));
 
   baba::Level* level = new baba::Level(width, height);
@@ -127,7 +136,7 @@ baba::Level* Loader::readLayer(uint16_t version)
       level->get(i)->add({ it->second });
     }
   }
-  
+
   return level;
 }
 
@@ -140,7 +149,7 @@ baba::Level* Loader::readLayer(uint16_t version)
 namespace sutils
 {
   using string_t = std::string;
-  
+
   inline static bool startsWith(const string_t& string, const string_t& prefix) { return string.substr(0, prefix.length()) == prefix; }
   static inline std::string& ltrim(std::string &s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
@@ -233,7 +242,7 @@ void ValuesParser::generateObject()
     object.name = sutils::trimQuotes(fields["name"]);
     object.sprite = sutils::trimQuotes(fields["sprite"]);
     object.layer = std::stoi(fields["layer"]);
-   
+
     auto tile = parseCoordinate(fields["tile"]);
     object.id = tile.first | (tile.second << 8);
 
@@ -315,22 +324,31 @@ void ValuesParser::generateObject()
 
 void ValuesParser::init()
 {
+  LOGDD("Loading game data from values.lua..");
   const path valuesFile = DATA_FOLDER + "values.lua";
-  
+
   std::ifstream file(valuesFile);
 
   if (file.is_open())
   {
     lines.clear();
-    
+
     std::string line;
     while (getline(file, line))
+    {
+      if (line.back() == '\r') line.pop_back();
       lines.push_back(line);
+    }
 
     file.close();
 
     count = lines.size();
     i = 0;
+  }
+  else
+  {
+    LOGDD("Unable to load values.lua from data folder, aborting.");
+    abort();
   }
 }
 
@@ -391,6 +409,8 @@ void ValuesParser::parse()
       }
     }
   }
+
+  LOGD("Loaded %zu objects", data.objects.size());
 }
 
 void Loader::loadGameData()

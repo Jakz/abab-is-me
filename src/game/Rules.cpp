@@ -3,6 +3,7 @@
 #include "game/Level.h"
 
 #include <algorithm>
+#include <cstdio>
 
 using namespace baba;
 

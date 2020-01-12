@@ -5,6 +5,8 @@
 #include "game/Level.h"
 #include "game/Rules.h"
 
+#include <algorithm>
+
 using namespace ui;
 using namespace baba;
 
@@ -32,7 +34,7 @@ const ObjectGfx& GameView::objectGfx(const baba::ObjectSpec* spec)
     return it->second;
   else
   {
-    path base = DATA_FOLDER + R"(Sprites\)" + spec->sprite;
+    path base = DATA_FOLDER + R"(Sprites/)" + spec->sprite;
     std::vector<uint32_t> frames;
 
     switch (spec->tiling)
@@ -57,6 +59,7 @@ const ObjectGfx& GameView::objectGfx(const baba::ObjectSpec* spec)
       break;
     }
 
+    LOGD("Caching gfx for %s in a %dx%d texture", spec->name.c_str(), 24 * 3 * frames.size(), 24);
     SDL_Surface* surface = SDL_CreateRGBSurface(0, 24 * 3 * frames.size(), 24, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
 
     ObjectGfx gfx;
@@ -65,9 +68,11 @@ const ObjectGfx& GameView::objectGfx(const baba::ObjectSpec* spec)
     {
       for (uint32_t f = 0; f < FRAMES; ++f)
       {
-        path path = base + "_" + std::to_string(frames[i]) + "_" + std::to_string(f+1) + ".png";
-        SDL_Surface* tmp = IMG_Load(path.c_str());
-        assert(tmp);
+        static char buffer[128];
+        sprintf(buffer, "%s_%d_%d.png", base.c_str(), frames[i], f+1);
+        SDL_Surface* tmp = IMG_Load(buffer);
+        if (!tmp)
+          LOGD("Error: missing graphics file %s", buffer);
 
         SDL_Rect dest = { (i * 3 + f) * 24, 0, 24, 24 };
         SDL_BlitSurface(tmp, nullptr, surface, &dest);
@@ -100,7 +105,8 @@ void GameView::render()
 
   if (!palette)
   {
-    palette = IMG_Load((DATA_FOLDER + R"(Palettes\default.png)").c_str());
+    palette = IMG_Load((DATA_FOLDER + R"(Palettes/default.png)").c_str());
+    assert(palette);
     SDL_Surface* tmp = SDL_ConvertSurfaceFormat(palette, SDL_PIXELFORMAT_BGRA8888, 0);
     SDL_FreeSurface(palette);
     palette = tmp;
@@ -119,7 +125,7 @@ void GameView::render()
   constexpr coord_t GFX_TILE_SIZE = 24;
   scaler = Scaler::SCALE_TO_FIT;
   offset = { 0, 0 };
-  size = { 1024, 768 };
+  size = { WIDTH, HEIGHT };
 
   float bestWidth = size.w / level->width();
   float bestHeight = size.h / level->height();
@@ -128,7 +134,7 @@ void GameView::render()
 
   if (scaler == Scaler::KEEP_AT_MOST_NATIVE)
     bestScale = std::min(bestScale, float(GFX_TILE_SIZE));
-  
+
   tileSize = bestScale;
   offset.x = (size.w - level->width() * bestScale) / 2;
   offset.y = (size.h - level->height() * bestScale) / 2;
@@ -136,27 +142,27 @@ void GameView::render()
 
   SDL_Rect bb = { 0,0, size.w, size.h };
   //TODO: check if this depends on some level property like theme
-  SDL_SetRenderDrawColor(renderer, 21, 24, 31, 255); 
+  SDL_SetRenderDrawColor(renderer, 21, 24, 31, 255);
   SDL_RenderFillRect(renderer, &bb);
 
   for (int y = 0; y < size.h/tileSize; ++y)
     for (int x = 0; x < size.w/tileSize; ++x)
     {
       auto* tile = level->get(x, y);
-      
+
       if (tile)
-      {        
+      {
         const SDL_Rect dest = { offset.x + x * tileSize, offset.y + y * tileSize, tileSize, tileSize };
-        
+
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderFillRect(renderer, &dest);
-        
+
         for (const auto& obj : *tile)
         {
           const auto& gfx = objectGfx(obj.spec);
 
           SDL_Color color;
-          assert(palette->format->BytesPerPixel == 4);
+          //assert(palette->format->BytesPerPixel == 4);
 
           const auto& ocolor = obj.active ? obj.spec->active : obj.spec->color;
 
@@ -176,7 +182,7 @@ void GameView::render()
 }
 
 void movement(Tile* tile, decltype(Tile::objects)::iterator object, D d, coord_t dx, coord_t dy)
-{  
+{
   std::vector<std::pair<Tile*, decltype(Tile::objects)::iterator>> objects;
 
   Tile* next = level->get(tile->x() + dx, tile->y() + dy);
@@ -192,7 +198,7 @@ void movement(Tile* tile, decltype(Tile::objects)::iterator object, D d, coord_t
     else
     {
       bool found = false;
-      
+
       for (auto it = next->begin(); it != next->end(); ++it)
       {
         if (rules.hasProperty(it->spec, ObjectProperty::STOP))
@@ -228,7 +234,7 @@ void movement(Tile* tile, decltype(Tile::objects)::iterator object, D d, coord_t
       else if (d == D::UP) variantBase = 5;
       else if (d == D::LEFT) variantBase = 10;
       else if (d == D::DOWN) variantBase = 15;
-      
+
       object.variant = variantBase + (object.variant + 1) % 5;
     }
 
@@ -271,7 +277,7 @@ void movement(D d, coord_t dx, coord_t dy)
   for (const auto& props : rules)
   {
     auto* spec = props.first;
-    
+
     if (props.second.properties.isSet(ObjectProperty::WIN))
       level->forEachObject([spec](Object& object) { if (object.spec == spec) object.active = true; });
   }

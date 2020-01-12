@@ -37,8 +37,8 @@ namespace baba
 
     ObjectState& state(const ObjectSpec* spec) { return _state[spec]; }
 
-    auto begin() { return _state.begin(); }
-    auto end() { return _state.end(); }
+    decltype(_state)::iterator begin() { return _state.begin(); }
+    decltype(_state)::iterator end() { return _state.end(); }
 
     bool hasProperty(const ObjectSpec* spec, ObjectProperty property) { return state(spec).properties.isSet(property); }
 

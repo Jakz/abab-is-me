@@ -24,10 +24,10 @@ namespace baba
 
 
 
-    auto begin() const { return objects.begin(); }
-    auto end() const { return objects.end(); }
-    auto begin() { return objects.begin(); }
-    auto end() { return objects.end(); }
+    decltype(objects)::const_iterator begin() const { return objects.begin(); }
+    decltype(objects)::const_iterator end() const { return objects.end(); }
+    decltype(objects)::iterator begin() { return objects.begin(); }
+    decltype(objects)::iterator end() { return objects.end(); }
 
     coord_t x() const { return coord.x; }
     coord_t y() const { return coord.y; }

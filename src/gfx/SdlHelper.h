@@ -80,15 +80,7 @@ bool SDL<EventHandler, Renderer>::init()
   }
 
   // SDL_WINDOW_FULLSCREEN
-#if defined(WINDOW_SCALE)
-#if defined(DEBUGGER)
-  _window = SDL_CreateWindow("AbabIsMe", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 480, SDL_WINDOW_OPENGL);
-#else
-  _window = SDL_CreateWindow("AbabIsMe", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL);
-#endif
-#else
   _window = SDL_CreateWindow("AbabIsMe", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, SDL_WINDOW_OPENGL);
-#endif
   _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
 
   return true;
