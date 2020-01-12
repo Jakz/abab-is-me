@@ -116,13 +116,41 @@ void GameView::render()
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
   SDL_RenderClear(renderer);
 
-  for (int y = 0; y < HEIGHT/24; ++y)
-    for (int x = 0; x < WIDTH/24; ++x)
+  constexpr coord_t GFX_TILE_SIZE = 24;
+  scaler = Scaler::SCALE_TO_FIT;
+  offset = { 0, 0 };
+  size = { 1024, 768 };
+
+  float bestWidth = size.w / level->width();
+  float bestHeight = size.h / level->height();
+
+  float bestScale = std::min(bestWidth, bestHeight);
+
+  if (scaler == Scaler::KEEP_AT_MOST_NATIVE)
+    bestScale = std::min(bestScale, float(GFX_TILE_SIZE));
+  
+  tileSize = bestScale;
+  offset.x = (size.w - level->width() * bestScale) / 2;
+  offset.y = (size.h - level->height() * bestScale) / 2;
+
+
+  SDL_Rect bb = { 0,0, size.w, size.h };
+  //TODO: check if this depends on some level property like theme
+  SDL_SetRenderDrawColor(renderer, 21, 24, 31, 255); 
+  SDL_RenderFillRect(renderer, &bb);
+
+  for (int y = 0; y < size.h/tileSize; ++y)
+    for (int x = 0; x < size.w/tileSize; ++x)
     {
       auto* tile = level->get(x, y);
       
       if (tile)
-      {
+      {        
+        const SDL_Rect dest = { offset.x + x * tileSize, offset.y + y * tileSize, tileSize, tileSize };
+        
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderFillRect(renderer, &dest);
+        
         for (const auto& obj : *tile)
         {
           const auto& gfx = objectGfx(obj.spec);
@@ -136,14 +164,15 @@ void GameView::render()
           SDL_SetTextureColorMod(gfx.texture, color.r, color.g, color.b);
 
           SDL_Rect src = gfx.sprites[obj.variant];
-          SDL_Rect dest = { x * 24, y * 24, 24, 24 };
 
-          src.x += tick * 24;
+          src.x += tick * GFX_TILE_SIZE;
 
           SDL_RenderCopy(renderer, gfx.texture, &src, &dest);
         }
       }
     }
+
+
 }
 
 void movement(Tile* tile, decltype(Tile::objects)::iterator object, D d, coord_t dx, coord_t dy)

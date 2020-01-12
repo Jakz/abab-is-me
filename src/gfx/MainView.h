@@ -1,11 +1,19 @@
 #pragma once
 
 #include "ViewManager.h"
+#include "Common.h"
 
 struct ObjectGfx;
 
 namespace ui
 {
+  enum class Scaler
+  {
+    SCALE_TO_FIT,
+    KEEP_AT_MOST_NATIVE
+  };
+
+  
   class GameView : public View
   {
   private:
@@ -15,8 +23,10 @@ namespace ui
 
     void render();
 
+    Scaler scaler;
     point_t offset;
-    point_t size;
+    size2d_t size;
+    coord_t tileSize;
 
   public:
     GameView(ViewManager* manager);

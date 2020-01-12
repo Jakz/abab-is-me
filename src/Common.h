@@ -45,9 +45,37 @@ private:
   bit_mask<T>(utype value) : value(value) { }
 };
 
+using coord_t = int32_t;
+
+struct point_t
+{
+  coord_t x, y;
+
+  bool operator==(const point_t& o) const
+  {
+    return x == o.x && y == o.y;
+  }
+
+  struct hash
+  {
+    size_t operator()(const point_t& p) const { return p.y << 16 | p.x; }
+  };
+};
+
+struct size2d_t
+{
+  coord_t w, h;
+};
+
 using path = std::string;
 
+#if _WIN32
 static const path DATA_FOLDER = R"(E:\Games\Portable\Baba.Is.You.v01.08.2019\Data\)";
+#else
+static const path DATA_FOLDER = R"(/media/SD/baba/)";
+#endif
+
+
 
 constexpr int32_t WIDTH = 1024;
 constexpr int32_t HEIGHT = 768;

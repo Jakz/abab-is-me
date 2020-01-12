@@ -7,23 +7,6 @@
 
 namespace baba
 {
-  using coord_t = int32_t;
-
-  struct point_t
-  {
-    coord_t x, y;
-
-    bool operator==(const point_t& o) const 
-    {
-      return x == o.x && y == o.y;
-    }
-
-    struct hash
-    {
-      size_t operator()(const point_t& p) const { return p.y << 16 | p.x; }
-    };
-  };
-
   enum class D { UP, DOWN, LEFT, RIGHT };
   
   struct ObjectSpec
