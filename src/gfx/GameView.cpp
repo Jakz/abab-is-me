@@ -146,42 +146,71 @@ void GameView::render()
     }
 }
 
+void movement(Tile* tile, decltype(Tile::objects)::iterator object, coord_t dx, coord_t dy)
+{  
+  std::vector<std::pair<Tile*, decltype(Tile::objects)::iterator>> objects;
+
+  Tile* next = level->get(tile->x() + dx, tile->y() + dy);
+
+  objects.push_back(std::make_pair(tile, object));
+
+  while (next)
+  {
+    if (!next)
+      return;
+    else if (next->empty())
+      break;
+    else
+    {
+      for (auto it = next->begin(); it != next->end(); ++it)
+      {
+        if (rules.hasProperty(it->spec, ObjectProperty::STOP))
+          return;
+        else if (rules.hasProperty(it->spec, ObjectProperty::PUSH))
+          objects.push_back(std::make_pair(next, it));
+        else if (it->spec->isText)
+          objects.push_back(std::make_pair(next, it));
+      }
+    }
+
+    next = level->get(next->x() + dx, next->y() + dy);
+  }
+
+  for (auto rit = objects.rbegin(); rit != objects.rend(); ++rit)
+  {
+    Object object = *rit->second;
+    rit->first->objects.erase(rit->second);
+    level->get(rit->first->x() + dx, rit->first->y() + dy)->objects.push_back(object);
+  }
+}
+
 
 void movement(coord_t dx, coord_t dy)
 {
-  for (auto& tile : *level)
-    for (auto& object : tile)
-      object.alreadyMoved = false;
+  level->forEachObject([](Object& object) { object.alreadyMoved = false; });
 
-  
+  std::vector<std::pair<Tile*, decltype(Tile::objects)::iterator>> movable;
+
   for (coord_t y = 0; y < level->height(); ++y)
     for (coord_t x = 0; x < level->width(); ++x)
     {
       Tile* tile = level->get(x, y);
-      Tile* dest = level->get(x + dx, y + dy);
 
-      if (dest)
-      {
-        for (auto it = tile->begin(); it != tile->end(); /**/)
-        {
-          const bool canMove = !it->alreadyMoved && rules.state(it->spec).properties.isSet(ObjectProperty::YOU);
-          const bool canMoveInto = !dest->any_of([](const Object& obj) { return rules.state(obj.spec).properties.isSet(ObjectProperty::STOP); });
-          
-          if (canMove && canMoveInto)
-          {
-            Object object = *it;
-            object.alreadyMoved = true;
-
-            it = tile->objects.erase(it);
-
-            dest->objects.push_back(object);
-            std::sort(dest->begin(), dest->end(), [](const Object& o1, const Object& o2) { return o1.spec->layer < o2.spec->layer; });
-          }
-          else
-            ++it;
-        }
-      }
+      for (auto it = tile->begin(); it != tile->end(); ++it)
+        if (rules.hasProperty(it->spec, ObjectProperty::YOU))
+          movable.push_back(std::make_pair(tile, it));
     }
+
+  for (auto& pair : movable)
+    movement(pair.first, pair.second, dx, dy);
+
+  for (auto& tile : *level)
+    std::sort(tile.begin(), tile.end(), [](const Object& o1, const Object& o2) { return o1.spec->layer < o2.spec->layer; });
+
+  level->forEachObject([](Object& object) { object.active = false; });
+  rules.clear();
+  rules.generate(level);
+  rules.apply();
 }
 
 

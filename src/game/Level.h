@@ -36,6 +36,8 @@ namespace baba
     Tile* get(const Tile* t, D d);
     const Tile* get(const Tile* t, D d) const;
 
+    void forEachObject(std::function<void(Object&)> lambda);
+
     void computeTiling();
 
     coord_t height() const { return _height; }

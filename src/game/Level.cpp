@@ -2,6 +2,8 @@
 
 #include "Tile.h"
 
+#include <algorithm>
+
 using namespace baba;
 
 Tile* Level::get(const Tile* t, D d)
@@ -53,4 +55,13 @@ void Level::computeTiling()
       }
     }
   }
+}
+
+void Level::forEachObject(std::function<void(Object&)> lambda)
+{
+  std::for_each(_tiles.begin(), _tiles.end(), [&lambda](Tile& tile) {
+    std::for_each(tile.begin(), tile.end(), [&lambda](Object& object) {
+      lambda(object);
+    });
+  });
 }

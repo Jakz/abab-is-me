@@ -10,6 +10,7 @@ namespace baba
   {
     YOU     = 0x00000001,
     STOP    = 0x00000002,
+    PUSH    = 0x00000004,
   };
 
   using ObjectProperties = bit_mask<ObjectProperty>;
@@ -34,6 +35,8 @@ namespace baba
     Rules(const GameData* data) : _data(data) { }
 
     ObjectState& state(const ObjectSpec* spec) { return _state[spec]; }
+
+    bool hasProperty(const ObjectSpec* spec, ObjectProperty property) { return state(spec).properties.isSet(property); }
 
     void clear();
     void generate(baba::Level* level);

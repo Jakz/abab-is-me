@@ -102,6 +102,8 @@ void Rules::apply()
       _state[object].properties.set(ObjectProperty::YOU);
     else if (property->spec->name == "text_stop")
       _state[object].properties.set(ObjectProperty::STOP);
+    else if (property->spec->name == "text_push")
+      _state[object].properties.set(ObjectProperty::PUSH);
     else
       assert(false);
   }
