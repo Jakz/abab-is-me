@@ -13,6 +13,7 @@ using namespace baba;
 extern GameData data;
 Rules rules(&data);
 extern Level* level;
+History history;
 
 SDL_Surface* palette = nullptr;
 
@@ -159,25 +160,29 @@ void GameView::render()
 
         for (const auto& obj : *tile)
         {
-          const auto& gfx = objectGfx(obj.spec);
-
           SDL_Color color;
-          //assert(palette->format->BytesPerPixel == 4);
-
           const auto& ocolor = obj.active ? obj.spec->active : obj.spec->color;
-
           SDL_GetRGB(*(((uint32_t*)palette->pixels) + ocolor.y * palette->w + ocolor.x), palette->format, &color.r, &color.g, &color.b);
-          SDL_SetTextureColorMod(gfx.texture, color.r, color.g, color.b);
 
-          auto variant = obj.variant;
-          if (obj.spec->tiling == ObjectSpec::Tiling::None)
-            variant = 0;
+          if (obj.spec == data.EDGE)
+          {
+            SDL_SetRenderDrawColor(renderer, 21, 24, 31, 255);
+            SDL_RenderFillRect(renderer, &dest);
+          }
+          else
+          {
+            const auto& gfx = objectGfx(obj.spec);
+            SDL_SetTextureColorMod(gfx.texture, color.r, color.g, color.b);
+            auto variant = obj.variant;
+            if (obj.spec->tiling == ObjectSpec::Tiling::None)
+              variant = 0;
 
-          SDL_Rect src = gfx.sprites[variant];
+            SDL_Rect src = gfx.sprites[variant];
 
-          src.x += tick * GFX_TILE_SIZE;
+            src.x += tick * GFX_TILE_SIZE;
 
-          SDL_RenderCopy(renderer, gfx.texture, &src, &dest);
+            SDL_RenderCopy(renderer, gfx.texture, &src, &dest);
+          }
         }
       }
     }
@@ -195,9 +200,7 @@ void movement(Tile* tile, decltype(Tile::objects)::iterator object, D d, coord_t
 
   while (next)
   {
-    if (!next)
-      return;
-    else if (next->empty())
+    if (next->empty())
       break;
     else
     {
@@ -253,6 +256,7 @@ void movement(Tile* tile, decltype(Tile::objects)::iterator object, D d, coord_t
 
 void movement(D d, coord_t dx, coord_t dy)
 {
+  history.push(level->state());
   level->forEachObject([](Object& object) { object.alreadyMoved = false; });
 
   std::vector<std::pair<Tile*, decltype(Tile::objects)::iterator>> movable;
@@ -299,6 +303,8 @@ void GameView::handleKeyboardEvent(const SDL_Event& event)
     case SDLK_RIGHT: movement(D::RIGHT, 1, 0);  break;
     case SDLK_UP: movement(D::UP, 0, -1); break;
     case SDLK_DOWN: movement(D::DOWN, 0, 1); break;
+
+    case SDLK_TAB: if (!history.empty()) level->restore(history.pop()); break;
     }
   }
 }

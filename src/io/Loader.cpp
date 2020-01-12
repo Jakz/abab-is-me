@@ -101,7 +101,7 @@ baba::Level* Loader::readLayer(uint16_t version, baba::Level* level)
   uint32_t height = read<uint32_t>(in);
 
   if (!level)
-    level = new baba::Level(width, height);
+    level = new baba::Level(data, width, height);
 
   std::vector<Object> objects;
 
@@ -344,6 +344,21 @@ void ValuesParser::generateObject()
 
     data.objects.push_back(object);
   }
+  else
+  {
+    assert(fields["entry_name"] == "edge");
+
+    baba::ObjectSpec edge;
+    auto color = parseCoordinate(fields["colour"]);
+    edge.color = { color.first, color.second };
+
+    auto tile = parseCoordinate(fields["tile"]);
+    edge.id = tile.first | (tile.second << 8);
+
+    edge.name = "edge";
+
+    data.objects.push_back(edge);
+  }
 }
 
 
@@ -411,6 +426,7 @@ void ValuesParser::parse()
           skipLine();
           state = s::InsideObject;
           fields.clear();
+          fields["entry_name"] = objectName.first;
         }
 
         break;

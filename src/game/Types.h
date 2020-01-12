@@ -35,6 +35,7 @@ namespace baba
     std::unordered_map<point_t, const ObjectSpec*, point_t::hash> objectsByGrid;
 
     const ObjectSpec* IS = nullptr;
+    const ObjectSpec* EDGE = nullptr;
 
     void finalize()
     {
@@ -45,9 +46,16 @@ namespace baba
         objectsByGrid[spec.grid] = &spec;
       }
 
-      auto it = objectsByName.find("text_is");
+      mapDefault(IS, "text_is");
+      mapDefault(EDGE, "edge");
+    }
+
+  private:
+    void mapDefault(const ObjectSpec*& dest, const char* name)
+    {
+      auto it = objectsByName.find(name);
       assert(it != objectsByName.end());
-      IS = it->second;
+      dest = it->second;
     }
   };
 

@@ -10,11 +10,12 @@ namespace baba
   struct Level
   {
   private:
+    const GameData& _data;
     coord_t _width, _height;
     LevelState _tiles;
 
   public:
-    Level(coord_t width, coord_t height) : _width(width), _height(height)
+    Level(const GameData& data, coord_t width, coord_t height) : _width(width), _height(height), _data(data)
     {
       _tiles.resize(width*height);
       for (coord_t y = 0; y < height; ++y)
@@ -39,8 +40,43 @@ namespace baba
     void forEachObject(std::function<void(Object&)> lambda);
 
     void computeTiling();
+    void placeEdge();
 
     coord_t height() const { return _height; }
     coord_t width() const { return _width; }
+
+    //TODO: use std::move from History class to make it much more efficient
+    void restore(const LevelState& state) { _tiles = state; }
+    LevelState state() const { return _tiles; }
   };
 }
+
+#include <deque>
+
+namespace baba
+{
+  class History
+  {
+  private:
+    static constexpr size_t MAX_SIZE = 16;
+    std::deque<LevelState> history;
+  public:
+    void push(LevelState&& state)
+    {
+      history.push_back(state);
+      if (history.size() > MAX_SIZE)
+        history.pop_front();
+    }
+
+    LevelState pop()
+    {
+      LevelState state = history.back();
+      history.pop_back();
+      return state;
+    }
+
+    bool empty() const { return history.empty(); }
+    size_t size() const { return history.size(); }
+  };
+}
+

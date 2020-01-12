@@ -47,10 +47,10 @@ void Level::computeTiling()
           auto up = get(tile, D::UP), down = get(tile, D::DOWN);
           auto left = get(tile, D::LEFT), right = get(tile, D::RIGHT);
 
-          if (right && right->has(object.spec)) object.variant |= 1;
-          if (up && up->has(object.spec)) object.variant |= 2;
-          if (left && left->has(object.spec)) object.variant |= 4;
-          if (down && down->has(object.spec)) object.variant |= 8;
+          if (right->has(object.spec)) object.variant |= 1;
+          if (up->has(object.spec)) object.variant |= 2;
+          if (left->has(object.spec)) object.variant |= 4;
+          if (down->has(object.spec)) object.variant |= 8;
         }
       }
     }
@@ -64,4 +64,27 @@ void Level::forEachObject(std::function<void(Object&)> lambda)
       lambda(object);
     });
   });
+}
+
+void Level::placeEdge()
+{
+  /*for (coord_t y = 0; y < height(); ++y)
+  {
+    for (coord_t x = 0; x == 0; x = width() - 1)
+    {
+      Tile* tile = get(x, y);
+      assert(tile->empty());
+      tile->add({ _data.EDGE });
+    }
+  }
+
+  for (coord_t x = 0; x < width(); ++x)
+  {
+    for (coord_t y = 0; y == 0; x = height() - 1)
+    {
+      Tile* tile = get(x, y);
+      assert(tile->empty());
+      tile->add({ _data.EDGE });
+    }
+  }*/
 }

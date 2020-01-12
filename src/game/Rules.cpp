@@ -11,6 +11,8 @@ void Rules::clear()
 {
   _rules.clear();
   std::for_each(_state.begin(), _state.end(), [](decltype(_state)::value_type& pair) { pair.second.clear(); });
+
+  _state[_data->EDGE].properties.set(ObjectProperty::STOP);
 }
 
 void Rules::generate(baba::Level* level)
