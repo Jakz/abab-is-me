@@ -10,7 +10,7 @@ namespace io
     baba::GameData& data;
     FILE* in;
 
-    baba::Level* readLayer(uint16_t version);
+    baba::Level* readLayer(uint16_t version, baba::Level* level);
 
   public:
     Loader(baba::GameData& data);

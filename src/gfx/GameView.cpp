@@ -169,7 +169,11 @@ void GameView::render()
           SDL_GetRGB(*(((uint32_t*)palette->pixels) + ocolor.y * palette->w + ocolor.x), palette->format, &color.r, &color.g, &color.b);
           SDL_SetTextureColorMod(gfx.texture, color.r, color.g, color.b);
 
-          SDL_Rect src = gfx.sprites[obj.variant];
+          auto variant = obj.variant;
+          if (obj.spec->tiling == ObjectSpec::Tiling::None)
+            variant = 0;
+
+          SDL_Rect src = gfx.sprites[variant];
 
           src.x += tick * GFX_TILE_SIZE;
 

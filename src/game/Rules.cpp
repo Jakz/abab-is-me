@@ -107,6 +107,8 @@ void Rules::apply()
       _state[object].properties.set(ObjectProperty::PUSH);
     else if (property->spec->name == "text_win")
       _state[object].properties.set(ObjectProperty::WIN);
+    else if (property->spec->name == "text_defeat")
+      _state[object].properties.set(ObjectProperty::DEFEAT);
     else
       assert(false);
   }

@@ -18,6 +18,7 @@ namespace std
 #endif
 
 using namespace io;
+using namespace baba;
 
 Loader::Loader(baba::GameData& data) : data(data)
 {
@@ -55,7 +56,6 @@ baba::Level* Loader::load(const path& p)
 
   const size_t length = flength(in);
 
-
   uint64_t achtung;
   uint16_t version;
 
@@ -78,10 +78,10 @@ baba::Level* Loader::load(const path& p)
       skip(2, in);
     }
     else if (header == LAYR)
-    {
+    {      
       uint16_t layerCount = read<uint16_t>(in);
       for (size_t i = 0; i < layerCount; ++i)
-        level = readLayer(version);
+        level = readLayer(version, level);
       break;
     }
     else
@@ -95,12 +95,17 @@ baba::Level* Loader::load(const path& p)
 
 using object_id = uint16_t;
 
-baba::Level* Loader::readLayer(uint16_t version)
+baba::Level* Loader::readLayer(uint16_t version, baba::Level* level)
 {
   uint32_t width = read<uint32_t>(in);
   uint32_t height = read<uint32_t>(in);
 
-  LOGD("Reading a layer of %dx%d cells", width, height);
+  if (!level)
+    level = new baba::Level(width, height);
+
+  std::vector<Object> objects;
+
+  LOGD("  reading a layer of %dx%d cells", width, height);
 
   if (version >= 258) skip(4, in);
   skip(25, in);
@@ -112,30 +117,50 @@ baba::Level* Loader::readLayer(uint16_t version)
 
   /* MAIN */
   skip(4, in);
-  uint32_t compressedSize = read<uint32_t>(in);
-  uint32_t nextPosition = ftell(in) + compressedSize;
 
-  Zip::byte* buffer = (Zip::byte*)std::calloc(compressedSize, 1);
-  fread(buffer, 1, compressedSize, in);
-  auto uncompressed = Zip::uncompress(buffer, compressedSize);
-
-  assert(uncompressed.length == (width * height * sizeof(object_id)));
-
-  baba::Level* level = new baba::Level(width, height);
-
-  /* layer data is made by 2 bytes object indices */
-  const int16_t* objects = reinterpret_cast<const int16_t*>(uncompressed.data);
-  for (uint32_t i = 0; i < width*height; ++i)
   {
-    int16_t id = objects[i];
+    uint32_t compressedSize = read<uint32_t>(in);
+    Zip::byte* buffer = (Zip::byte*)std::calloc(compressedSize, 1);
+    fread(buffer, 1, compressedSize, in);
+    auto uncompressed = Zip::uncompress(buffer, compressedSize);
+    free(buffer);
 
-    auto it = data.objectsByID.find(id);
+    assert(uncompressed.length == (width * height * sizeof(object_id)));
 
-    if (it != data.objectsByID.end())
+
+    /* layer data is made by 2 bytes object indices */
+    const int16_t* identifiers = reinterpret_cast<const int16_t*>(uncompressed.data);
+    for (uint32_t i = 0; i < width*height; ++i)
     {
-      level->get(i)->add({ it->second });
+      int16_t id = identifiers[i];
+
+      auto it = data.objectsByID.find(id);
+
+      if (it != data.objectsByID.end())
+        objects.push_back({ it->second });
+      else
+        objects.push_back({ nullptr }); //TODO: EMPTY object
     }
   }
+
+  if (dataBlocks == 2)
+  {
+    skip(9, in);
+    uint32_t compressedSize = read<uint32_t>(in);
+    Zip::byte* buffer = (Zip::byte*)std::calloc(compressedSize, 1);
+    fread(buffer, 1, compressedSize, in);
+    auto uncompressed = Zip::uncompress(buffer, compressedSize);
+    free(buffer);
+
+    assert(uncompressed.length == width * height);
+
+    for (uint32_t i = 0; i < width*height; ++i)
+      objects[i].variant = uncompressed.data[i];
+  }
+
+  for (uint32_t i = 0; i < width*height; ++i)
+    if (objects[i].spec)
+      level->get(i)->add(objects[i]);
 
   return level;
 }
@@ -336,7 +361,7 @@ void ValuesParser::init()
     std::string line;
     while (getline(file, line))
     {
-      if (line.back() == '\r') line.pop_back();
+      if (!line.empty() && line.back() == '\r') line.pop_back();
       lines.push_back(line);
     }
 
@@ -410,7 +435,7 @@ void ValuesParser::parse()
     }
   }
 
-  LOGD("Loaded %zu objects", data.objects.size());
+  LOGD("  loaded %zu objects.", data.objects.size());
 }
 
 void Loader::loadGameData()
