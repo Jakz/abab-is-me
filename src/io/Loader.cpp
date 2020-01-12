@@ -293,6 +293,8 @@ void ValuesParser::generateObject()
       }
     }
 
+    assert(object.isText || object.type == baba::ObjectSpec::Type::Noun);
+
     {
       int tiling = std::stoi(fields["tiling"]);
 

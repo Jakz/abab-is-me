@@ -35,7 +35,7 @@ void Rules::generate(baba::Level* level)
 
         if (left)
         {
-          auto* noun = left->find([](const Object& obj) { return obj.spec->type == ObjectSpec::Type::Noun; });
+          auto* noun = left->find([](const Object& obj) { return obj.spec->isText && obj.spec->type == ObjectSpec::Type::Noun; });
           if (noun)
             horizontal.push_back(noun);
         }
@@ -44,14 +44,14 @@ void Rules::generate(baba::Level* level)
 
         if (right)
         {
-          auto* property = right->find([](const Object& obj) { return obj.spec->type == ObjectSpec::Type::Property; });
+          auto* property = right->find([](const Object& obj) { return obj.spec->isText && obj.spec->type == ObjectSpec::Type::Property; });
           if (property)
             horizontal.push_back(property);
         }
 
         if (up)
         {
-          auto* noun = up->find([](const Object& obj) { return obj.spec->type == ObjectSpec::Type::Noun; });
+          auto* noun = up->find([](const Object& obj) { return obj.spec->isText && obj.spec->type == ObjectSpec::Type::Noun; });
           if (noun)
             vertical.push_back(noun);
         }
@@ -60,7 +60,7 @@ void Rules::generate(baba::Level* level)
 
         if (down)
         {
-          auto* property = down->find([](const Object& obj) { return obj.spec->type == ObjectSpec::Type::Property; });
+          auto* property = down->find([](const Object& obj) { return obj.spec->isText && obj.spec->type == ObjectSpec::Type::Property; });
           if (property)
             vertical.push_back(property);
         }
@@ -104,6 +104,8 @@ void Rules::apply()
       _state[object].properties.set(ObjectProperty::STOP);
     else if (property->spec->name == "text_push")
       _state[object].properties.set(ObjectProperty::PUSH);
+    else if (property->spec->name == "text_win")
+      _state[object].properties.set(ObjectProperty::WIN);
     else
       assert(false);
   }

@@ -15,6 +15,9 @@ namespace ui
 
     void render();
 
+    point_t offset;
+    point_t size;
+
   public:
     GameView(ViewManager* manager);
     ~GameView();

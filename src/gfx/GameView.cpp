@@ -146,7 +146,7 @@ void GameView::render()
     }
 }
 
-void movement(Tile* tile, decltype(Tile::objects)::iterator object, coord_t dx, coord_t dy)
+void movement(Tile* tile, decltype(Tile::objects)::iterator object, D d, coord_t dx, coord_t dy)
 {  
   std::vector<std::pair<Tile*, decltype(Tile::objects)::iterator>> objects;
 
@@ -162,15 +162,26 @@ void movement(Tile* tile, decltype(Tile::objects)::iterator object, coord_t dx, 
       break;
     else
     {
+      bool found = false;
+      
       for (auto it = next->begin(); it != next->end(); ++it)
       {
         if (rules.hasProperty(it->spec, ObjectProperty::STOP))
           return;
         else if (rules.hasProperty(it->spec, ObjectProperty::PUSH))
+        {
           objects.push_back(std::make_pair(next, it));
+          found = true;
+        }
         else if (it->spec->isText)
+        {
           objects.push_back(std::make_pair(next, it));
+          found = true;
+        }
       }
+
+      if (!found)
+        break;
     }
 
     next = level->get(next->x() + dx, next->y() + dy);
@@ -179,13 +190,29 @@ void movement(Tile* tile, decltype(Tile::objects)::iterator object, coord_t dx, 
   for (auto rit = objects.rbegin(); rit != objects.rend(); ++rit)
   {
     Object object = *rit->second;
-    rit->first->objects.erase(rit->second);
-    level->get(rit->first->x() + dx, rit->first->y() + dy)->objects.push_back(object);
+    Tile* tile = rit->first;
+
+    if (object.spec->tiling == ObjectSpec::Tiling::Character)
+    {
+      uint32_t variantBase = 0;
+      if (d == D::RIGHT) variantBase = 0;
+      else if (d == D::UP) variantBase = 5;
+      else if (d == D::LEFT) variantBase = 10;
+      else if (d == D::DOWN) variantBase = 15;
+      
+      object.variant = variantBase + (object.variant + 1) % 5;
+    }
+
+
+    tile->objects.erase(rit->second);
+    level->get(tile->x() + dx, tile->y() + dy)->objects.push_back(object);
+
+
   }
 }
 
 
-void movement(coord_t dx, coord_t dy)
+void movement(D d, coord_t dx, coord_t dy)
 {
   level->forEachObject([](Object& object) { object.alreadyMoved = false; });
 
@@ -202,7 +229,7 @@ void movement(coord_t dx, coord_t dy)
     }
 
   for (auto& pair : movable)
-    movement(pair.first, pair.second, dx, dy);
+    movement(pair.first, pair.second, d, dx, dy);
 
   for (auto& tile : *level)
     std::sort(tile.begin(), tile.end(), [](const Object& o1, const Object& o2) { return o1.spec->layer < o2.spec->layer; });
@@ -211,6 +238,14 @@ void movement(coord_t dx, coord_t dy)
   rules.clear();
   rules.generate(level);
   rules.apply();
+
+  for (const auto& props : rules)
+  {
+    auto* spec = props.first;
+    
+    if (props.second.properties.isSet(ObjectProperty::WIN))
+      level->forEachObject([spec](Object& object) { if (object.spec == spec) object.active = true; });
+  }
 }
 
 
@@ -221,10 +256,10 @@ void GameView::handleKeyboardEvent(const SDL_Event& event)
     switch (event.key.keysym.sym)
     {
     case SDLK_ESCAPE: manager->exit(); break;
-    case SDLK_LEFT: movement(-1, 0);  break;
-    case SDLK_RIGHT: movement(1, 0);  break;
-    case SDLK_UP: movement(0, -1); break;
-    case SDLK_DOWN: movement(0, 1); break;
+    case SDLK_LEFT: movement(D::LEFT, -1, 0);  break;
+    case SDLK_RIGHT: movement(D::RIGHT, 1, 0);  break;
+    case SDLK_UP: movement(D::UP, 0, -1); break;
+    case SDLK_DOWN: movement(D::DOWN, 0, 1); break;
     }
   }
 }
