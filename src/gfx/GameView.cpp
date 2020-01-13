@@ -198,6 +198,8 @@ void movement(Tile* tile, decltype(Tile::objects)::iterator object, D d, coord_t
 
   objects.push_back(std::make_pair(tile, object));
 
+  bool isStopped = false;
+
   while (next)
   {
     if (next->empty())
@@ -209,7 +211,10 @@ void movement(Tile* tile, decltype(Tile::objects)::iterator object, D d, coord_t
       for (auto it = next->begin(); it != next->end(); ++it)
       {
         if (rules.hasProperty(it->spec, ObjectProperty::STOP))
-          return;
+        {
+          isStopped = true;
+          found = true;
+        }
         else if (rules.hasProperty(it->spec, ObjectProperty::PUSH))
         {
           objects.push_back(std::make_pair(next, it));
@@ -229,28 +234,29 @@ void movement(Tile* tile, decltype(Tile::objects)::iterator object, D d, coord_t
     next = level->get(next->x() + dx, next->y() + dy);
   }
 
-  for (auto rit = objects.rbegin(); rit != objects.rend(); ++rit)
+  if (!isStopped)
   {
-    Object object = *rit->second;
-    Tile* tile = rit->first;
-
-    if (object.spec->tiling == ObjectSpec::Tiling::Character)
+    for (auto rit = objects.rbegin(); rit != objects.rend(); ++rit)
     {
-      uint32_t variantBase = 0;
-      if (d == D::RIGHT) variantBase = 0;
-      else if (d == D::UP) variantBase = 5;
-      else if (d == D::LEFT) variantBase = 10;
-      else if (d == D::DOWN) variantBase = 15;
+      Object object = *rit->second;
+      Tile* tile = rit->first;
 
-      object.variant = variantBase + (object.variant + 1) % 5;
+      if (object.spec->tiling == ObjectSpec::Tiling::Character)
+      {
+        uint32_t variantBase = 0;
+        if (d == D::RIGHT) variantBase = 0;
+        else if (d == D::UP) variantBase = 5;
+        else if (d == D::LEFT) variantBase = 10;
+        else if (d == D::DOWN) variantBase = 15;
+
+        object.variant = variantBase + (object.variant + 1) % 5;
+      }
+
+      tile->objects.erase(rit->second);
+      level->get(tile->x() + dx, tile->y() + dy)->objects.push_back(object);
     }
-
-
-    tile->objects.erase(rit->second);
-    level->get(tile->x() + dx, tile->y() + dy)->objects.push_back(object);
-
-
   }
+
 }
 
 
