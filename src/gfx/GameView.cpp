@@ -190,6 +190,12 @@ void GameView::render()
 
 }
 
+
+bool operator&&(const ObjectSpec* spec, ObjectProperty prop)
+{
+  return rules.hasProperty(spec, prop);
+}
+
 struct MoveInfo
 {
   Tile* tile;
@@ -201,44 +207,66 @@ void movement(MoveInfo info, D d, coord_t dx, coord_t dy)
 {
   std::vector<MoveInfo> objects;
 
-  Tile* next = level->get(info.tile->x() + dx, info.tile->y() + dy);
+  Tile* tile = info.tile;
+  Tile* next = tile;
 
-  objects.push_back(info);
+  auto it = info.it;
 
   bool isStopped = false;
 
-  while (next)
+  while (tile)
   {
+    next = level->get(tile->x() + dx, tile->y() + dy);
+
     if (next->empty())
+    {
+      objects.emplace_back(tile, it);
       break;
+    }
     else
     {
       bool found = false;
 
-      for (auto it = next->begin(); it != next->end(); ++it)
+      for (auto nit = next->begin(); nit != next->end(); ++nit)
       {
-        if (rules.hasProperty(it->spec, ObjectProperty::STOP))
+        if ((nit->spec && ObjectProperty::DEFEAT) && (it->spec && ObjectProperty::YOU))
+        {
+          tile->objects.erase(it);
+          found = false;
+        }
+        /* next is stop, just break from the cycle, we can't move */
+        else if (nit->spec && ObjectProperty::STOP)
         {
           isStopped = true;
-          found = true;
+          break;
         }
-        else if (rules.hasProperty(it->spec, ObjectProperty::PUSH))
+        /* it's push, it could move must we must see if it can be moved too*/
+        else if (nit->spec && ObjectProperty::PUSH)
         {
-          objects.emplace_back(next, it);
+          objects.emplace_back(tile, it);
+          it = nit;
           found = true;
+          break;
         }
-        else if (it->spec->isText)
+        else if (nit->spec->isText)
         {
-          objects.emplace_back(next, it);
+          objects.emplace_back(tile, it);
+          it = nit;
           found = true;
+          break;
+        }
+        else
+        {
+          objects.emplace_back(tile, it);
+          found = false;
         }
       }
 
-      if (!found)
+      if (!found || isStopped)
         break;
     }
 
-    next = level->get(next->x() + dx, next->y() + dy);
+    tile = next;
   }
 
   if (!isStopped)
@@ -266,7 +294,6 @@ void movement(MoveInfo info, D d, coord_t dx, coord_t dy)
 
 }
 
-
 void movement(D d, coord_t dx, coord_t dy)
 {
   history.push(level->state());
@@ -284,23 +311,26 @@ void movement(D d, coord_t dx, coord_t dy)
           movable.emplace_back(tile, it);
     }
 
-  for (const auto& pair : movable)
-    movement(pair, d, dx, dy);
-
-  for (auto& tile : *level)
-    std::sort(tile.begin(), tile.end(), [](const Object& o1, const Object& o2) { return o1.spec->layer < o2.spec->layer; });
-
-  level->forEachObject([](Object& object) { object.active = false; });
-  rules.clear();
-  rules.generate(level);
-  rules.apply();
-
-  for (const auto& props : rules)
+  if (!movable.empty())
   {
-    auto* spec = props.first;
+    for (const auto& pair : movable)
+      movement(pair, d, dx, dy);
 
-    if (props.second.properties.isSet(ObjectProperty::WIN))
-      level->forEachObject([spec](Object& object) { if (object.spec == spec) object.active = true; });
+    for (auto& tile : *level)
+      std::sort(tile.begin(), tile.end(), [](const Object& o1, const Object& o2) { return o1.spec->layer < o2.spec->layer; });
+
+    level->forEachObject([](Object& object) { object.active = false; });
+    rules.clear();
+    rules.generate(level);
+    rules.apply();
+
+    for (const auto& props : rules)
+    {
+      auto* spec = props.first;
+
+      if (props.second.properties.isSet(ObjectProperty::WIN))
+        level->forEachObject([spec](Object& object) { if (object.spec == spec) object.active = true; });
+    }
   }
 }
 
