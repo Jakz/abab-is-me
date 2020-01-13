@@ -190,13 +190,20 @@ void GameView::render()
 
 }
 
-void movement(Tile* tile, decltype(Tile::objects)::iterator object, D d, coord_t dx, coord_t dy)
+struct MoveInfo
 {
-  std::vector<std::pair<Tile*, decltype(Tile::objects)::iterator>> objects;
+  Tile* tile;
+  decltype(Tile::objects)::iterator it;
+  MoveInfo(Tile* tile, decltype(it) it) : tile(tile), it(it) { }
+};
 
-  Tile* next = level->get(tile->x() + dx, tile->y() + dy);
+void movement(MoveInfo info, D d, coord_t dx, coord_t dy)
+{
+  std::vector<MoveInfo> objects;
 
-  objects.push_back(std::make_pair(tile, object));
+  Tile* next = level->get(info.tile->x() + dx, info.tile->y() + dy);
+
+  objects.push_back(info);
 
   bool isStopped = false;
 
@@ -217,12 +224,12 @@ void movement(Tile* tile, decltype(Tile::objects)::iterator object, D d, coord_t
         }
         else if (rules.hasProperty(it->spec, ObjectProperty::PUSH))
         {
-          objects.push_back(std::make_pair(next, it));
+          objects.emplace_back(next, it);
           found = true;
         }
         else if (it->spec->isText)
         {
-          objects.push_back(std::make_pair(next, it));
+          objects.emplace_back(next, it);
           found = true;
         }
       }
@@ -238,8 +245,8 @@ void movement(Tile* tile, decltype(Tile::objects)::iterator object, D d, coord_t
   {
     for (auto rit = objects.rbegin(); rit != objects.rend(); ++rit)
     {
-      Object object = *rit->second;
-      Tile* tile = rit->first;
+      Object object = *rit->it;
+      Tile* tile = rit->tile;
 
       if (object.spec->tiling == ObjectSpec::Tiling::Character)
       {
@@ -252,7 +259,7 @@ void movement(Tile* tile, decltype(Tile::objects)::iterator object, D d, coord_t
         object.variant = variantBase + (object.variant + 1) % 5;
       }
 
-      tile->objects.erase(rit->second);
+      tile->objects.erase(rit->it);
       level->get(tile->x() + dx, tile->y() + dy)->objects.push_back(object);
     }
   }
@@ -265,7 +272,7 @@ void movement(D d, coord_t dx, coord_t dy)
   history.push(level->state());
   level->forEachObject([](Object& object) { object.alreadyMoved = false; });
 
-  std::vector<std::pair<Tile*, decltype(Tile::objects)::iterator>> movable;
+  std::vector<MoveInfo> movable;
 
   for (coord_t y = 0; y < level->height(); ++y)
     for (coord_t x = 0; x < level->width(); ++x)
@@ -274,11 +281,11 @@ void movement(D d, coord_t dx, coord_t dy)
 
       for (auto it = tile->begin(); it != tile->end(); ++it)
         if (rules.hasProperty(it->spec, ObjectProperty::YOU))
-          movable.push_back(std::make_pair(tile, it));
+          movable.emplace_back(tile, it);
     }
 
-  for (auto& pair : movable)
-    movement(pair.first, pair.second, d, dx, dy);
+  for (const auto& pair : movable)
+    movement(pair, d, dx, dy);
 
   for (auto& tile : *level)
     std::sort(tile.begin(), tile.end(), [](const Object& o1, const Object& o2) { return o1.spec->layer < o2.spec->layer; });
