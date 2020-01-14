@@ -198,6 +198,20 @@ void GameView::render()
     manager->text("Defeat!", WIDTH - 5, 5, { 255, 0, 0 }, ui::TextAlign::RIGHT, 1.0f);
 }
 
+void GameView::updateMoveBounds()
+{
+  level->forEachTile([this](Tile& tile) {
+    if (tile.has(ObjectProperty::YOU))
+    {
+      moveBounds[0].x = std::min(moveBounds[0].x, tile.x());
+      moveBounds[0].y = std::min(moveBounds[0].y, tile.y());
+
+      moveBounds[1].x = std::max(moveBounds[1].x, tile.x());
+      moveBounds[1].y = std::max(moveBounds[1].y, tile.y());
+    }
+  });
+}
+
 
 bool operator&&(const ObjectSpec* spec, ObjectProperty prop)
 {
@@ -310,7 +324,7 @@ void movement(D d)
       Tile* tile = level->get(x, y);
 
       for (auto it = tile->begin(); it != tile->end(); ++it)
-        if (rules.hasProperty(it->spec, ObjectProperty::YOU))
+        if (it->spec && ObjectProperty::YOU)
           movable.emplace_back(tile, it);
     }
 
@@ -335,6 +349,8 @@ void movement(D d)
         level->forEachObject([spec](Object& object) { if (object.spec == spec) object.active = true; });
     }
   }
+
+  
 }
 
 
@@ -345,10 +361,10 @@ void GameView::handleKeyboardEvent(const SDL_Event& event)
     switch (event.key.keysym.sym)
     {
     case SDLK_ESCAPE: manager->exit(); break;
-    case SDLK_LEFT: movement(D::LEFT);  break;
-    case SDLK_RIGHT: movement(D::RIGHT);  break;
-    case SDLK_UP: movement(D::UP); break;
-    case SDLK_DOWN: movement(D::DOWN); break;
+    case SDLK_LEFT: movement(D::LEFT); updateMoveBounds(); break;
+    case SDLK_RIGHT: movement(D::RIGHT); updateMoveBounds(); break;
+    case SDLK_UP: movement(D::UP); updateMoveBounds(); break;
+    case SDLK_DOWN: movement(D::DOWN); updateMoveBounds(); break;
 
     case SDLK_TAB: if (!history.empty()) level->restore(history.pop()); break;
     }

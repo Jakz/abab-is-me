@@ -28,6 +28,10 @@ namespace ui
     size2d_t size;
     coord_t tileSize;
 
+    point_t moveBounds[2];
+
+    void updateMoveBounds();
+
   public:
     GameView(ViewManager* manager);
     ~GameView();
