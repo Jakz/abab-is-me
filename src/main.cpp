@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
 {
   io::Loader loader(data);
   loader.loadGameData();
-  level = loader.load("2level.l");
+  level = loader.load("5level.l");
   level->computeTiling();
   
   ui::ViewManager ui;

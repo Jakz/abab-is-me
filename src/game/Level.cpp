@@ -83,15 +83,15 @@ bool Level::isDefeat()
     anyYou |= rules.hasProperty(object.spec, ObjectProperty::YOU);
   });
 
-  return anyYou;
+  return !anyYou;
 }
 
 bool Level::isVictory()
 {
   bool anyVictory = false;
   forEachTile([&anyVictory](Tile& tile) {
-    const bool hasYou = tile.any_of([](const Object& o) { return rules.hasProperty(o.spec, ObjectProperty::YOU); });
-    const bool hasWin = tile.any_of([](const Object& o) { return rules.hasProperty(o.spec, ObjectProperty::WIN); });
+    const bool hasYou = tile.has(ObjectProperty::YOU);
+    const bool hasWin = tile.has(ObjectProperty::WIN);
 
     anyVictory |= (hasYou && hasWin);
   });

@@ -18,6 +18,8 @@ namespace baba
     bool empty() const { return objects.empty(); }
 
     bool has(const ObjectSpec* spec) const;
+    bool has(ObjectProperty property) const;
+
     bool any_of(const std::function<bool(const Object&)>& predicate) const;
     Object* find(const std::function<bool(const Object&)>& predicate);
     Object* find(const ObjectSpec* spec) { return find([spec](const Object& obj) { return obj.spec == spec; }); }

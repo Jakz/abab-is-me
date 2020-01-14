@@ -193,9 +193,9 @@ void GameView::render()
     manager->text(rules.rules()[i].name(), 5, 5 + i * 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
 
   if (level->isVictory())
-    manager->text("Victory!", 5, WIDTH - 5, { 255, 255, 0 }, ui::TextAlign::RIGHT, 1.0f);
+    manager->text("Victory!", WIDTH - 5, 5, { 255, 255, 0 }, ui::TextAlign::RIGHT, 1.0f);
   else if (level->isDefeat())
-    manager->text("Defeat!", 5, WIDTH - 5, { 255, 0, 0 }, ui::TextAlign::RIGHT, 1.0f);
+    manager->text("Defeat!", WIDTH - 5, 5, { 255, 0, 0 }, ui::TextAlign::RIGHT, 1.0f);
 }
 
 
@@ -219,10 +219,10 @@ bool isMovementAllowed(MoveInfo info, D d)
   Tile* next = level->get(info.tile, d);
 
   while (next)
-  {
-    if (next->any_of([](const Object& o) { return o.spec && ObjectProperty::STOP; }))
+  {    
+    if (next->has(ObjectProperty::STOP))
       return false;
-    else if (!next->any_of([](const Object& o) { return o.spec && ObjectProperty::PUSH; }))
+    else if (!next->has(ObjectProperty::PUSH))
       return true;
 
     next = level->get(next, d);
@@ -234,13 +234,11 @@ bool isMovementAllowed(MoveInfo info, D d)
 bool movement(MoveInfo info, D d)
 {
   Tile* tile = info.tile;
-  Tile* next = tile;
+  Tile* next = level->get(tile, d);
 
   auto it = info.it;
 
   bool isStopped = false;
-
-  next = level->get(tile, d);
 
   if (next->empty())
   {
@@ -249,6 +247,12 @@ bool movement(MoveInfo info, D d)
   {
     for (auto nit = next->begin(); nit != next->end(); ++nit)
     {
+      if (it->spec && ObjectProperty::YOU && next->has(ObjectProperty::DEFEAT))
+      {
+        tile->objects.erase(it);
+        return false;
+      }
+      
       /* next is stop, just break from the cycle, we can't move */
       if (nit->spec && ObjectProperty::STOP)
       {

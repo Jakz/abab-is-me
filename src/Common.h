@@ -95,4 +95,5 @@ namespace baba
   enum class ObjectProperty;
 }
 
+extern baba::Rules rules;
 bool operator&&(const baba::ObjectSpec* spec, baba::ObjectProperty prop);
