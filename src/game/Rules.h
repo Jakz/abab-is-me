@@ -13,6 +13,7 @@ namespace baba
     PUSH    = 0x00000004,
     WIN     = 0x00000008,
     DEFEAT  = 0x00000010,
+    MOVE    = 0x00000020,
   };
 
   using ObjectProperties = bit_mask<ObjectProperty>;
