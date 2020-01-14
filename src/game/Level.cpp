@@ -66,6 +66,13 @@ void Level::forEachObject(std::function<void(Object&)> lambda)
   });
 }
 
+void Level::forEachTile(std::function<void(Tile&)> lambda)
+{
+  std::for_each(_tiles.begin(), _tiles.end(), [&lambda](Tile& tile) {
+    lambda(tile);
+  });
+}
+
 void Level::placeEdge()
 {
   /*for (coord_t y = 0; y < height(); ++y)

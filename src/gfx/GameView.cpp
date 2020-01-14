@@ -203,10 +203,28 @@ struct MoveInfo
   MoveInfo(Tile* tile, decltype(it) it) : tile(tile), it(it) { }
 };
 
-void movement(MoveInfo info, D d, coord_t dx, coord_t dy)
+bool isMovementAllowed(MoveInfo info, D d)
 {
-  std::vector<MoveInfo> objects;
+  bool allowed = true;
+  bool finished = false;
 
+  Tile* next = level->get(info.tile, d);
+
+  while (next)
+  {
+    if (next->any_of([](const Object& o) { return o.spec && ObjectProperty::STOP; }))
+      return false;
+    else if (!next->any_of([](const Object& o) { return o.spec && ObjectProperty::PUSH; }))
+      return true;
+
+    next = level->get(next, d);
+  }
+
+  return true;
+}
+
+bool movement(MoveInfo info, D d)
+{
   Tile* tile = info.tile;
   Tile* next = tile;
 
@@ -214,87 +232,60 @@ void movement(MoveInfo info, D d, coord_t dx, coord_t dy)
 
   bool isStopped = false;
 
-  while (tile)
+  next = level->get(tile, d);
+
+  if (next->empty())
   {
-    next = level->get(tile->x() + dx, tile->y() + dy);
-
-    if (next->empty())
+  }
+  else
+  {
+    for (auto nit = next->begin(); nit != next->end(); ++nit)
     {
-      objects.emplace_back(tile, it);
-      break;
-    }
-    else
-    {
-      bool found = false;
-
-      for (auto nit = next->begin(); nit != next->end(); ++nit)
+      /* next is stop, just break from the cycle, we can't move */
+      if (nit->spec && ObjectProperty::STOP)
       {
-        if ((nit->spec && ObjectProperty::DEFEAT) && (it->spec && ObjectProperty::YOU))
-        {
-          tile->objects.erase(it);
-          found = false;
-        }
-        /* next is stop, just break from the cycle, we can't move */
-        else if (nit->spec && ObjectProperty::STOP)
-        {
-          isStopped = true;
-          break;
-        }
-        /* it's push, it could move must we must see if it can be moved too*/
-        else if (nit->spec && ObjectProperty::PUSH)
-        {
-          objects.emplace_back(tile, it);
-          it = nit;
-          found = true;
-          break;
-        }
-        else if (nit->spec->isText)
-        {
-          objects.emplace_back(tile, it);
-          it = nit;
-          found = true;
-          break;
-        }
-        else
-        {
-          objects.emplace_back(tile, it);
-          found = false;
-        }
-      }
-
-      if (!found || isStopped)
+        isStopped = true;
         break;
+      }
+      /* it's push, it could move must we must see if it can be moved too*/
+      else if (nit->spec && ObjectProperty::PUSH || nit->spec->isText)
+      {
+        /* if current can be moved we check next, otherwise we can stop */
+        isStopped |= !movement(MoveInfo(next, nit), d);
+        if (!isStopped && next->begin() != next->end())
+          nit = next->begin(); // restart
+        else
+          break;
+      }
     }
-
-    tile = next;
   }
 
   if (!isStopped)
   {
-    for (auto rit = objects.rbegin(); rit != objects.rend(); ++rit)
+    Object object = *info.it;
+    Tile* tile = info.tile;
+
+    if (object.spec->tiling == ObjectSpec::Tiling::Character)
     {
-      Object object = *rit->it;
-      Tile* tile = rit->tile;
+      uint32_t variantBase = 0;
+      if (d == D::RIGHT) variantBase = 0;
+      else if (d == D::UP) variantBase = 5;
+      else if (d == D::LEFT) variantBase = 10;
+      else if (d == D::DOWN) variantBase = 15;
 
-      if (object.spec->tiling == ObjectSpec::Tiling::Character)
-      {
-        uint32_t variantBase = 0;
-        if (d == D::RIGHT) variantBase = 0;
-        else if (d == D::UP) variantBase = 5;
-        else if (d == D::LEFT) variantBase = 10;
-        else if (d == D::DOWN) variantBase = 15;
-
-        object.variant = variantBase + (object.variant + 1) % 5;
-      }
-
-      tile->objects.erase(rit->it);
-      level->get(tile->x() + dx, tile->y() + dy)->objects.push_back(object);
+      object.variant = variantBase + (object.variant + 1) % 5;
     }
+
+    tile->objects.erase(info.it);
+    level->get(tile, d)->objects.push_back(object);
+
+    return true;
   }
 
+  return false;
 }
 
-void movement(D d, coord_t dx, coord_t dy)
+void movement(D d)
 {
   history.push(level->state());
   level->forEachObject([](Object& object) { object.alreadyMoved = false; });
@@ -314,7 +305,7 @@ void movement(D d, coord_t dx, coord_t dy)
   if (!movable.empty())
   {
     for (const auto& pair : movable)
-      movement(pair, d, dx, dy);
+      movement(pair, d);
 
     for (auto& tile : *level)
       std::sort(tile.begin(), tile.end(), [](const Object& o1, const Object& o2) { return o1.spec->layer < o2.spec->layer; });
@@ -342,10 +333,10 @@ void GameView::handleKeyboardEvent(const SDL_Event& event)
     switch (event.key.keysym.sym)
     {
     case SDLK_ESCAPE: manager->exit(); break;
-    case SDLK_LEFT: movement(D::LEFT, -1, 0);  break;
-    case SDLK_RIGHT: movement(D::RIGHT, 1, 0);  break;
-    case SDLK_UP: movement(D::UP, 0, -1); break;
-    case SDLK_DOWN: movement(D::DOWN, 0, 1); break;
+    case SDLK_LEFT: movement(D::LEFT);  break;
+    case SDLK_RIGHT: movement(D::RIGHT);  break;
+    case SDLK_UP: movement(D::UP); break;
+    case SDLK_DOWN: movement(D::DOWN); break;
 
     case SDLK_TAB: if (!history.empty()) level->restore(history.pop()); break;
     }

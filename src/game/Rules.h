@@ -46,6 +46,8 @@ namespace baba
     void clear();
     void generate(baba::Level* level);
     void apply();
+
+    void resolve(baba::Level* level);
   };
 
 }

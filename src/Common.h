@@ -90,4 +90,9 @@ namespace baba
   struct ObjectSpec;
   struct Level;
   struct GameData;
+  struct Rules;
+
+  enum class ObjectProperty;
 }
+
+bool operator&&(const baba::ObjectSpec* spec, baba::ObjectProperty prop);

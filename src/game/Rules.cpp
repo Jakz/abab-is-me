@@ -115,3 +115,10 @@ void Rules::apply()
       assert(false);
   }
 }
+
+void Rules::resolve(baba::Level* level)
+{
+  level->forEachTile([this](Tile& tile) {
+    const bool hasDefeat = tile.any_of([this](const Object& object) { return hasProperty(object.spec, ObjectProperty::DEFEAT); });
+  });
+}

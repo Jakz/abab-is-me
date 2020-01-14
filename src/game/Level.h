@@ -38,6 +38,7 @@ namespace baba
     const Tile* get(const Tile* t, D d) const;
 
     void forEachObject(std::function<void(Object&)> lambda);
+    void forEachTile(std::function<void(Tile&)> lambda);
 
     void computeTiling();
     void placeEdge();

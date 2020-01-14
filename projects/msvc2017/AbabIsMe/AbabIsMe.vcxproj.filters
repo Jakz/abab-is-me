@@ -87,4 +87,7 @@
       <Filter>src\game</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="Natvis.natvis" />
+  </ItemGroup>
 </Project>
