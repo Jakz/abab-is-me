@@ -146,8 +146,9 @@ void GameView::render()
   SDL_SetRenderDrawColor(renderer, 21, 24, 31, 255);
   SDL_RenderFillRect(renderer, &bb);
 
-  for (int y = 0; y < size.h/tileSize; ++y)
-    for (int x = 0; x < size.w/tileSize; ++x)
+  for (int y = 0; y < size.h / tileSize; ++y)
+  {
+    for (int x = 0; x < size.w / tileSize; ++x)
     {
       auto* tile = level->get(x, y);
 
@@ -186,8 +187,10 @@ void GameView::render()
         }
       }
     }
+  }
 
-
+  for (coord_t i = 0; i < rules.rules().size(); ++i)
+    manager->text(rules.rules()[i].name(), 5, 5 + i * 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
 }
 
 

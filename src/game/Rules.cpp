@@ -7,6 +7,14 @@
 
 using namespace baba;
 
+std::string Rule::name() const
+{
+  std::string text = "";
+  for (const auto& term : terms)
+    text += term->spec->name.substr(5) + " ";
+  return text;
+}
+
 void Rules::clear()
 {
   _rules.clear();
@@ -69,23 +77,12 @@ void Rules::generate(baba::Level* level)
         }
 
         if (horizontal.size() == 3)
-          _rules.push_back(horizontal);
+          _rules.push_back({ horizontal });
 
         if (vertical.size() == 3)
-          _rules.push_back(vertical);
+          _rules.push_back({ vertical });
       }
     }
-  }
-
-  for (const auto& rule : _rules)
-  {
-    std::string text = "";
-    for (const auto& term : rule)
-    {
-      text += term->spec->name.substr(5) + " ";
-      term->active = true;
-    }
-    LOGD("Found rule: %s", text.c_str());
   }
 }
 
@@ -93,9 +90,9 @@ void Rules::apply()
 {
   for (const Rule& rule : _rules)
   {
-    auto& noun = rule[0];
-    auto& verb = rule[1];
-    auto& property = rule[2];
+    auto* noun = rule[0];
+    auto* verb = rule[1];
+    auto* property = rule[2];
 
     auto it = _data->objectsByGrid.find({ noun->spec->grid.x - 1, noun->spec->grid.y });
     assert(it != _data->objectsByGrid.end());
@@ -113,6 +110,10 @@ void Rules::apply()
       _state[object].properties.set(ObjectProperty::DEFEAT);
     else
       assert(false);
+
+    noun->active = true;
+    verb->active = true;
+    property->active = true;
   }
 }
 

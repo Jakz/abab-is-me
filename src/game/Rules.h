@@ -24,7 +24,14 @@ namespace baba
     void clear() { properties.clear(); }
   };
 
-  using Rule = std::vector<Object*>;
+
+  struct Rule
+  {
+    std::vector<Object*> terms;
+    std::string name() const;
+
+    Object* operator[](size_t i) const { return terms[i]; }
+  };
 
   struct Rules
   {
@@ -40,6 +47,8 @@ namespace baba
 
     decltype(_state)::iterator begin() { return _state.begin(); }
     decltype(_state)::iterator end() { return _state.end(); }
+
+    const decltype(_rules)& rules() const { return _rules; }
 
     bool hasProperty(const ObjectSpec* spec, ObjectProperty property) { return state(spec).properties.isSet(property); }
 
