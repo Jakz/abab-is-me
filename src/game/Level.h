@@ -41,7 +41,6 @@ namespace baba
     void forEachTile(std::function<void(Tile&)> lambda);
 
     void computeTiling();
-    void placeEdge();
 
     coord_t height() const { return _height; }
     coord_t width() const { return _width; }
@@ -49,6 +48,9 @@ namespace baba
     //TODO: use std::move from History class to make it much more efficient
     void restore(const LevelState& state) { _tiles = state; }
     LevelState state() const { return _tiles; }
+
+    bool isVictory();
+    bool isDefeat();
   };
 }
 

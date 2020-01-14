@@ -191,6 +191,11 @@ void GameView::render()
 
   for (coord_t i = 0; i < rules.rules().size(); ++i)
     manager->text(rules.rules()[i].name(), 5, 5 + i * 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
+
+  if (level->isVictory())
+    manager->text("Victory!", 5, WIDTH - 5, { 255, 255, 0 }, ui::TextAlign::RIGHT, 1.0f);
+  else if (level->isDefeat())
+    manager->text("Defeat!", 5, WIDTH - 5, { 255, 0, 0 }, ui::TextAlign::RIGHT, 1.0f);
 }
 
 

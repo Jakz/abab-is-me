@@ -1,10 +1,13 @@
 #include "Level.h"
 
 #include "Tile.h"
+#include "Rules.h"
 
 #include <algorithm>
 
 using namespace baba;
+
+extern baba::Rules rules;
 
 Tile* Level::get(const Tile* t, D d)
 {
@@ -73,25 +76,25 @@ void Level::forEachTile(std::function<void(Tile&)> lambda)
   });
 }
 
-void Level::placeEdge()
+bool Level::isDefeat()
 {
-  /*for (coord_t y = 0; y < height(); ++y)
-  {
-    for (coord_t x = 0; x == 0; x = width() - 1)
-    {
-      Tile* tile = get(x, y);
-      assert(tile->empty());
-      tile->add({ _data.EDGE });
-    }
-  }
+  bool anyYou = false;
+  forEachObject([&anyYou](Object& object) {
+    anyYou |= rules.hasProperty(object.spec, ObjectProperty::YOU);
+  });
 
-  for (coord_t x = 0; x < width(); ++x)
-  {
-    for (coord_t y = 0; y == 0; x = height() - 1)
-    {
-      Tile* tile = get(x, y);
-      assert(tile->empty());
-      tile->add({ _data.EDGE });
-    }
-  }*/
+  return anyYou;
+}
+
+bool Level::isVictory()
+{
+  bool anyVictory = false;
+  forEachTile([&anyVictory](Tile& tile) {
+    const bool hasYou = tile.any_of([](const Object& o) { return rules.hasProperty(o.spec, ObjectProperty::YOU); });
+    const bool hasWin = tile.any_of([](const Object& o) { return rules.hasProperty(o.spec, ObjectProperty::WIN); });
+
+    anyVictory |= (hasYou && hasWin);
+  });
+
+  return anyVictory;
 }

@@ -17,7 +17,6 @@ int main(int argc, char* argv[])
   loader.loadGameData();
   level = loader.load("2level.l");
   level->computeTiling();
-  level->placeEdge();
   
   ui::ViewManager ui;
 
