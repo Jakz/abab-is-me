@@ -155,7 +155,14 @@ baba::Level* Loader::readLayer(uint16_t version, baba::Level* level)
     assert(uncompressed.length == width * height);
 
     for (uint32_t i = 0; i < width*height; ++i)
+    {
       objects[i].variant = uncompressed.data[i];
+
+      /*if (objects[i].spec && objects[i].spec->tiling == ObjectSpec::Tiling::Character)
+      {
+        printf("Variant %s: %d\n", objects[i].spec->name.c_str(), objects[i].variant);
+      }*/
+    }
   }
 
   for (uint32_t i = 0; i < width*height; ++i)

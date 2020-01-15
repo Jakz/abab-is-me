@@ -62,6 +62,7 @@ namespace baba
   struct Object
   {
     const ObjectSpec* spec;
+    D direction;
     uint32_t variant;
     bool alreadyMoved;
     bool active;

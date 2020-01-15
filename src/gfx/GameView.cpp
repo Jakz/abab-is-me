@@ -313,7 +313,6 @@ bool movement(MoveInfo info, D d)
 
 void movement(D d)
 {
-  history.push(level->state());
   level->forEachObject([](Object& object) { object.alreadyMoved = false; });
 
   std::vector<MoveInfo> movable;
@@ -330,6 +329,8 @@ void movement(D d)
 
   if (!movable.empty())
   {
+    history.push(level->state());
+
     for (const auto& pair : movable)
       movement(pair, d);
 
@@ -366,7 +367,16 @@ void GameView::handleKeyboardEvent(const SDL_Event& event)
     case SDLK_UP: movement(D::UP); updateMoveBounds(); break;
     case SDLK_DOWN: movement(D::DOWN); updateMoveBounds(); break;
 
-    case SDLK_TAB: if (!history.empty()) level->restore(history.pop()); break;
+    case SDLK_TAB:
+      if (!history.empty())
+      {
+        level->restore(history.pop());
+        rules.clear();
+        rules.generate(level);
+        rules.apply();
+      }
+      
+      break;
     }
   }
 }
