@@ -151,6 +151,7 @@ void SDL<EventHandler, Renderer>::handleEvents()
 #if MOUSE_ENABLED
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEBUTTONUP:
+    case SDL_MOUSEMOTION:
 #if defined(WINDOW_SCALE)
       event.button.x /= WINDOW_SCALE;
       event.button.y /= WINDOW_SCALE;

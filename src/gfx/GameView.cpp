@@ -195,6 +195,10 @@ void GameView::render()
     manager->text("Defeat!", WIDTH - 5, 5, { 255, 0, 0 }, ui::TextAlign::RIGHT, 1.0f);
 
   manager->text(level->name(), WIDTH / 2, HEIGHT - 20, { 255, 255, 255 }, ui::TextAlign::CENTER, 2.0f);
+
+#if MOUSE_ENABLED
+  manager->text(hoverInfo, 5, HEIGHT - 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
+#endif
 }
 
 void GameView::updateMoveBounds()
@@ -378,7 +382,22 @@ void GameView::handleKeyboardEvent(const SDL_Event& event)
 
 void GameView::handleMouseEvent(const SDL_Event& event)
 {
+  if (event.type == SDL_MOUSEMOTION)
+  {
+    coord_t x = (event.motion.x - offset.x) / tileSize;
+    coord_t y = (event.motion.y - offset.y) / tileSize;
 
+    Tile* tile = level->get(x, y);
+
+    if (tile)
+    {
+      hoverInfo.resize(256);
+      memset(hoverInfo.data(), 0, 256);
+      snprintf(hoverInfo.data(), 256, "%d,%d: %s", x, y, tile->empty() ? "" : tile->object()->spec->name.c_str());
+    }
+  }
+  else
+    hoverInfo = "";
 }
 
 

@@ -30,6 +30,10 @@ namespace ui
 
     point_t moveBounds[2];
 
+#if MOUSE_ENABLED
+    std::string hoverInfo;
+#endif
+
     void updateMoveBounds();
 
   public:
