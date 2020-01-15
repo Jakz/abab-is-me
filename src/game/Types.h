@@ -32,16 +32,32 @@ namespace baba
   {
     std::vector<ObjectSpec> objects;
     std::unordered_map<int32_t, const ObjectSpec*> objectsByID;
-    std::unordered_map<std::string, const ObjectSpec*> objectsByKey;
+    std::unordered_map<std::string, ObjectSpec*> objectsByKey;
     std::unordered_map<std::string, const ObjectSpec*> objectsByName;
     std::unordered_map<point_t, const ObjectSpec*, point_t::hash> objectsByGrid;
 
     const ObjectSpec* IS = nullptr;
     const ObjectSpec* EDGE = nullptr;
 
+    GameData() = default;
+
+    GameData(const GameData& other)
+    {
+      this->objects = other.objects;
+      finalize();
+    }
+
+    GameData& operator=(const GameData& other)
+    {
+      this->objects = other.objects;
+      finalize();
+    }
+
     void finalize()
     {
-      for (const auto& spec : objects)
+      clearMaps();
+      
+      for (auto& spec : objects)
       {
         objectsByID[spec.id] = &spec;
         objectsByName[spec.name] = &spec;
@@ -59,6 +75,14 @@ namespace baba
       auto it = objectsByName.find(name);
       assert(it != objectsByName.end());
       dest = it->second;
+    }
+
+    void clearMaps()
+    {
+      objectsByID.clear();
+      objectsByKey.clear();
+      objectsByName.clear();
+      objectsByGrid.clear();
     }
   };
 

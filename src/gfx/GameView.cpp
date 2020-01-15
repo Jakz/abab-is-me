@@ -104,7 +104,7 @@ void GameView::render()
 
   if (!palette)
   {
-    palette = IMG_Load((DATA_FOLDER + R"(Palettes/factory.png)").c_str());
+    palette = IMG_Load((DATA_FOLDER + R"(Palettes/default.png)").c_str());
     assert(palette);
     SDL_Surface* tmp = SDL_ConvertSurfaceFormat(palette, SDL_PIXELFORMAT_BGRA8888, 0);
     SDL_FreeSurface(palette);

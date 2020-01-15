@@ -71,9 +71,9 @@ namespace sutils
     return lines;
   }
 
-  static inline std::pair<std::string, std::string> parseKeyValue(const std::string& v)
+  static std::pair<std::string, std::string> parseKeyValue(const std::string& v, const std::string delim = "=")
   {
-    size_t idx = v.find("=");
+    size_t idx = v.find(delim);
     if (idx == std::string::npos)
       return std::make_pair("", "");
     else
@@ -84,6 +84,24 @@ namespace sutils
       return std::make_pair(sutils::trim(key), sutils::trim(value));
     }
   }
+
+  static point_t parseCoordinate(std::string v)
+  {
+    //TODO: optimizable
+    
+    if (v.front() == '{' && v.back() == '}')
+      v = v.substr(1, v.size() - 2);
+    
+    auto idx = v.find_first_of(",");
+    assert(idx != std::string::npos);
+
+    auto fh = v.substr(0, idx), sh = v.substr(idx + 1);
+
+    int32_t f = std::stoi(sutils::trim(fh));
+    int32_t s = std::stoi(sutils::trim(sh));
+    return { f, s };
+  }
+
 }
 
 using namespace io;
@@ -120,14 +138,36 @@ void Loader::loadLD(const path& path, baba::Level* level, GameData& data)
   {
     const auto& l = lines[i];
 
-    if (s == S::NONE && l == "[general]")
+    if (l == "[general]")
       s = S::GENERAL;
+    else if (l == "[tiles]")
+      s = S::TILES;
     else if (s == S::GENERAL)
     {
       auto pair = sutils::parseKeyValue(l);
       
       if (pair.first == "name")
         level->_name = pair.second;
+    }
+    else if (s == S::TILES)
+    {
+      auto p = sutils::parseKeyValue(l);
+  
+      if (sutils::startsWith(p.first, "object"))
+      {
+        auto f = sutils::parseKeyValue(p.first, "_");
+
+        auto* spec = data.objectsByKey[f.first];
+
+        if (f.second == "image")
+          spec->sprite = p.second;
+        else if (f.second == "name")
+          spec->name = p.second;
+        else if (f.second == "colour")
+          spec->color = sutils::parseCoordinate(p.second);
+        else if (f.second == "activecolour")
+          spec->color = sutils::parseCoordinate(p.second);
+      }
     }
   }
 }
@@ -283,7 +323,6 @@ private:
   s state = s::None;
 
   void skipLine(size_t d = 1) { i += d; }
-  std::pair<int32_t, int32_t> parseCoordinate(const std::string& v);
 
   void generateObject();
 
@@ -293,16 +332,6 @@ public:
   void init();
   void parse();
 };
-
-std::pair<int32_t, int32_t> ValuesParser::parseCoordinate(const std::string& v)
-{
-  assert(v.front() == '{' && v.back() == '}');
-  auto idx = v.find_first_of(", ");
-  assert(idx != std::string::npos);
-  int32_t f = std::stoi(v.substr(1, idx - 1));
-  int32_t s = std::stoi(v.substr(idx + 2));
-  return std::make_pair(f, s);
-}
 
 void ValuesParser::generateObject()
 {
@@ -323,14 +352,11 @@ void ValuesParser::generateObject()
     object.key = fields["entry_name"];
     object.layer = std::stoi(fields["layer"]);
 
-    auto tile = parseCoordinate(fields["tile"]);
-    object.id = tile.first | (tile.second << 8);
+    auto tile = sutils::parseCoordinate(fields["tile"]);
+    object.id = tile.x | (tile.y << 8);
 
-    auto color = parseCoordinate(fields["colour"]);
-    object.color = { color.first, color.second };
-
-    auto grid = parseCoordinate(fields["grid"]);
-    object.grid = { grid.first, grid.second };
+    object.color = sutils::parseCoordinate(fields["colour"]);
+    object.grid = sutils::parseCoordinate(fields["grid"]);
 
     {
       auto type = sutils::trimQuotes(fields["unittype"]);
@@ -345,8 +371,7 @@ void ValuesParser::generateObject()
 
     if (object.isText)
     {
-      auto active = parseCoordinate(fields["active"]);
-      object.active = { active.first, active.second };
+      object.active = sutils::parseCoordinate(fields["active"]);
     }
     else
     {
@@ -404,11 +429,10 @@ void ValuesParser::generateObject()
     assert(fields["entry_name"] == "edge");
 
     baba::ObjectSpec edge;
-    auto color = parseCoordinate(fields["colour"]);
-    edge.color = { color.first, color.second };
+    edge.color = sutils::parseCoordinate(fields["colour"]);
 
-    auto tile = parseCoordinate(fields["tile"]);
-    edge.id = tile.first | (tile.second << 8);
+    auto tile = sutils::parseCoordinate(fields["tile"]);
+    edge.id = tile.x | (tile.y << 8);
 
     edge.name = "edge";
 
