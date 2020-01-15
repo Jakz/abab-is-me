@@ -21,6 +21,7 @@ namespace baba
     point_t grid;
     std::string name;
     std::string sprite;
+    std::string key;
     bool spriteInRoot;
     bool isText;
     Tiling tiling;
@@ -31,6 +32,7 @@ namespace baba
   {
     std::vector<ObjectSpec> objects;
     std::unordered_map<int32_t, const ObjectSpec*> objectsByID;
+    std::unordered_map<std::string, const ObjectSpec*> objectsByKey;
     std::unordered_map<std::string, const ObjectSpec*> objectsByName;
     std::unordered_map<point_t, const ObjectSpec*, point_t::hash> objectsByGrid;
 
@@ -44,6 +46,7 @@ namespace baba
         objectsByID[spec.id] = &spec;
         objectsByName[spec.name] = &spec;
         objectsByGrid[spec.grid] = &spec;
+        objectsByKey[spec.key] = &spec;
       }
 
       mapDefault(IS, "text_is");

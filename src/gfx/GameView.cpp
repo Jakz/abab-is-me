@@ -10,8 +10,6 @@
 using namespace ui;
 using namespace baba;
 
-extern GameData data;
-Rules rules(&data);
 extern Level* level;
 History history;
 
@@ -106,7 +104,7 @@ void GameView::render()
 
   if (!palette)
   {
-    palette = IMG_Load((DATA_FOLDER + R"(Palettes/default.png)").c_str());
+    palette = IMG_Load((DATA_FOLDER + R"(Palettes/factory.png)").c_str());
     assert(palette);
     SDL_Surface* tmp = SDL_ConvertSurfaceFormat(palette, SDL_PIXELFORMAT_BGRA8888, 0);
     SDL_FreeSurface(palette);
@@ -115,9 +113,7 @@ void GameView::render()
     //rules.state(data.objectsByName["baba"]).properties.set(baba::ObjectProperty::YOU);
     //rules.state(data.objectsByName["wall"]).properties.set(baba::ObjectProperty::STOP);
 
-    rules.clear();
-    rules.generate(level);
-    rules.apply();
+    level->updateRules();
   }
 
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -165,7 +161,7 @@ void GameView::render()
           const auto& ocolor = obj.active ? obj.spec->active : obj.spec->color;
           SDL_GetRGB(*(((uint32_t*)palette->pixels) + ocolor.y * palette->w + ocolor.x), palette->format, &color.r, &color.g, &color.b);
 
-          if (obj.spec == data.EDGE)
+          if (obj.spec == level->data()->EDGE)
           {
             SDL_SetRenderDrawColor(renderer, 21, 24, 31, 255);
             SDL_RenderFillRect(renderer, &dest);
@@ -189,13 +185,16 @@ void GameView::render()
     }
   }
 
-  for (coord_t i = 0; i < rules.rules().size(); ++i)
-    manager->text(rules.rules()[i].name(), 5, 5 + i * 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
+  const auto& rulesList = level->rules().rules();
+  for (coord_t i = 0; i < rulesList.size(); ++i)
+    manager->text(rulesList[i].name(), 5, 5 + i * 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
 
   if (level->isVictory())
     manager->text("Victory!", WIDTH - 5, 5, { 255, 255, 0 }, ui::TextAlign::RIGHT, 1.0f);
   else if (level->isDefeat())
     manager->text("Defeat!", WIDTH - 5, 5, { 255, 0, 0 }, ui::TextAlign::RIGHT, 1.0f);
+
+  manager->text(level->name(), WIDTH / 2, HEIGHT - 20, { 255, 255, 255 }, ui::TextAlign::CENTER, 2.0f);
 }
 
 void GameView::updateMoveBounds()
@@ -215,7 +214,7 @@ void GameView::updateMoveBounds()
 
 bool operator&&(const ObjectSpec* spec, ObjectProperty prop)
 {
-  return rules.hasProperty(spec, prop);
+  return level->rules().hasProperty(spec, prop);
 }
 
 struct MoveInfo
@@ -338,11 +337,9 @@ void movement(D d)
       std::sort(tile.begin(), tile.end(), [](const Object& o1, const Object& o2) { return o1.spec->layer < o2.spec->layer; });
 
     level->forEachObject([](Object& object) { object.active = false; });
-    rules.clear();
-    rules.generate(level);
-    rules.apply();
+    level->updateRules();
 
-    for (const auto& props : rules)
+    for (const auto& props : level->rules())
     {
       auto* spec = props.first;
 
@@ -371,9 +368,7 @@ void GameView::handleKeyboardEvent(const SDL_Event& event)
       if (!history.empty())
       {
         level->restore(history.pop());
-        rules.clear();
-        rules.generate(level);
-        rules.apply();
+        level->updateRules();
       }
       
       break;

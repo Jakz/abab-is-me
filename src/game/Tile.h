@@ -9,8 +9,13 @@ namespace baba
 {
   struct Tile
   {
-    std::vector<Object> objects;
+    const Level* level;
     point_t coord;
+
+    std::vector<Object> objects;
+
+    Tile() = default;
+    Tile(const Level* level, point_t coord) : level(level), coord(coord) { }
 
     void add(Object object) { objects.push_back(object); }
     const Object* object() const { return !objects.empty() ? &objects[0] : nullptr; }

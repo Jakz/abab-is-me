@@ -95,5 +95,9 @@ namespace baba
   enum class ObjectProperty;
 }
 
-extern baba::Rules rules;
+namespace io
+{
+  class Loader;
+}
+
 bool operator&&(const baba::ObjectSpec* spec, baba::ObjectProperty prop);

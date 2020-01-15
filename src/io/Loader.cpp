@@ -17,6 +17,75 @@ namespace std
 }
 #endif
 
+#include "game/Types.h"
+
+#include <algorithm>
+#include <vector>
+#include <unordered_map>
+
+namespace sutils
+{
+  using string_t = std::string;
+
+  inline static bool startsWith(const string_t& string, const string_t& prefix) { return string.substr(0, prefix.length()) == prefix; }
+  static inline std::string& ltrim(std::string &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
+      return ch != ' ' && ch != '\t';
+    }));
+    return s;
+  }
+  static inline std::string& rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
+      return ch != ' ' && ch != '\t';
+    }).base(), s.end());
+    return s;
+  }
+  static inline std::string& trim(std::string &s) {
+    ltrim(s);
+    rtrim(s);
+    return s;
+  }
+
+  static inline std::string trimQuotes(const std::string& s)
+  {
+    return s.substr(1, s.length() - 2);
+  }
+
+  static inline std::vector<std::string> readFileToLines(const std::string& path)
+  {
+    std::vector<std::string> lines;
+    std::ifstream file(path);
+
+    if (file.is_open())
+    {
+      std::string line;
+      while (getline(file, line))
+      {
+        if (!line.empty() && line.back() == '\r') line.pop_back();
+        lines.push_back(line);
+      }
+
+      file.close();
+    }
+
+    return lines;
+  }
+
+  static inline std::pair<std::string, std::string> parseKeyValue(const std::string& v)
+  {
+    size_t idx = v.find("=");
+    if (idx == std::string::npos)
+      return std::make_pair("", "");
+    else
+    {
+      std::string key = v.substr(0, idx);
+      std::string value = (v.length() >= idx + 1) ? v.substr(idx + 1) : "";
+      if (!value.empty() && value.back() == ',') value.pop_back();
+      return std::make_pair(sutils::trim(key), sutils::trim(value));
+    }
+  }
+}
+
 using namespace io;
 using namespace baba;
 
@@ -40,10 +109,34 @@ size_t flength(FILE* in) { fseek(in, 0, SEEK_END); size_t ot = ftell(in); fseek(
 
 */
 
-baba::Level* Loader::load(const path& p)
+void Loader::loadLD(const path& path, baba::Level* level, GameData& data)
 {
-  LOGD("Loading level %s", p.c_str());
-  path fullPath = DATA_FOLDER + R"(Worlds/baba/)" + p;
+  enum class S { NONE, GENERAL, TILES };
+  S s = S::NONE;
+
+  auto lines = sutils::readFileToLines(path);
+
+  for (int i = 0; i < lines.size(); ++i)
+  {
+    const auto& l = lines[i];
+
+    if (s == S::NONE && l == "[general]")
+      s = S::GENERAL;
+    else if (s == S::GENERAL)
+    {
+      auto pair = sutils::parseKeyValue(l);
+      
+      if (pair.first == "name")
+        level->_name = pair.second;
+    }
+  }
+}
+
+baba::Level* Loader::load(const std::string& name)
+{
+  LOGD("Loading level %s", name.c_str());
+
+  path fullPath = DATA_FOLDER + R"(Worlds/baba/)" + name + ".l";
   in = fopen(fullPath.c_str(), "rb");
   assert(in);
 
@@ -90,6 +183,10 @@ baba::Level* Loader::load(const path& p)
   }
 
   fclose(in);
+
+  path ldPath = DATA_FOLDER + R"(Worlds/baba/)" + name + ".ld";
+  loadLD(ldPath, level, data);
+
   return level;
 }
 
@@ -172,41 +269,6 @@ baba::Level* Loader::readLayer(uint16_t version, baba::Level* level)
   return level;
 }
 
-#include "game/Types.h"
-
-#include <algorithm>
-#include <vector>
-#include <unordered_map>
-
-namespace sutils
-{
-  using string_t = std::string;
-
-  inline static bool startsWith(const string_t& string, const string_t& prefix) { return string.substr(0, prefix.length()) == prefix; }
-  static inline std::string& ltrim(std::string &s) {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
-      return ch != ' ' && ch != '\t';
-    }));
-    return s;
-  }
-  static inline std::string& rtrim(std::string &s) {
-    s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
-      return ch != ' ' && ch != '\t';
-    }).base(), s.end());
-    return s;
-  }
-  static inline std::string& trim(std::string &s) {
-    ltrim(s);
-    rtrim(s);
-    return s;
-  }
-
-  static inline std::string trimQuotes(const std::string& s)
-  {
-    return s.substr(1, s.length() - 2);
-  }
-}
-
 class ValuesParser
 {
 private:
@@ -221,7 +283,6 @@ private:
   s state = s::None;
 
   void skipLine(size_t d = 1) { i += d; }
-  std::pair<std::string, std::string> parseKeyValue(const std::string& v);
   std::pair<int32_t, int32_t> parseCoordinate(const std::string& v);
 
   void generateObject();
@@ -232,20 +293,6 @@ public:
   void init();
   void parse();
 };
-
-std::pair<std::string, std::string> ValuesParser::parseKeyValue(const std::string& v)
-{
-  size_t idx = v.find(" =");
-  if (idx == std::string::npos)
-    return std::make_pair("", "");
-  else
-  {
-    std::string key = v.substr(0, idx);
-    std::string value = (v.length() >= idx + 3) ? v.substr(idx + 3) : "";
-    if (!value.empty() && value.back() == ',') value.pop_back();
-    return std::make_pair(key, value);
-  }
-}
 
 std::pair<int32_t, int32_t> ValuesParser::parseCoordinate(const std::string& v)
 {
@@ -273,6 +320,7 @@ void ValuesParser::generateObject()
 
     object.name = sutils::trimQuotes(fields["name"]);
     object.sprite = sutils::trimQuotes(fields["sprite"]);
+    object.key = fields["entry_name"];
     object.layer = std::stoi(fields["layer"]);
 
     auto tile = parseCoordinate(fields["tile"]);
@@ -374,25 +422,11 @@ void ValuesParser::init()
   LOGDD("Loading game data from values.lua..");
   const path valuesFile = DATA_FOLDER + "values.lua";
 
-  std::ifstream file(valuesFile);
+  lines = sutils::readFileToLines(valuesFile);
+  count = lines.size();
+  i = 0;
 
-  if (file.is_open())
-  {
-    lines.clear();
-
-    std::string line;
-    while (getline(file, line))
-    {
-      if (!line.empty() && line.back() == '\r') line.pop_back();
-      lines.push_back(line);
-    }
-
-    file.close();
-
-    count = lines.size();
-    i = 0;
-  }
-  else
+  if (count == 0)
   {
     LOGDD("Unable to load values.lua from data folder, aborting.");
     abort();
@@ -427,7 +461,7 @@ void ValuesParser::parse()
           state = s::Finished;
         else
         {
-          auto objectName = parseKeyValue(line);
+          auto objectName = sutils::parseKeyValue(line);
           assert(!objectName.first.empty() && objectName.second.empty());
           //LOGD("Parsing object %s", objectName.first.c_str());
           skipLine();
@@ -447,7 +481,7 @@ void ValuesParser::parse()
         }
         else
         {
-          auto pair = parseKeyValue(line);
+          auto pair = sutils::parseKeyValue(line);
           fields.emplace(pair);
           assert(!pair.first.empty() && !pair.second.empty());
           //LOGD("  Field %s = %s", pair.first.c_str(), pair.second.c_str());

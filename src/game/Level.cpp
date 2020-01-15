@@ -7,7 +7,14 @@
 
 using namespace baba;
 
-extern baba::Rules rules;
+Level::Level(const GameData& data, coord_t width, coord_t height) : _width(width), _height(height), _data(data), _rules(&data)
+{
+  _tiles.resize(width*height);
+ 
+  for (coord_t y = 0; y < height; ++y)
+    for (coord_t x = 0; x < width; ++x)
+      *get(x, y) = Tile(this, { x, y });
+}
 
 Tile* Level::get(const Tile* t, D d)
 {
@@ -79,8 +86,8 @@ void Level::forEachTile(std::function<void(Tile&)> lambda)
 bool Level::isDefeat()
 {
   bool anyYou = false;
-  forEachObject([&anyYou](Object& object) {
-    anyYou |= rules.hasProperty(object.spec, ObjectProperty::YOU);
+  forEachObject([&anyYou, this](Object& object) {
+    anyYou |= _rules.hasProperty(object.spec, ObjectProperty::YOU);
   });
 
   return !anyYou;
@@ -97,4 +104,11 @@ bool Level::isVictory()
   });
 
   return anyVictory;
+}
+
+void Level::updateRules()
+{
+  _rules.clear();
+  _rules.generate(this);
+  _rules.apply();
 }

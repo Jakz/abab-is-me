@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Types.h"
+
 #include "Tile.h"
+#include "Rules.h"
 
 namespace baba
 {
@@ -10,18 +12,18 @@ namespace baba
   struct Level
   {
   private:
+    Rules _rules;
     const GameData& _data;
     coord_t _width, _height;
     LevelState _tiles;
+    std::string _name;
 
   public:
-    Level(const GameData& data, coord_t width, coord_t height) : _width(width), _height(height), _data(data)
-    {
-      _tiles.resize(width*height);
-      for (coord_t y = 0; y < height; ++y)
-        for (coord_t x = 0; x < width; ++x)
-          get(x, y)->coord = { x, y };
-    }
+    Level(const GameData& data, coord_t width, coord_t height);
+
+    const std::string& name() const { return _name; }
+    const GameData* data() const { return &_data; }
+    const Rules& rules() const { return _rules; }
 
     decltype(_tiles)::const_iterator begin() const { return _tiles.begin(); }
     decltype(_tiles)::const_iterator end() const { return _tiles.end(); }
@@ -51,6 +53,10 @@ namespace baba
 
     bool isVictory();
     bool isDefeat();
+
+    void updateRules();
+
+    friend class io::Loader;
   };
 }
 

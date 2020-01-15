@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "Rules.h"
+#include "Level.h"
 
 using namespace baba;
 
@@ -13,7 +14,7 @@ bool Tile::has(const ObjectSpec* spec) const
 
 bool Tile::has(ObjectProperty property) const
 {
-  return any_of([property](const Object& object) { return rules.hasProperty(object.spec, property); });
+  return any_of([this, property](const Object& object) { return level->rules().hasProperty(object.spec, property); });
 }
 
 bool Tile::any_of(const std::function<bool(const Object&)>& predicate) const

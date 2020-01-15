@@ -38,20 +38,22 @@ namespace baba
   {
   private:
     const GameData* _data;
-    std::unordered_map<const ObjectSpec*, ObjectState> _state;
+    mutable std::unordered_map<const ObjectSpec*, ObjectState> _state;
     std::vector<Rule> _rules;
 
   public:
     Rules(const GameData* data) : _data(data) { }
 
-    ObjectState& state(const ObjectSpec* spec) { return _state[spec]; }
+    ObjectState& state(const ObjectSpec* spec) const { return _state[spec]; }
 
     decltype(_state)::iterator begin() { return _state.begin(); }
     decltype(_state)::iterator end() { return _state.end(); }
+    decltype(_state)::const_iterator begin() const { return _state.begin(); }
+    decltype(_state)::const_iterator end() const { return _state.end(); }
 
     const decltype(_rules)& rules() const { return _rules; }
 
-    bool hasProperty(const ObjectSpec* spec, ObjectProperty property) { return state(spec).properties.isSet(property); }
+    bool hasProperty(const ObjectSpec* spec, ObjectProperty property) const { return state(spec).properties.isSet(property); }
 
     void clear();
     void generate(baba::Level* level);
