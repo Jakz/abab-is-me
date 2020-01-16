@@ -7,10 +7,17 @@
 
 using namespace baba;
 
-Level::Level(const GameData& data, coord_t width, coord_t height) : _width(width), _height(height), _data(data), _rules(&data)
+Level::Level(const GameData& data) : _data(data), _rules(&data), _width(0), _height(0)
 {
+}
+
+void Level::resize(coord_t width, coord_t height)
+{
+  _width = width;
+  _height = height;
+  
   _tiles.resize(width*height);
- 
+
   for (coord_t y = 0; y < height; ++y)
     for (coord_t x = 0; x < width; ++x)
       *get(x, y) = Tile(this, { x, y });

@@ -52,7 +52,8 @@ const ObjectGfx& GameView::objectGfx(const baba::ObjectSpec* spec)
       frames.push_back(24);
       break;
     case baba::ObjectSpec::Tiling::Character:
-      int32_t f[] = { 31, 0, 1, 2, 3, 7, 8, 9, 10, 11, 15, 16, 17, 18, 19, 23, 24, 25, 26, 27 };
+      //int32_t f[] = { 31, 0, 1, 2, 3, 7, 8, 9, 10, 11, 15, 16, 17, 18, 19, 23, 24, 25, 26, 27 };
+      int32_t f[] = { 0, 1, 2, 3, 8, 9, 10, 11, 16, 17, 18, 19, 24, 25, 26, 27 };
       for (int32_t i : f)
         frames.push_back(i);
       break;
@@ -223,9 +224,10 @@ bool operator&&(const ObjectSpec* spec, ObjectProperty prop)
 
 struct MoveInfo
 {
+  enum class Type { YOU, MOVE } type;
   Tile* tile;
   decltype(Tile::objects)::iterator it;
-  MoveInfo(Tile* tile, decltype(it) it) : tile(tile), it(it) { }
+  MoveInfo(Type type, Tile* tile, decltype(it) it) : type(type), tile(tile), it(it) { }
 };
 
 bool isMovementAllowed(MoveInfo info, D d)
@@ -256,6 +258,7 @@ bool movement(MoveInfo info, D d)
   auto it = info.it;
 
   bool isStopped = false;
+  bool updateVariant = false;
 
   if (next->empty())
   {
@@ -273,14 +276,23 @@ bool movement(MoveInfo info, D d)
       /* next is stop, just break from the cycle, we can't move */
       if (nit->spec && ObjectProperty::STOP)
       {
+        if (info.type == MoveInfo::Type::MOVE)
+        {
+          if (it->direction == D::DOWN) it->direction = D::UP;
+          else if (it->direction == D::UP) it->direction = D::DOWN;
+          else if (it->direction == D::LEFT) it->direction = D::RIGHT;
+          else if (it->direction == D::RIGHT) it->direction = D::LEFT;
+          updateVariant = true;
+        }
+
         isStopped = true;
         break;
       }
       /* it's push, it could move must we must see if it can be moved too*/
-      else if (nit->spec && ObjectProperty::PUSH || nit->spec->isText)
+      else if (info.type == MoveInfo::Type::YOU && (it->spec && ObjectProperty::PUSH || nit->spec->isText))
       {
         /* if current can be moved we check next, otherwise we can stop */
-        isStopped |= !movement(MoveInfo(next, nit), d);
+        isStopped |= !movement(MoveInfo(info.type, next, nit), d);
         if (!isStopped && next->begin() != next->end())
           nit = next->begin(); // restart
         else
@@ -289,26 +301,43 @@ bool movement(MoveInfo info, D d)
     }
   }
 
+  if (!isStopped || updateVariant)
+  {
+    if (info.it->spec->tiling == ObjectSpec::Tiling::Character)
+    {
+      uint32_t variantBase = 0;
+      if (d == D::RIGHT) variantBase = 0;
+      else if (d == D::UP) variantBase = 4;
+      else if (d == D::LEFT) variantBase = 8;
+      else if (d == D::DOWN) variantBase = 12;
+
+      info.it->variant = variantBase + (info.it->variant + 1) % 4;
+    }
+  }
+
   if (!isStopped)
   {
     Object object = *info.it;
     Tile* tile = info.tile;
 
-    if (object.spec->tiling == ObjectSpec::Tiling::Character)
-    {
-      uint32_t variantBase = 0;
-      if (d == D::RIGHT) variantBase = 0;
-      else if (d == D::UP) variantBase = 5;
-      else if (d == D::LEFT) variantBase = 10;
-      else if (d == D::DOWN) variantBase = 15;
-
-      object.variant = variantBase + (object.variant + 1) % 5;
-    }
-
     tile->objects.erase(info.it);
     level->get(tile, d)->objects.push_back(object);
 
     return true;
+  }
+
+  if (!isStopped || updateVariant)
+  {
+    if (info.it->spec->tiling == ObjectSpec::Tiling::Character)
+    {
+      uint32_t variantBase = 0;
+      if (d == D::RIGHT) variantBase = 0;
+      else if (d == D::UP) variantBase = 4;
+      else if (d == D::LEFT) variantBase = 8;
+      else if (d == D::DOWN) variantBase = 12;
+
+      info.it->variant = variantBase + (info.it->variant + 1) % 4;
+    }
   }
 
   return false;
@@ -318,7 +347,8 @@ void movement(D d)
 {
   level->forEachObject([](Object& object) { object.alreadyMoved = false; });
 
-  std::vector<MoveInfo> movable;
+  std::vector<MoveInfo> you;
+  std::vector<std::pair<MoveInfo, D>> move;
 
   for (coord_t y = 0; y < level->height(); ++y)
     for (coord_t x = 0; x < level->width(); ++x)
@@ -326,16 +356,23 @@ void movement(D d)
       Tile* tile = level->get(x, y);
 
       for (auto it = tile->begin(); it != tile->end(); ++it)
+      {
         if (it->spec && ObjectProperty::YOU)
-          movable.emplace_back(tile, it);
+          you.emplace_back(MoveInfo::Type::YOU, tile, it);
+        if (it->spec && ObjectProperty::MOVE)
+          move.emplace_back(MoveInfo(MoveInfo::Type::MOVE, tile, it), it->direction);
+      }
     }
 
-  if (!movable.empty())
+  if (!you.empty())
   {
     history.push(level->state());
 
-    for (const auto& pair : movable)
+    for (const auto& pair : you)
       movement(pair, d);
+
+    for (const auto& pair : move)
+      movement(pair.first, pair.second);
 
     for (auto& tile : *level)
       std::sort(tile.begin(), tile.end(), [](const Object& o1, const Object& o2) { return o1.spec->layer < o2.spec->layer; });
@@ -393,7 +430,17 @@ void GameView::handleMouseEvent(const SDL_Event& event)
     {
       hoverInfo.resize(256);
       memset(hoverInfo.data(), 0, 256);
-      snprintf(hoverInfo.data(), 256, "%d,%d: %s", x, y, tile->empty() ? "" : tile->object()->spec->name.c_str());
+
+      const auto* object = tile->object();
+
+      if (tile->object())
+      {
+        snprintf(hoverInfo.data(), 256, "%d,%d: %s, variant: %d", x, y, object->spec->name.c_str(), object->variant );
+      }
+      else
+        snprintf(hoverInfo.data(), 256, "%d,%d: empty", x, y);
+
+
     }
   }
   else

@@ -19,11 +19,13 @@ namespace baba
     std::string _name;
 
   public:
-    Level(const GameData& data, coord_t width, coord_t height);
+    Level(const GameData& data);
 
     const std::string& name() const { return _name; }
     const GameData* data() const { return &_data; }
     const Rules& rules() const { return _rules; }
+
+    void resize(coord_t width, coord_t height);
 
     decltype(_tiles)::const_iterator begin() const { return _tiles.begin(); }
     decltype(_tiles)::const_iterator end() const { return _tiles.end(); }

@@ -12,7 +12,7 @@ namespace baba
   struct ObjectSpec
   {
     enum class Type { Noun = 0, Verb, Property, Adjective, Negative, Unused, Conjunction, Preposition };
-    enum class Tiling { None = -1, Directions, Tiled, Character, Belt };
+    enum class Tiling { None = -1, Directions, Tiled, Character, Belt, Unknown }; //TODO: unknown, eg cog in 7level
 
     Type type;
     int32_t id;

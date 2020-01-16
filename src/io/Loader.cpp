@@ -102,6 +102,18 @@ namespace sutils
     return { f, s };
   }
 
+  baba::ObjectSpec::Tiling valueToTiling(int value)
+  {
+    switch (value) {
+    case -1: return baba::ObjectSpec::Tiling::None;
+    case 0: return baba::ObjectSpec::Tiling::Directions;
+    case 1: return baba::ObjectSpec::Tiling::Tiled;
+    case 2: return baba::ObjectSpec::Tiling::Character;
+    case 3: return baba::ObjectSpec::Tiling::Belt;
+    case 4: return baba::ObjectSpec::Tiling::Unknown;
+    default: assert(false); return baba::ObjectSpec::Tiling::None;
+    }
+  }
 }
 
 using namespace io;
@@ -167,6 +179,8 @@ void Loader::loadLD(const path& path, baba::Level* level, GameData& data)
           spec->color = sutils::parseCoordinate(p.second);
         else if (f.second == "activecolour")
           spec->color = sutils::parseCoordinate(p.second);
+        else if (f.second == "tiling")
+          spec->tiling = sutils::valueToTiling(std::stoi(p.second));
       }
     }
   }
@@ -175,6 +189,10 @@ void Loader::loadLD(const path& path, baba::Level* level, GameData& data)
 baba::Level* Loader::load(const std::string& name)
 {
   LOGD("Loading level %s", name.c_str());
+  Level* level = new Level(data);
+
+  path ldPath = DATA_FOLDER + R"(Worlds/baba/)" + name + ".ld";
+  loadLD(ldPath, level, data);
 
   path fullPath = DATA_FOLDER + R"(Worlds/baba/)" + name + ".l";
   in = fopen(fullPath.c_str(), "rb");
@@ -198,8 +216,6 @@ baba::Level* Loader::load(const std::string& name)
   read(version, in);
   assert(version >= MIN_VERSION && version <= MAX_VERSION);
 
-  baba::Level* level = nullptr;
-
   while (ftell(in) < length)
   {
     uint32_t header;
@@ -214,7 +230,7 @@ baba::Level* Loader::load(const std::string& name)
     {      
       uint16_t layerCount = read<uint16_t>(in);
       for (size_t i = 0; i < layerCount; ++i)
-        level = readLayer(version, level);
+        readLayer(version, level);
       break;
     }
     else
@@ -223,9 +239,6 @@ baba::Level* Loader::load(const std::string& name)
   }
 
   fclose(in);
-
-  path ldPath = DATA_FOLDER + R"(Worlds/baba/)" + name + ".ld";
-  loadLD(ldPath, level, data);
 
   return level;
 }
@@ -237,8 +250,8 @@ baba::Level* Loader::readLayer(uint16_t version, baba::Level* level)
   uint32_t width = read<uint32_t>(in);
   uint32_t height = read<uint32_t>(in);
 
-  if (!level)
-    level = new baba::Level(data, width, height);
+  if (level->width() == 0)
+    level->resize(width, height);
 
   std::vector<Object> objects;
 
@@ -293,12 +306,15 @@ baba::Level* Loader::readLayer(uint16_t version, baba::Level* level)
 
     for (uint32_t i = 0; i < width*height; ++i)
     {
-      objects[i].variant = uncompressed.data[i];
+      auto& object = objects[i];
+      
+      object.variant = uncompressed.data[i];
 
-      /*if (objects[i].spec && objects[i].spec->tiling == ObjectSpec::Tiling::Character)
+      if (object.spec && object.spec->tiling == ObjectSpec::Tiling::Character)
       {
-        printf("Variant %s: %d\n", objects[i].spec->name.c_str(), objects[i].variant);
-      }*/
+        if (object.variant == 0)
+          object.direction = D::RIGHT;
+      }
     }
   }
 
@@ -409,18 +425,7 @@ void ValuesParser::generateObject()
 
     assert(object.isText || object.type == baba::ObjectSpec::Type::Noun);
 
-    {
-      int tiling = std::stoi(fields["tiling"]);
-
-      switch (tiling) {
-      case -1: object.tiling = baba::ObjectSpec::Tiling::None; break;
-      case 0: object.tiling = baba::ObjectSpec::Tiling::Directions; break;
-      case 1: object.tiling = baba::ObjectSpec::Tiling::Tiled; break;
-      case 2: object.tiling = baba::ObjectSpec::Tiling::Character; break;
-      case 3: object.tiling = baba::ObjectSpec::Tiling::Belt; break;
-      default: assert(false);
-      }
-    }
+    object.tiling = sutils::valueToTiling(std::stoi(fields["tiling"]));
 
     data.objects.push_back(object);
   }
