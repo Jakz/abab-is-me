@@ -86,6 +86,9 @@
     <ClCompile Include="..\..\..\src\game\Rules.cpp">
       <Filter>src\game</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\LevelSelectView.cpp">
+      <Filter>src\gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="Natvis.natvis" />

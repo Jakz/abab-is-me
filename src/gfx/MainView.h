@@ -43,4 +43,17 @@ namespace ui
     void handleKeyboardEvent(const SDL_Event& event);
     void handleMouseEvent(const SDL_Event& event);
   };
+
+  class LevelSelectView : public View
+  {
+  private:
+    ViewManager* gvm;
+
+  public:
+    LevelSelectView(ViewManager* gvm) : gvm(gvm) { }
+
+    void render() override;
+    void handleKeyboardEvent(const SDL_Event& event) override;
+    void handleMouseEvent(const SDL_Event& event) override;
+  };
 }

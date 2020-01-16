@@ -157,6 +157,7 @@
     <ClCompile Include="..\..\..\src\game\Rules.cpp" />
     <ClCompile Include="..\..\..\src\game\Tile.cpp" />
     <ClCompile Include="..\..\..\src\gfx\GameView.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\LevelSelectView.cpp" />
     <ClCompile Include="..\..\..\src\gfx\ViewManager.cpp" />
     <ClCompile Include="..\..\..\src\io\Loader.cpp" />
     <ClCompile Include="..\..\..\src\io\Zips.cpp" />

@@ -20,17 +20,17 @@ namespace ui
   };
 
   class GameView;
-  class MenuView;
+  class LevelSelectView;
 
   class ViewManager : public SDL<ViewManager, ViewManager>
   {
   public:
     using view_t = View;
-    static const size_t VIEW_COUNT = 1;
 
     SDL_Texture* _font;
 
   private:
+    LevelSelectView* _levelSelectView;
     GameView* _gameView;
     view_t* _view;
 
