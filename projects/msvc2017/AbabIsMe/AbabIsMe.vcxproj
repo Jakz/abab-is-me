@@ -76,12 +76,12 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;D:\dev\openmom\libs\sdl2\win\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(SolutionDir)..\..\libs\zlib\lib\win_x64\zlib.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2_image.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)..\..\libs\zlib\lib\win_x64\zlib.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2_image.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
@@ -91,12 +91,12 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;D:\dev\openmom\libs\sdl2\win\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(SolutionDir)..\..\libs\zlib\lib\win_x64\zlib.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2_image.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)..\..\libs\zlib\lib\win_x64\zlib.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2_image.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
@@ -108,14 +108,14 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;D:\dev\openmom\libs\sdl2\win\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(SolutionDir)..\..\libs\zlib\lib\win_x64\zlib.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2_image.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)..\..\libs\zlib\lib\win_x64\zlib.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2_image.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
@@ -127,14 +127,14 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;D:\dev\openmom\libs\sdl2\win\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(SolutionDir)..\..\libs\zlib\lib\win_x64\zlib.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2_image.lib;C:\Users\Jack\Documents\dev\openmom\libs\sdl2\win\lib\x64\SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)..\..\libs\zlib\lib\win_x64\zlib.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2_image.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>

@@ -94,7 +94,7 @@ namespace baba
   struct GameData;
   struct Rules;
 
-  enum class ObjectProperty;
+  enum class ObjectProperty : uint64_t;
 }
 
 namespace io

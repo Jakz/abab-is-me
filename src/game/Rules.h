@@ -6,14 +6,14 @@
 
 namespace baba
 {
-  enum class ObjectProperty
+  enum class ObjectProperty : uint64_t
   {
-    YOU     = 0x00000001,
-    STOP    = 0x00000002,
-    PUSH    = 0x00000004,
-    WIN     = 0x00000008,
-    DEFEAT  = 0x00000010,
-    MOVE    = 0x00000020,
+    YOU     = 0x00000001ULL,
+    STOP    = 0x00000002ULL,
+    PUSH    = 0x00000004ULL,
+    WIN     = 0x00000008ULL,
+    DEFEAT  = 0x00000010ULL,
+    MOVE    = 0x00000020ULL,
   };
 
   using ObjectProperties = bit_mask<ObjectProperty>;

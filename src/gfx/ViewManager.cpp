@@ -7,7 +7,7 @@ using namespace ui;
 ui::ViewManager::ViewManager() : SDL<ui::ViewManager, ui::ViewManager>(*this, *this), _font(nullptr),
 _gameView(new GameView(this)), _levelSelectView(new LevelSelectView(this))
 {
-  _view = _levelSelectView;
+  _view = _gameView;
 }
 
 void ui::ViewManager::deinit()
