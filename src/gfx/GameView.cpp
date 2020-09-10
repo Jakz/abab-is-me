@@ -26,6 +26,7 @@ struct ObjectGfx
 };
 
 std::unordered_map<const baba::ObjectSpec*, ObjectGfx> objectGfxs;
+std::unordered_map<std::string, ObjectGfx> imageGfxs;
 
 const ObjectGfx& GameView::objectGfx(const baba::ObjectSpec* spec)
 {
@@ -91,7 +92,7 @@ const ObjectGfx& GameView::objectGfx(const baba::ObjectSpec* spec)
       }
     }
 
-    gfx.texture = SDL_CreateTextureFromSurface(manager->renderer(), surface);
+    gfx.texture = SDL_CreateTextureFromSurface(gvm->renderer(), surface);
     gfx.w = surface->w;
     gfx.h = surface->h;
     SDL_FreeSurface(surface);
@@ -102,14 +103,56 @@ const ObjectGfx& GameView::objectGfx(const baba::ObjectSpec* spec)
   }
 }
 
+const ObjectGfx& GameView::imageGfx(const std::string& image)
+{
+  auto it = imageGfxs.find(image);
 
-GameView::GameView(ViewManager* manager) : manager(manager)
+  if (it != imageGfxs.end())
+    return it->second;
+  
+  
+  std::string path = DATA_FOLDER + R"(Worlds\baba\Images\)" + image;
+
+  SDL_Surface* surface = nullptr;
+  ObjectGfx gfx;
+
+  for (size_t i = 0; i < 3; ++i)
+  {
+    auto image = IMG_Load((path + "_" + std::to_string(i+1) + ".png").c_str());
+    assert(image);
+
+    if (!surface)
+    {
+      surface = SDL_CreateRGBSurface(0, image->w * 3, image->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+      gfx.w = image->w;
+      gfx.h = image->h;
+      assert(surface);
+    }
+
+    SDL_Rect dest = { i * image->w, 0, image->w, image->h };
+    SDL_BlitSurface(image, nullptr, surface, &dest);
+
+    gfx.sprites.push_back(dest);
+
+    SDL_FreeSurface(image);
+  }
+
+  gfx.texture = SDL_CreateTextureFromSurface(gvm->renderer(), surface);
+  SDL_FreeSurface(surface);
+
+  auto rit = imageGfxs.emplace(std::make_pair(image, gfx));
+
+  return rit.first->second;
+}
+
+
+GameView::GameView(ViewManager* gvm) : gvm(gvm)
 {
 }
 
 void GameView::render()
 {
-  SDL_Renderer* renderer = manager->renderer();
+  SDL_Renderer* renderer = gvm->renderer();
 
   auto tick = (SDL_GetTicks() / 150) % 3;
 
@@ -127,6 +170,9 @@ void GameView::render()
 
     SDL_GetRGB(*(((uint32_t*)palette->pixels) + 0 * palette->w + 1), palette->format, &colors.outside.r, &colors.outside.g, &colors.outside.b);
     SDL_GetRGB(*(((uint32_t*)palette->pixels) + 4 * palette->w + 0), palette->format, &colors.inside.r, &colors.inside.g, &colors.inside.b);
+
+    colors.outside.a = 255;
+    colors.inside.a = 255;
 
     level->updateRules();
   }
@@ -151,8 +197,23 @@ void GameView::render()
 
   SDL_Rect bb = { 0,0, size.w, size.h };
 
-  SDL_SetRenderDrawColor(renderer, colors.outside.r, colors.outside.g, colors.outside.b, 255);
-  SDL_RenderFillRect(renderer, &bb);
+  
+  gvm->fillRect(bb, colors.outside);
+
+  const auto& images = level->images();
+
+
+  SDL_Rect insideRect = { offset.x, offset.y, offset.x + level->width()* tileSize, offset.y + level->height() * tileSize };
+  gvm->fillRect(insideRect, colors.inside);
+
+  for (const auto& image : images)
+  {
+    const auto& gfx = imageGfx(image);
+
+    SDL_Rect dest = { offset.x + level->width()*tileSize / 2 - gfx.sprites[tick].w / 2, offset.y + level->height()*tileSize / 2 - gfx.sprites[tick].h / 2, gfx.sprites[tick].w, gfx.sprites[tick].h };
+
+    SDL_RenderCopy(renderer, gfx.texture, &gfx.sprites[tick], &dest);
+  }
 
   for (int y = 0; y < size.h / tileSize; ++y)
   {
@@ -163,9 +224,7 @@ void GameView::render()
       if (tile)
       {
         const SDL_Rect dest = { offset.x + x * tileSize, offset.y + y * tileSize, tileSize, tileSize };
-
-        SDL_SetRenderDrawColor(renderer, colors.inside.r, colors.inside.g, colors.inside.b, 255);
-        SDL_RenderFillRect(renderer, &dest);
+        //gvm->fillRect(dest, colors.inside);
 
         for (const auto& obj : *tile)
         {
@@ -175,8 +234,7 @@ void GameView::render()
 
           if (obj.spec == level->data()->EDGE)
           {
-            SDL_SetRenderDrawColor(renderer, colors.outside.r, colors.outside.g, colors.outside.b, 255);
-            SDL_RenderFillRect(renderer, &dest);
+            //gvm->fillRect(dest, colors.outside);
           }
           else
           {
@@ -199,17 +257,17 @@ void GameView::render()
 
   const auto& rulesList = level->rules().rules();
   for (coord_t i = 0; i < rulesList.size(); ++i)
-    manager->text(rulesList[i].name(), 5, 5 + i * 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
+    gvm->text(rulesList[i].name(), 5, 5 + i * 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
 
   if (level->isVictory())
-    manager->text("Victory!", WIDTH - 5, 5, { 255, 255, 0 }, ui::TextAlign::RIGHT, 1.0f);
+    gvm->text("Victory!", WIDTH - 5, 5, { 255, 255, 0 }, ui::TextAlign::RIGHT, 1.0f);
   else if (level->isDefeat())
-    manager->text("Defeat!", WIDTH - 5, 5, { 255, 0, 0 }, ui::TextAlign::RIGHT, 1.0f);
+    gvm->text("Defeat!", WIDTH - 5, 5, { 255, 0, 0 }, ui::TextAlign::RIGHT, 1.0f);
 
-  manager->text(level->name(), WIDTH / 2, HEIGHT - 20, { 255, 255, 255 }, ui::TextAlign::CENTER, 2.0f);
+  gvm->text(level->name(), WIDTH / 2, HEIGHT - 20, { 255, 255, 255 }, ui::TextAlign::CENTER, 2.0f);
 
 #if MOUSE_ENABLED
-  manager->text(hoverInfo, 5, HEIGHT - 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
+  gvm->text(hoverInfo, 5, HEIGHT - 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
 #endif
 }
 
@@ -300,7 +358,7 @@ bool movement(MoveInfo info, D d)
         break;
       }
       /* it's push, it could move must we must see if it can be moved too*/
-      else if (info.type == MoveInfo::Type::YOU && (it->spec && ObjectProperty::PUSH || nit->spec->isText))
+      else if (info.type == MoveInfo::Type::YOU && (nit->spec && ObjectProperty::PUSH || nit->spec->isText))
       {
         /* if current can be moved we check next, otherwise we can stop */
         isStopped |= !movement(MoveInfo(info.type, next, nit), d);
@@ -410,7 +468,7 @@ void GameView::handleKeyboardEvent(const SDL_Event& event)
   {
     switch (event.key.keysym.sym)
     {
-    case SDLK_ESCAPE: manager->exit(); break;
+    case SDLK_ESCAPE: gvm->exit(); break;
     case SDLK_LEFT: movement(D::LEFT); updateMoveBounds(); break;
     case SDLK_RIGHT: movement(D::RIGHT); updateMoveBounds(); break;
     case SDLK_UP: movement(D::UP); updateMoveBounds(); break;

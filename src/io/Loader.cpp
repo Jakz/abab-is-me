@@ -15,6 +15,9 @@ namespace std
 {
   int stoi(const std::string& str) { return atoi(str.c_str()); }
 }
+#else
+#include <filesystem>
+#include <regex>
 #endif
 
 #include "game/Types.h"
@@ -71,6 +74,44 @@ namespace sutils
     return lines;
   }
 
+  static inline std::vector<path> contentsOfFolder(const path& base, bool recursive, std::function<bool(path)> filter)
+  {
+    std::vector<path> files;
+
+    for (const auto& entry : std::filesystem::directory_iterator(base))
+    {
+      if (entry.is_regular_file() && filter(entry.path().filename().string()))
+        files.push_back(entry.path().filename().string());
+    }
+
+    return files;
+    
+    /*DIR *d;
+    struct dirent *dir;
+    d = opendir(base.c_str());
+
+    if (d)
+    {
+      while ((dir = readdir(d)) != NULL)
+      {
+        path name = path(dir->d_name);
+
+        if (name == "." || name == ".." || name == ".DS_Store" || excludePredicate(name))
+          continue;
+        else if (dir->d_type == DT_DIR && recursive)
+        {
+          auto rfiles = contentsOfFolder(base.append(name), recursive, excludePredicate);
+          files.reserve(files.size() + rfiles.size());
+          std::move(rfiles.begin(), rfiles.end(), std::back_inserter(files));
+        }
+        else if (dir->d_type == DT_REG)
+          files.push_back(base.append(name));
+      }
+
+      closedir(d);
+    }*/
+  }
+
   static std::pair<std::string, std::string> parseKeyValue(const std::string& v, const std::string delim = "=")
   {
     size_t idx = v.find(delim);
@@ -83,6 +124,21 @@ namespace sutils
       if (!value.empty() && value.back() == ',') value.pop_back();
       return std::make_pair(sutils::trim(key), sutils::trim(value));
     }
+  }
+
+  static std::pair<int32_t, std::string> parseNumberKeyValue(const std::string& v)
+  {
+    std::string number = "";
+
+    size_t i = 0;
+
+    while (v[i] >= '0' && v[i] <= '9')
+    {
+      number += v[i];
+      ++i;
+    }
+
+    return std::make_pair(std::stoi(number), v.substr(i));
   }
 
   static point_t parseCoordinate(std::string v)
@@ -141,7 +197,7 @@ size_t flength(FILE* in) { fseek(in, 0, SEEK_END); size_t ot = ftell(in); fseek(
 
 void Loader::loadLD(const path& path, baba::Level* level, GameData& data)
 {
-  enum class S { NONE, GENERAL, TILES };
+  enum class S { NONE, GENERAL, IMAGES, SPECIALS, ICONS, PATHS, TILES, LEVELS };
   S s = S::NONE;
 
   auto lines = sutils::readFileToLines(path);
@@ -149,11 +205,24 @@ void Loader::loadLD(const path& path, baba::Level* level, GameData& data)
   for (int i = 0; i < lines.size(); ++i)
   {
     const auto& l = lines[i];
+    
+    //TODO: ignore comments which start with --
 
-    if (l == "[general]")
-      s = S::GENERAL;
-    else if (l == "[tiles]")
-      s = S::TILES;
+    if (l[0] == '[')
+    {
+      if (l == "[general]")
+        s = S::GENERAL;
+      else if (l == "[tiles]")
+        s = S::TILES;
+      else if (l == "[specials]")
+        s = S::SPECIALS;
+      else if (l == "[images]")
+        s = S::IMAGES;
+      else if (l == "[icons]" || l == "[levels]" || l == "[paths]")
+        s = S::NONE;
+      else
+        assert(false);
+    }
     else if (s == S::GENERAL)
     {
       auto pair = sutils::parseKeyValue(l);
@@ -162,6 +231,33 @@ void Loader::loadLD(const path& path, baba::Level* level, GameData& data)
         level->_name = pair.second;
       else if (pair.first == "palette")
         level->_palette = pair.second;
+      else if (pair.first == "subtitle")
+        level->_subtitle = pair.second;
+    }
+    else if (s == S::IMAGES)
+    {
+      auto pair = sutils::parseKeyValue(l);
+
+      if (pair.first == "total")
+      {
+        assert(level->_images.empty());
+        level->_images.resize(std::stoi(pair.second));
+      }
+      else
+      {
+        assert(!level->_images.empty());
+        auto index = std::stoi(pair.first);
+        const auto& image = pair.second;
+        level->_images[index] = image;
+      }
+
+    }
+    else if (s == S::SPECIALS)
+    {
+      auto p = sutils::parseKeyValue(l);
+      auto nv = sutils::parseNumberKeyValue(p.first);
+
+      //LOGD("special %d %s = %s", nv.first, nv.second.c_str(), p.second.c_str());
     }
     else if (s == S::TILES)
     {
@@ -198,7 +294,9 @@ baba::Level* Loader::load(const std::string& name)
 
   path fullPath = DATA_FOLDER + R"(Worlds/baba/)" + name + ".l";
   in = fopen(fullPath.c_str(), "rb");
-  assert(in);
+  
+  if (!in)
+    return nullptr;
 
   //TODO: endianness
   static constexpr uint64_t ACHTUNG = 0x21474e5554484341;
@@ -254,6 +352,8 @@ baba::Level* Loader::readLayer(uint16_t version, baba::Level* level)
 
   if (level->width() == 0)
     level->resize(width, height);
+  else
+    assert(level->width() == width && level->height() == height);
 
   std::vector<Object> objects;
 
@@ -528,8 +628,31 @@ void ValuesParser::parse()
 
 void Loader::loadGameData()
 {
+  //std::regex pattern(R"(^[0-9]+level.l$)");
+  //auto levels = sutils::contentsOfFolder(DATA_FOLDER + R"(Worlds/baba)", false, [&pattern](auto path) { return std::regex_search(path, pattern); });
+
+  
   ValuesParser parser(data);
   parser.init();
   parser.parse();
   data.finalize();
+
+  
+  /*coord_t mw = -1, mh = -1, ii = 0;
+
+  for (uint32_t i = 0; i <= 327; ++i)
+  {
+    auto path = std::to_string(i) + "level";
+    auto level = load(path);
+
+    if (level && (mw < level->width() || mh < level->height()))
+    {
+      mw = std::max(mw, level->width());
+      mh = std::max(mh, level->height());
+      ii = i;
+    }
+  }
+
+  LOGD("Max size: %d x %d for level %d", mw, mh, ii);*/
+  
 }

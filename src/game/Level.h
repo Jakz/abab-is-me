@@ -17,13 +17,19 @@ namespace baba
     coord_t _width, _height;
     LevelState _tiles;
     std::string _name;
+    std::string _subtitle;
     std::string _palette;
+
+    std::vector<std::string> _images;
 
   public:
     Level(const GameData& data);
 
     const std::string& palette() const { return _palette; }
     const std::string& name() const { return _name; }
+    const std::string& subtitle() const { return _subtitle; }
+    const decltype(_images)& images() const { return _images; }
+
     const GameData* data() const { return &_data; }
     const Rules& rules() const { return _rules; }
 

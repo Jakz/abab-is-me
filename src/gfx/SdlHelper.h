@@ -10,6 +10,8 @@
 #include <cassert>
 
 using u32 = uint32_t;
+using color_t = SDL_Color;
+using rect_t = SDL_Rect;
 
 template<typename EventHandler, typename Renderer>
 class SDL
@@ -57,6 +59,14 @@ public:
   void blit(SDL_Texture* texture, int sx, int sy, int w, int h, int dx, int dy);
   void blit(SDL_Texture* texture, int sx, int sy, int w, int h, int dx, int dy, int dw, int dh);
   void blit(SDL_Texture* texture, int dx, int dy);
+
+  void drawRect(int x, int y, int w, int h, color_t color);
+  void fillRect(int x, int y, int w, int h, color_t color);
+  void line(int x1, int y1, int x2, int y2, color_t color);
+  void clear(color_t color);
+
+  void fillRect(const rect_t& rect, color_t color) { fillRect(rect.x, rect.y, rect.w, rect.h, color); }
+  void drawRect(const rect_t& rect, color_t color) { drawRect(rect.x, rect.y, rect.w, rect.h, color); }
 
   //void slowTextBlit(TTF_Font* font, int dx, int dy, Align align, const std::string& string);
 
@@ -160,6 +170,36 @@ void SDL<EventHandler, Renderer>::handleEvents()
 #endif
     }
   }
+}
+
+template<typename EventHandler, typename Renderer>
+inline void SDL<EventHandler, Renderer>::drawRect(int x, int y, int w, int h, color_t color)
+{
+  SDL_SetRenderDrawColor(_renderer, color.r, color.g, color.b, color.a);
+  SDL_Rect rect = { x, y, w, h };
+  SDL_RenderDrawRect(_renderer, &rect);
+}
+
+template<typename EventHandler, typename Renderer>
+inline void SDL<EventHandler, Renderer>::fillRect(int x, int y, int w, int h, color_t color)
+{
+  SDL_SetRenderDrawColor(_renderer, color.r, color.g, color.b, color.a);
+  SDL_Rect rect = { x, y, w, h };
+  SDL_RenderFillRect(_renderer, &rect);
+}
+
+template<typename EventHandler, typename Renderer>
+inline void SDL<EventHandler, Renderer>::line(int x1, int y1, int x2, int y2, color_t color)
+{
+  SDL_SetRenderDrawColor(_renderer, color.r, color.g, color.b, color.a);
+  SDL_RenderDrawLine(_renderer, x1, y1, x2, y2);
+}
+
+template<typename EventHandler, typename Renderer>
+inline void SDL<EventHandler, Renderer>::clear(color_t color)
+{
+  SDL_SetRenderDrawColor(_renderer, color.r, color.g, color.b, 255);
+  SDL_RenderClear(_renderer);
 }
 
 template<typename EventHandler, typename Renderer>

@@ -17,8 +17,9 @@ namespace ui
   class GameView : public View
   {
   private:
-    ViewManager* manager;
+    ViewManager* gvm;
 
+    const ObjectGfx& imageGfx(const std::string& spec);
     const ObjectGfx& objectGfx(const baba::ObjectSpec* spec);
 
     void render();
@@ -43,7 +44,7 @@ namespace ui
     void updateMoveBounds();
 
   public:
-    GameView(ViewManager* manager);
+    GameView(ViewManager* gvm);
     ~GameView();
 
     void handleKeyboardEvent(const SDL_Event& event);
