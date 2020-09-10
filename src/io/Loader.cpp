@@ -160,6 +160,8 @@ void Loader::loadLD(const path& path, baba::Level* level, GameData& data)
       
       if (pair.first == "name")
         level->_name = pair.second;
+      else if (pair.first == "palette")
+        level->_palette = pair.second;
     }
     else if (s == S::TILES)
     {

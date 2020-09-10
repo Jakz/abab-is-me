@@ -6,6 +6,7 @@
 #include "game/Rules.h"
 
 #include <algorithm>
+#include <numeric>
 
 using namespace ui;
 using namespace baba;
@@ -20,6 +21,7 @@ struct ObjectGfx
 {
   SDL_Texture* texture;
   std::vector<SDL_Rect> sprites;
+  size_t w, h;
   /* R U L D */
 };
 
@@ -59,8 +61,13 @@ const ObjectGfx& GameView::objectGfx(const baba::ObjectSpec* spec)
       break;
     }
 
-    LOGD("Caching gfx for %s in a %dx%d texture", spec->name.c_str(), 24 * 3 * frames.size(), 24);
     SDL_Surface* surface = SDL_CreateRGBSurface(0, 24 * 3 * frames.size(), 24, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+
+    auto cacheSize = std::accumulate(objectGfxs.begin(), objectGfxs.end(), 0ULL, [](uint64_t val, const auto& entry) { return entry.second.w * entry.second.h * 4 + val; });
+    cacheSize += surface->w * surface->h * 4;
+
+    LOGD("Caching gfx for %s in a %dx%d texture, total cache size: %.2f", spec->name.c_str(), 24 * 3 * frames.size(), 24, cacheSize / 1024.0f);
+
 
     ObjectGfx gfx;
 
@@ -85,9 +92,12 @@ const ObjectGfx& GameView::objectGfx(const baba::ObjectSpec* spec)
     }
 
     gfx.texture = SDL_CreateTextureFromSurface(manager->renderer(), surface);
+    gfx.w = surface->w;
+    gfx.h = surface->h;
     SDL_FreeSurface(surface);
 
     auto rit = objectGfxs.emplace(std::make_pair(spec, gfx));
+
     return rit.first->second;
   }
 }
@@ -103,9 +113,10 @@ void GameView::render()
 
   auto tick = (SDL_GetTicks() / 150) % 3;
 
+  //TODO: should be reloaded if level changes
   if (!palette)
   {
-    palette = IMG_Load((DATA_FOLDER + R"(Palettes/default.png)").c_str());
+    palette = IMG_Load((DATA_FOLDER + R"(Palettes/)" + level->palette()).c_str());
     assert(palette);
     SDL_Surface* tmp = SDL_ConvertSurfaceFormat(palette, SDL_PIXELFORMAT_BGRA8888, 0);
     SDL_FreeSurface(palette);
@@ -114,11 +125,11 @@ void GameView::render()
     //rules.state(data.objectsByName["baba"]).properties.set(baba::ObjectProperty::YOU);
     //rules.state(data.objectsByName["wall"]).properties.set(baba::ObjectProperty::STOP);
 
+    SDL_GetRGB(*(((uint32_t*)palette->pixels) + 0 * palette->w + 1), palette->format, &colors.outside.r, &colors.outside.g, &colors.outside.b);
+    SDL_GetRGB(*(((uint32_t*)palette->pixels) + 4 * palette->w + 0), palette->format, &colors.inside.r, &colors.inside.g, &colors.inside.b);
+
     level->updateRules();
   }
-
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-  SDL_RenderClear(renderer);
 
   constexpr coord_t GFX_TILE_SIZE = 24;
   scaler = Scaler::SCALE_TO_FIT;
@@ -139,8 +150,8 @@ void GameView::render()
 
 
   SDL_Rect bb = { 0,0, size.w, size.h };
-  //TODO: check if this depends on some level property like theme
-  SDL_SetRenderDrawColor(renderer, 21, 24, 31, 255);
+
+  SDL_SetRenderDrawColor(renderer, colors.outside.r, colors.outside.g, colors.outside.b, 255);
   SDL_RenderFillRect(renderer, &bb);
 
   for (int y = 0; y < size.h / tileSize; ++y)
@@ -153,7 +164,7 @@ void GameView::render()
       {
         const SDL_Rect dest = { offset.x + x * tileSize, offset.y + y * tileSize, tileSize, tileSize };
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_SetRenderDrawColor(renderer, colors.inside.r, colors.inside.g, colors.inside.b, 255);
         SDL_RenderFillRect(renderer, &dest);
 
         for (const auto& obj : *tile)
@@ -164,7 +175,7 @@ void GameView::render()
 
           if (obj.spec == level->data()->EDGE)
           {
-            SDL_SetRenderDrawColor(renderer, 21, 24, 31, 255);
+            SDL_SetRenderDrawColor(renderer, colors.outside.r, colors.outside.g, colors.outside.b, 255);
             SDL_RenderFillRect(renderer, &dest);
           }
           else

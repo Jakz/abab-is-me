@@ -28,6 +28,12 @@ namespace ui
     size2d_t size;
     coord_t tileSize;
 
+    struct
+    {
+      SDL_Color outside;
+      SDL_Color inside;
+    } colors;
+
     point_t moveBounds[2];
 
 #if MOUSE_ENABLED
