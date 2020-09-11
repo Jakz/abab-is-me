@@ -10,12 +10,13 @@
 
 baba::GameData data;
 baba::Level* level;
+int levelIndex = 1;
 
 int main(int argc, char* argv[])
 {
-  io::Loader loader(data);
-  loader.loadGameData();
-  level = loader.load("106level");
+  io::Loader loader;
+  data = loader.loadGameData();
+  level = loader.load(std::to_string(levelIndex) + "level", data);
   level->computeTiling();
   
   ui::ViewManager ui;

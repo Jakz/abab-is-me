@@ -54,6 +54,9 @@
     <ClInclude Include="..\..\..\src\game\Tile.h">
       <Filter>src\game</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\LevelRenderer.h">
+      <Filter>src\gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp">

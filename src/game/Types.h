@@ -51,6 +51,7 @@ namespace baba
     {
       this->objects = other.objects;
       finalize();
+      return *this;
     }
 
     void finalize()

@@ -7,19 +7,16 @@ namespace io
   class Loader
   {
   private:
-    baba::GameData& data;
     FILE* in;
 
     baba::Level* readLayer(uint16_t version, baba::Level* level);
 
-    void loadLD(const path& path, baba::Level* level, baba::GameData& data);
+    void loadLD(const path& path, baba::Level* level, bool headerOnly = false);
 
   public:
-    Loader(baba::GameData& data);
+    Loader();
 
-    baba::Level* load(const std::string& name);
-    
-
-    void loadGameData();
+    baba::Level* load(const std::string& name, const baba::GameData& baseData);
+    baba::GameData loadGameData();
   };
 }

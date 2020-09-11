@@ -7,7 +7,7 @@
 
 using namespace baba;
 
-Level::Level(const GameData& data) : _data(data), _rules(&data), _width(0), _height(0)
+Level::Level(const GameData& data) : _data(data), _rules(&_data), _width(0), _height(0)
 {
 }
 

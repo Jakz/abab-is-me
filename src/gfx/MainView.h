@@ -3,7 +3,7 @@
 #include "ViewManager.h"
 #include "Common.h"
 
-struct ObjectGfx;
+class LevelRenderer;
 
 namespace ui
 {
@@ -17,10 +17,8 @@ namespace ui
   class GameView : public View
   {
   private:
+    std::unique_ptr<LevelRenderer> levelRenderer;
     ViewManager* gvm;
-
-    const ObjectGfx& imageGfx(const std::string& spec);
-    const ObjectGfx& objectGfx(const baba::ObjectSpec* spec);
 
     void render();
 

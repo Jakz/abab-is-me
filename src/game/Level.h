@@ -9,15 +9,22 @@ namespace baba
 {
   using LevelState = std::vector<Tile>;
 
+  enum LevelType { Normal = 0, Meta = 1 };
+
+  struct LevelInfo
+  {
+    std::string name;
+    std::string subtitle;
+  };
+
   struct Level
   {
   private:
     Rules _rules;
-    const GameData& _data;
+    GameData _data;
     coord_t _width, _height;
     LevelState _tiles;
-    std::string _name;
-    std::string _subtitle;
+    LevelInfo _info;
     std::string _palette;
 
     std::vector<std::string> _images;
@@ -26,8 +33,8 @@ namespace baba
     Level(const GameData& data);
 
     const std::string& palette() const { return _palette; }
-    const std::string& name() const { return _name; }
-    const std::string& subtitle() const { return _subtitle; }
+    const std::string& name() const { return _info.name; }
+    const std::string& subtitle() const { return _info.subtitle; }
     const decltype(_images)& images() const { return _images; }
 
     const GameData* data() const { return &_data; }

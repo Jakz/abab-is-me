@@ -5,8 +5,7 @@
 #include "game/Level.h"
 #include "game/Rules.h"
 
-#include <algorithm>
-#include <numeric>
+#include "LevelRenderer.h"
 
 using namespace ui;
 using namespace baba;
@@ -16,137 +15,7 @@ History history;
 
 SDL_Surface* palette = nullptr;
 
-constexpr uint32_t FRAMES = 3;
-struct ObjectGfx
-{
-  SDL_Texture* texture;
-  std::vector<SDL_Rect> sprites;
-  size_t w, h;
-  /* R U L D */
-};
-
-std::unordered_map<const baba::ObjectSpec*, ObjectGfx> objectGfxs;
-std::unordered_map<std::string, ObjectGfx> imageGfxs;
-
-const ObjectGfx& GameView::objectGfx(const baba::ObjectSpec* spec)
-{
-  auto it = objectGfxs.find(spec);
-
-  if (it != objectGfxs.end())
-    return it->second;
-  else
-  {
-    path base = DATA_FOLDER + R"(Sprites/)" + spec->sprite;
-    std::vector<uint32_t> frames;
-
-    switch (spec->tiling)
-    {
-    case baba::ObjectSpec::Tiling::None:
-      frames.push_back(0);
-      break;
-    case baba::ObjectSpec::Tiling::Tiled:
-      for (int32_t i = 0; i < 16; ++i)
-        frames.push_back(i);
-      break;
-    case baba::ObjectSpec::Tiling::Directions:
-      frames.push_back(0);
-      frames.push_back(8);
-      frames.push_back(16);
-      frames.push_back(24);
-      break;
-    case baba::ObjectSpec::Tiling::Character:
-      //int32_t f[] = { 31, 0, 1, 2, 3, 7, 8, 9, 10, 11, 15, 16, 17, 18, 19, 23, 24, 25, 26, 27 };
-      int32_t f[] = { 0, 1, 2, 3, 8, 9, 10, 11, 16, 17, 18, 19, 24, 25, 26, 27 };
-      for (int32_t i : f)
-        frames.push_back(i);
-      break;
-    }
-
-    SDL_Surface* surface = SDL_CreateRGBSurface(0, 24 * 3 * frames.size(), 24, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
-
-    auto cacheSize = std::accumulate(objectGfxs.begin(), objectGfxs.end(), 0ULL, [](uint64_t val, const auto& entry) { return entry.second.w * entry.second.h * 4 + val; });
-    cacheSize += surface->w * surface->h * 4;
-
-    LOGD("Caching gfx for %s in a %dx%d texture, total cache size: %.2f", spec->name.c_str(), 24 * 3 * frames.size(), 24, cacheSize / 1024.0f);
-
-
-    ObjectGfx gfx;
-
-    for (uint32_t i = 0; i < frames.size(); ++i)
-    {
-      for (uint32_t f = 0; f < FRAMES; ++f)
-      {
-        static char buffer[128];
-        sprintf(buffer, "%s_%d_%d.png", base.c_str(), frames[i], f+1);
-        SDL_Surface* tmp = IMG_Load(buffer);
-        if (!tmp)
-          LOGD("Error: missing graphics file %s", buffer);
-
-        SDL_Rect dest = { (i * 3 + f) * 24, 0, 24, 24 };
-        SDL_BlitSurface(tmp, nullptr, surface, &dest);
-
-        SDL_FreeSurface(tmp);
-
-        if (f == 0)
-          gfx.sprites.push_back(dest);
-      }
-    }
-
-    gfx.texture = SDL_CreateTextureFromSurface(gvm->renderer(), surface);
-    gfx.w = surface->w;
-    gfx.h = surface->h;
-    SDL_FreeSurface(surface);
-
-    auto rit = objectGfxs.emplace(std::make_pair(spec, gfx));
-
-    return rit.first->second;
-  }
-}
-
-const ObjectGfx& GameView::imageGfx(const std::string& image)
-{
-  auto it = imageGfxs.find(image);
-
-  if (it != imageGfxs.end())
-    return it->second;
-  
-  
-  std::string path = DATA_FOLDER + R"(Worlds\baba\Images\)" + image;
-
-  SDL_Surface* surface = nullptr;
-  ObjectGfx gfx;
-
-  for (size_t i = 0; i < 3; ++i)
-  {
-    auto image = IMG_Load((path + "_" + std::to_string(i+1) + ".png").c_str());
-    assert(image);
-
-    if (!surface)
-    {
-      surface = SDL_CreateRGBSurface(0, image->w * 3, image->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
-      gfx.w = image->w;
-      gfx.h = image->h;
-      assert(surface);
-    }
-
-    SDL_Rect dest = { i * image->w, 0, image->w, image->h };
-    SDL_BlitSurface(image, nullptr, surface, &dest);
-
-    gfx.sprites.push_back(dest);
-
-    SDL_FreeSurface(image);
-  }
-
-  gfx.texture = SDL_CreateTextureFromSurface(gvm->renderer(), surface);
-  SDL_FreeSurface(surface);
-
-  auto rit = imageGfxs.emplace(std::make_pair(image, gfx));
-
-  return rit.first->second;
-}
-
-
-GameView::GameView(ViewManager* gvm) : gvm(gvm)
+GameView::GameView(ViewManager* gvm) : gvm(gvm), levelRenderer(new LevelRenderer(gvm))
 {
 }
 
@@ -154,7 +23,7 @@ void GameView::render()
 {
   SDL_Renderer* renderer = gvm->renderer();
 
-  auto tick = (SDL_GetTicks() / 150) % 3;
+  auto tick = (SDL_GetTicks() / 180) % 3;
 
   //TODO: should be reloaded if level changes
   if (!palette)
@@ -180,7 +49,7 @@ void GameView::render()
   constexpr coord_t GFX_TILE_SIZE = 24;
   scaler = Scaler::SCALE_TO_FIT;
   offset = { 0, 0 };
-  size = { WIDTH, HEIGHT };
+  size = gvm->getWindowSize();
 
   float bestWidth = size.w / level->width();
   float bestHeight = size.h / level->height();
@@ -197,20 +66,21 @@ void GameView::render()
 
   SDL_Rect bb = { 0,0, size.w, size.h };
 
-  
+  /* TODO: on level 106 (main world) outside and inside are swapped */
   gvm->fillRect(bb, colors.outside);
 
   const auto& images = level->images();
 
 
-  SDL_Rect insideRect = { offset.x, offset.y, offset.x + level->width()* tileSize, offset.y + level->height() * tileSize };
+  SDL_Rect insideRect = { offset.x, offset.y, level->width()* tileSize, level->height() * tileSize };
   gvm->fillRect(insideRect, colors.inside);
 
   for (const auto& image : images)
   {
-    const auto& gfx = imageGfx(image);
+    const auto& gfx = levelRenderer->imageGfx(image);
 
-    SDL_Rect dest = { offset.x + level->width()*tileSize / 2 - gfx.sprites[tick].w / 2, offset.y + level->height()*tileSize / 2 - gfx.sprites[tick].h / 2, gfx.sprites[tick].w, gfx.sprites[tick].h };
+    //SDL_Rect dest = { offset.x + level->width()*tileSize / 2 - gfx.sprites[tick].w / 2, offset.y + level->height()*tileSize / 2 - gfx.sprites[tick].h / 2, gfx.sprites[tick].w, gfx.sprites[tick].h };
+    SDL_Rect dest = { offset.x + tileSize, offset.y + tileSize, (level->width() - 2) * tileSize, (level->height() - 2) * tileSize };
 
     SDL_RenderCopy(renderer, gfx.texture, &gfx.sprites[tick], &dest);
   }
@@ -238,7 +108,7 @@ void GameView::render()
           }
           else
           {
-            const auto& gfx = objectGfx(obj.spec);
+            const auto& gfx = levelRenderer->objectGfx(obj.spec);
             SDL_SetTextureColorMod(gfx.texture, color.r, color.g, color.b);
             auto variant = obj.variant;
             if (obj.spec->tiling == ObjectSpec::Tiling::None)
@@ -260,14 +130,14 @@ void GameView::render()
     gvm->text(rulesList[i].name(), 5, 5 + i * 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
 
   if (level->isVictory())
-    gvm->text("Victory!", WIDTH - 5, 5, { 255, 255, 0 }, ui::TextAlign::RIGHT, 1.0f);
+    gvm->text("Victory!", size.w - 5, 5, { 255, 255, 0 }, ui::TextAlign::RIGHT, 1.0f);
   else if (level->isDefeat())
-    gvm->text("Defeat!", WIDTH - 5, 5, { 255, 0, 0 }, ui::TextAlign::RIGHT, 1.0f);
+    gvm->text("Defeat!", size.w - 5, 5, { 255, 0, 0 }, ui::TextAlign::RIGHT, 1.0f);
 
-  gvm->text(level->name(), WIDTH / 2, HEIGHT - 20, { 255, 255, 255 }, ui::TextAlign::CENTER, 2.0f);
+  gvm->text(level->name(), size.w / 2, size.h - 20, { 255, 255, 255 }, ui::TextAlign::CENTER, 2.0f);
 
 #if MOUSE_ENABLED
-  gvm->text(hoverInfo, 5, HEIGHT - 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
+  gvm->text(hoverInfo, 5, size.h - 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
 #endif
 }
 
@@ -474,7 +344,7 @@ void GameView::handleKeyboardEvent(const SDL_Event& event)
     case SDLK_UP: movement(D::UP); updateMoveBounds(); break;
     case SDLK_DOWN: movement(D::DOWN); updateMoveBounds(); break;
 
-    case SDLK_TAB:
+    case SDLK_z:
       if (!history.empty())
       {
         level->restore(history.pop());

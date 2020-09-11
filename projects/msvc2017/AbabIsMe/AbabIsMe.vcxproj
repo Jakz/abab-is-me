@@ -144,6 +144,7 @@
     <ClInclude Include="..\..\..\src\game\Rules.h" />
     <ClInclude Include="..\..\..\src\game\Tile.h" />
     <ClInclude Include="..\..\..\src\game\Types.h" />
+    <ClInclude Include="..\..\..\src\gfx\LevelRenderer.h" />
     <ClInclude Include="..\..\..\src\gfx\MainView.h" />
     <ClInclude Include="..\..\..\src\gfx\SdlHelper.h" />
     <ClInclude Include="..\..\..\src\gfx\ViewManager.h" />

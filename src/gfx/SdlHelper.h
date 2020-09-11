@@ -53,6 +53,13 @@ public:
   void loop();
   void handleEvents();
 
+  size2d_t getWindowSize()
+  {
+    int w, h;
+    SDL_GetWindowSize(_window, &w, &h);
+    return { w, h };
+  }
+
   void exit() { willQuit = true; }
 
   void blit(SDL_Texture* texture, const SDL_Rect& src, int dx, int dy);
@@ -90,7 +97,7 @@ bool SDL<EventHandler, Renderer>::init()
   }
 
   // SDL_WINDOW_FULLSCREEN
-  _window = SDL_CreateWindow("AbabIsMe", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, SDL_WINDOW_OPENGL);
+  _window = SDL_CreateWindow("AbabIsMe", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
   _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
 
   return true;

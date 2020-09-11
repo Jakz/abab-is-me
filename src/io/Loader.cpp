@@ -175,7 +175,7 @@ namespace sutils
 using namespace io;
 using namespace baba;
 
-Loader::Loader(baba::GameData& data) : data(data)
+Loader::Loader()
 {
 
 }
@@ -195,7 +195,7 @@ size_t flength(FILE* in) { fseek(in, 0, SEEK_END); size_t ot = ftell(in); fseek(
 
 */
 
-void Loader::loadLD(const path& path, baba::Level* level, GameData& data)
+void Loader::loadLD(const path& path, baba::Level* level, bool headerOnly)
 {
   enum class S { NONE, GENERAL, IMAGES, SPECIALS, ICONS, PATHS, TILES, LEVELS };
   S s = S::NONE;
@@ -228,69 +228,80 @@ void Loader::loadLD(const path& path, baba::Level* level, GameData& data)
       auto pair = sutils::parseKeyValue(l);
       
       if (pair.first == "name")
-        level->_name = pair.second;
+        level->_info.name = pair.second;
       else if (pair.first == "palette")
         level->_palette = pair.second;
       else if (pair.first == "subtitle")
-        level->_subtitle = pair.second;
+        level->_info.subtitle = pair.second;
     }
-    else if (s == S::IMAGES)
+    else if (!headerOnly)
     {
-      auto pair = sutils::parseKeyValue(l);
-
-      if (pair.first == "total")
+      switch (s)
       {
-        assert(level->_images.empty());
-        level->_images.resize(std::stoi(pair.second));
+      case S::GENERAL: break;
+      case S::IMAGES:
+      {
+        auto pair = sutils::parseKeyValue(l);
+
+        if (pair.first == "total")
+        {
+          assert(level->_images.empty());
+          level->_images.resize(std::stoi(pair.second));
+        }
+        else
+        {
+          assert(!level->_images.empty());
+          auto index = std::stoi(pair.first);
+          const auto& image = pair.second;
+          level->_images[index] = image;
+        }
+
+        break;
       }
-      else
+      case S::SPECIALS:
       {
-        assert(!level->_images.empty());
-        auto index = std::stoi(pair.first);
-        const auto& image = pair.second;
-        level->_images[index] = image;
+        auto p = sutils::parseKeyValue(l);
+        auto nv = sutils::parseNumberKeyValue(p.first);
+
+        //LOGD("special %d %s = %s", nv.first, nv.second.c_str(), p.second.c_str());
+        break;
       }
-
-    }
-    else if (s == S::SPECIALS)
-    {
-      auto p = sutils::parseKeyValue(l);
-      auto nv = sutils::parseNumberKeyValue(p.first);
-
-      //LOGD("special %d %s = %s", nv.first, nv.second.c_str(), p.second.c_str());
-    }
-    else if (s == S::TILES)
-    {
-      auto p = sutils::parseKeyValue(l);
-  
-      if (sutils::startsWith(p.first, "object"))
+      case S::TILES:
       {
-        auto f = sutils::parseKeyValue(p.first, "_");
+        auto p = sutils::parseKeyValue(l);
 
-        auto* spec = data.objectsByKey[f.first];
+        if (sutils::startsWith(p.first, "object"))
+        {
+          auto f = sutils::parseKeyValue(p.first, "_");
 
-        if (f.second == "image")
-          spec->sprite = p.second;
-        else if (f.second == "name")
-          spec->name = p.second;
-        else if (f.second == "colour")
-          spec->color = sutils::parseCoordinate(p.second);
-        else if (f.second == "activecolour")
-          spec->color = sutils::parseCoordinate(p.second);
-        else if (f.second == "tiling")
-          spec->tiling = sutils::valueToTiling(std::stoi(p.second));
+          auto* spec = level->_data.objectsByKey[f.first];
+
+          if (f.second == "image")
+            spec->sprite = p.second;
+          else if (f.second == "name")
+            spec->name = p.second;
+          else if (f.second == "colour")
+            spec->color = sutils::parseCoordinate(p.second);
+          else if (f.second == "activecolour")
+            spec->color = sutils::parseCoordinate(p.second);
+          else if (f.second == "tiling")
+            spec->tiling = sutils::valueToTiling(std::stoi(p.second));
+          break;
+        }
+      }
+      default: { }
       }
     }
   }
 }
 
-baba::Level* Loader::load(const std::string& name)
+baba::Level* Loader::load(const std::string& name, const GameData& baseData)
 {
   LOGD("Loading level %s", name.c_str());
-  Level* level = new Level(data);
+  Level* level = new Level(baseData);
 
   path ldPath = DATA_FOLDER + R"(Worlds/baba/)" + name + ".ld";
-  loadLD(ldPath, level, data);
+  loadLD(ldPath, level);
 
   path fullPath = DATA_FOLDER + R"(Worlds/baba/)" + name + ".l";
   in = fopen(fullPath.c_str(), "rb");
@@ -386,9 +397,9 @@ baba::Level* Loader::readLayer(uint16_t version, baba::Level* level)
     {
       int16_t id = identifiers[i];
 
-      auto it = data.objectsByID.find(id);
+      auto it = level->_data.objectsByID.find(id);
 
-      if (it != data.objectsByID.end())
+      if (it != level->_data.objectsByID.end())
         objects.push_back({ it->second });
       else
         objects.push_back({ nullptr }); //TODO: EMPTY object
@@ -626,17 +637,17 @@ void ValuesParser::parse()
   LOGD("  loaded %zu objects.", data.objects.size());
 }
 
-void Loader::loadGameData()
+GameData Loader::loadGameData()
 {
   //std::regex pattern(R"(^[0-9]+level.l$)");
   //auto levels = sutils::contentsOfFolder(DATA_FOLDER + R"(Worlds/baba)", false, [&pattern](auto path) { return std::regex_search(path, pattern); });
-
   
+  GameData data;
   ValuesParser parser(data);
   parser.init();
   parser.parse();
   data.finalize();
-
+  return data;
   
   /*coord_t mw = -1, mh = -1, ii = 0;
 
