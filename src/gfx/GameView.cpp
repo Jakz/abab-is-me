@@ -11,12 +11,38 @@ using namespace ui;
 using namespace baba;
 
 extern Level* level;
+extern void prevLevel();
+extern void nextLevel();
+
 History history;
 
-SDL_Surface* palette = nullptr;
-
-GameView::GameView(ViewManager* gvm) : gvm(gvm), levelRenderer(new LevelRenderer(gvm))
+GameView::GameView(ViewManager* gvm) : gvm(gvm), levelRenderer(new LevelRenderer(gvm)), colors({ nullptr })
 {
+}
+
+void GameView::levelLoaded()
+{
+  auto& palette = colors.palette;
+  
+  if (palette)
+    SDL_FreeSurface(palette);
+
+  palette = IMG_Load((DATA_FOLDER + R"(Palettes/)" + level->palette()).c_str());
+  assert(palette);
+  SDL_Surface* tmp = SDL_ConvertSurfaceFormat(palette, SDL_PIXELFORMAT_BGRA8888, 0);
+  SDL_FreeSurface(palette);
+  palette = tmp;
+
+  //rules.state(data.objectsByName["baba"]).properties.set(baba::ObjectProperty::YOU);
+  //rules.state(data.objectsByName["wall"]).properties.set(baba::ObjectProperty::STOP);
+
+  SDL_GetRGB(*(((uint32_t*)palette->pixels) + 0 * palette->w + 1), palette->format, &colors.outside.r, &colors.outside.g, &colors.outside.b);
+  SDL_GetRGB(*(((uint32_t*)palette->pixels) + 4 * palette->w + 0), palette->format, &colors.inside.r, &colors.inside.g, &colors.inside.b);
+
+  colors.outside.a = 255;
+  colors.inside.a = 255;
+
+  level->updateRules();
 }
 
 void GameView::render()
@@ -24,27 +50,6 @@ void GameView::render()
   SDL_Renderer* renderer = gvm->renderer();
 
   auto tick = (SDL_GetTicks() / 180) % 3;
-
-  //TODO: should be reloaded if level changes
-  if (!palette)
-  {
-    palette = IMG_Load((DATA_FOLDER + R"(Palettes/)" + level->palette()).c_str());
-    assert(palette);
-    SDL_Surface* tmp = SDL_ConvertSurfaceFormat(palette, SDL_PIXELFORMAT_BGRA8888, 0);
-    SDL_FreeSurface(palette);
-    palette = tmp;
-
-    //rules.state(data.objectsByName["baba"]).properties.set(baba::ObjectProperty::YOU);
-    //rules.state(data.objectsByName["wall"]).properties.set(baba::ObjectProperty::STOP);
-
-    SDL_GetRGB(*(((uint32_t*)palette->pixels) + 0 * palette->w + 1), palette->format, &colors.outside.r, &colors.outside.g, &colors.outside.b);
-    SDL_GetRGB(*(((uint32_t*)palette->pixels) + 4 * palette->w + 0), palette->format, &colors.inside.r, &colors.inside.g, &colors.inside.b);
-
-    colors.outside.a = 255;
-    colors.inside.a = 255;
-
-    level->updateRules();
-  }
 
   constexpr coord_t GFX_TILE_SIZE = 24;
   scaler = Scaler::SCALE_TO_FIT;
@@ -62,6 +67,7 @@ void GameView::render()
   tileSize = bestScale;
   offset.x = (size.w - level->width() * bestScale) / 2;
   offset.y = (size.h - level->height() * bestScale) / 2;
+  const float ratio = bestScale / GFX_TILE_SIZE;
 
 
   SDL_Rect bb = { 0,0, size.w, size.h };
@@ -93,14 +99,13 @@ void GameView::render()
 
       if (tile)
       {
-        const SDL_Rect dest = { offset.x + x * tileSize, offset.y + y * tileSize, tileSize, tileSize };
         //gvm->fillRect(dest, colors.inside);
 
         for (const auto& obj : *tile)
         {
           SDL_Color color;
           const auto& ocolor = obj.active ? obj.spec->active : obj.spec->color;
-          SDL_GetRGB(*(((uint32_t*)palette->pixels) + ocolor.y * palette->w + ocolor.x), palette->format, &color.r, &color.g, &color.b);
+          SDL_GetRGB(*(((uint32_t*)colors.palette->pixels) + ocolor.y * colors.palette->w + ocolor.x), colors.palette->format, &color.r, &color.g, &color.b);
 
           if (obj.spec == level->data()->EDGE)
           {
@@ -115,8 +120,9 @@ void GameView::render()
               variant = 0;
 
             SDL_Rect src = gfx.sprites[variant];
+            const SDL_Rect dest = { offset.x + x * tileSize + tileSize/2 - src.w/2, offset.y + y * tileSize + tileSize/2 - src.h/2, src.w * ratio, src.h * ratio };
 
-            src.x += tick * GFX_TILE_SIZE;
+            src.x += tick * src.w;
 
             SDL_RenderCopy(renderer, gfx.texture, &src, &dest);
           }
@@ -343,6 +349,9 @@ void GameView::handleKeyboardEvent(const SDL_Event& event)
     case SDLK_RIGHT: movement(D::RIGHT); updateMoveBounds(); break;
     case SDLK_UP: movement(D::UP); updateMoveBounds(); break;
     case SDLK_DOWN: movement(D::DOWN); updateMoveBounds(); break;
+
+    case SDLK_KP_PLUS: nextLevel(); break;
+    case SDLK_KP_MINUS: prevLevel(); break;
 
     case SDLK_z:
       if (!history.empty())

@@ -29,6 +29,7 @@ namespace ui
 
     struct
     {
+      SDL_Surface* palette;
       SDL_Color outside;
       SDL_Color inside;
     } colors;
@@ -47,6 +48,8 @@ namespace ui
 
     void handleKeyboardEvent(const SDL_Event& event);
     void handleMouseEvent(const SDL_Event& event);
+
+    void levelLoaded();
   };
 
   class LevelSelectView : public View

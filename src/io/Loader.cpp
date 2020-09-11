@@ -286,6 +286,8 @@ void Loader::loadLD(const path& path, baba::Level* level, bool headerOnly)
             spec->color = sutils::parseCoordinate(p.second);
           else if (f.second == "tiling")
             spec->tiling = sutils::valueToTiling(std::stoi(p.second));
+          else if (f.second == "root")
+            spec->spriteInRoot = p.second == "1" ? true : false;
           break;
         }
       }

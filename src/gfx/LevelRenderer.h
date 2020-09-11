@@ -51,7 +51,13 @@ const LevelRenderer::ObjectGfx& LevelRenderer::objectGfx(const baba::ObjectSpec*
     return it->second;
   else
   {
-    path base = DATA_FOLDER + R"(Sprites/)" + spec->sprite;
+    path base;
+    
+    if (spec->spriteInRoot)
+      base = DATA_FOLDER + R"(Sprites/)" + spec->sprite;
+    else /* TODO: use world folder, not hardcoded one */
+      base = DATA_FOLDER + R"(Worlds/baba/Sprites/)" + spec->sprite;
+
     std::vector<uint32_t> frames;
 
     switch (spec->tiling)
@@ -77,12 +83,7 @@ const LevelRenderer::ObjectGfx& LevelRenderer::objectGfx(const baba::ObjectSpec*
       break;
     }
 
-    SDL_Surface* surface = SDL_CreateRGBSurface(0, 24 * 3 * frames.size(), 24, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
-
-    auto cacheSize = std::accumulate(objectGfxs.begin(), objectGfxs.end(), 0ULL, [](uint64_t val, const auto& entry) { return entry.second.w * entry.second.h * 4 + val; });
-    cacheSize += surface->w * surface->h * 4;
-
-    LOGD("Caching gfx for %s in a %dx%d texture, total cache size: %.2f", spec->name.c_str(), 24 * 3 * frames.size(), 24, cacheSize / 1024.0f);
+    SDL_Surface* surface = nullptr;
 
 
     ObjectGfx gfx;
@@ -97,7 +98,14 @@ const LevelRenderer::ObjectGfx& LevelRenderer::objectGfx(const baba::ObjectSpec*
         if (!tmp)
           LOGD("Error: missing graphics file %s", buffer);
 
-        SDL_Rect dest = { (i * 3 + f) * 24, 0, 24, 24 };
+        if (!surface)
+        {
+          if (tmp->w != 24)
+            printf("asad\n");
+          surface = SDL_CreateRGBSurface(0, tmp->w * 3 * frames.size(), tmp->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+        }
+
+        SDL_Rect dest = { (i * 3 + f) * tmp->w, 0, tmp->w, tmp->h };
         SDL_BlitSurface(tmp, nullptr, surface, &dest);
 
         SDL_FreeSurface(tmp);
@@ -106,6 +114,10 @@ const LevelRenderer::ObjectGfx& LevelRenderer::objectGfx(const baba::ObjectSpec*
           gfx.sprites.push_back(dest);
       }
     }
+
+    auto cacheSize = std::accumulate(objectGfxs.begin(), objectGfxs.end(), 0ULL, [](uint64_t val, const auto& entry) { return entry.second.w * entry.second.h * 4 + val; });
+    cacheSize += surface->w * surface->h * 4;
+    LOGD("Caching gfx for %s (%s) in a %dx%d texture, total cache size: %.2f", spec->name.c_str(), spec->sprite.c_str(), surface->w, surface->h, cacheSize / 1024.0f);
 
     gfx.texture = SDL_CreateTextureFromSurface(gvm->renderer(), surface);
     gfx.w = surface->w;

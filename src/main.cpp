@@ -2,6 +2,7 @@
 #include <cstdlib>
 
 #include "gfx/ViewManager.h"
+#include "gfx/MainView.h"
 
 #include "io/Loader.h"
 
@@ -9,30 +10,62 @@
 #include "game/Level.h"
 
 baba::GameData data;
-baba::Level* level;
-int levelIndex = 1;
+baba::Level* level = nullptr;
+int levelIndex = 0;
+
+io::Loader loader;
+ui::ViewManager vm;
+
+void nextLevel()
+{
+  delete level;
+  level = nullptr;
+
+  while (!level)
+  {
+    ++levelIndex;
+    level = loader.load(std::to_string(levelIndex) + "level", data);
+  }
+
+  level->computeTiling();
+  vm.gameView()->levelLoaded();
+}
+
+void prevLevel()
+{
+  delete level;
+  level = nullptr;
+
+  while (!level)
+  {
+    --levelIndex;
+    level = loader.load(std::to_string(levelIndex) + "level", data);
+  }
+
+  level->computeTiling();
+  vm.gameView()->levelLoaded();
+}
 
 int main(int argc, char* argv[])
 {
-  io::Loader loader;
   data = loader.loadGameData();
   level = loader.load(std::to_string(levelIndex) + "level", data);
   level->computeTiling();
   
-  ui::ViewManager ui;
-
-  if (!ui.init())
+  if (!vm.init())
     return -1;
 
-  if (!ui.loadData())
+  if (!vm.loadData())
   {
     printf("Error while loading and initializing data.\n");
-    ui.deinit();
+    vm.deinit();
     return -1;
   }
 
-  ui.loop();
-  ui.deinit();
+  vm.gameView()->levelLoaded();
+
+  vm.loop();
+  vm.deinit();
 
   //loader.load("1level.l");
 
