@@ -32,6 +32,8 @@ public:
   const ObjectGfx& objectGfx(const baba::ObjectSpec* spec) const;
   const ObjectGfx& imageGfx(const std::string& image) const;
 
+  void flushCache();
+
 public:
   LevelRenderer(ui::ViewManager* gvm) : gvm(gvm)
   {
@@ -42,6 +44,12 @@ public:
 #include "Common.h"
 #include "game/Level.h"
 #include "gfx/ViewManager.h"
+
+void LevelRenderer::flushCache()
+{
+  objectGfxs.clear();
+  imageGfxs.clear();
+}
 
 const LevelRenderer::ObjectGfx& LevelRenderer::objectGfx(const baba::ObjectSpec* spec) const
 {

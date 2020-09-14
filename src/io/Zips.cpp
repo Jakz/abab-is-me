@@ -182,10 +182,10 @@ Zip::unique_cptr Zip::uncompress(const byte* data, size_t length)
   {
     switch (result)
     {
-      case Z_MEM_ERROR: printf("cocos2d: ZipUtils: Out of memory while decompressing map data!" "\n"); break;
-      case Z_VERSION_ERROR: printf("cocos2d: ZipUtils: Incompatible zlib version!" "\n"); break;
-      case Z_DATA_ERROR: printf("cocos2d: ZipUtils: Incorrect zlib compressed data!" "\n"); break;
-      default: printf("cocos2d: ZipUtils: Unknown error while decompressing map data!" "\n");
+      case Z_MEM_ERROR: printf("Zip: Out of memory while decompressing map data!" "\n"); break;
+      case Z_VERSION_ERROR: printf("Zip: Incompatible zlib version!" "\n"); break;
+      case Z_DATA_ERROR: printf("Zip: Incorrect zlib compressed data!" "\n"); break;
+      default: printf("Zip: Unknown error while decompressing map data!" "\n");
     }
 
     free(dataOut);

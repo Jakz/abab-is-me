@@ -302,6 +302,8 @@ baba::Level* Loader::load(const std::string& name, const GameData& baseData)
   LOGD("Loading level %s", name.c_str());
   Level* level = new Level(baseData);
 
+  level->_info.filename = name;
+
   path ldPath = DATA_FOLDER + R"(Worlds/baba/)" + name + ".ld";
   loadLD(ldPath, level);
 

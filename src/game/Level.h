@@ -15,6 +15,7 @@ namespace baba
   {
     std::string name;
     std::string subtitle;
+    std::string filename;
   };
 
   struct Level
@@ -35,6 +36,7 @@ namespace baba
     const std::string& palette() const { return _palette; }
     const std::string& name() const { return _info.name; }
     const std::string& subtitle() const { return _info.subtitle; }
+    const std::string& filename() const { return _info.filename; }
     const decltype(_images)& images() const { return _images; }
 
     const GameData* data() const { return &_data; }

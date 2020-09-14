@@ -32,6 +32,7 @@ namespace ui
       SDL_Surface* palette;
       SDL_Color outside;
       SDL_Color inside;
+      SDL_Color grid;
     } colors;
 
     point_t moveBounds[2];
@@ -41,6 +42,8 @@ namespace ui
 #endif
 
     void updateMoveBounds();
+
+    void drawGrid(point_t b, size2d_t size, size2d_t count);
 
   public:
     GameView(ViewManager* gvm);

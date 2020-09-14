@@ -18,6 +18,7 @@ History history;
 
 GameView::GameView(ViewManager* gvm) : gvm(gvm), levelRenderer(new LevelRenderer(gvm)), colors({ nullptr })
 {
+  colors.grid.a = 0;
 }
 
 void GameView::levelLoaded()
@@ -77,9 +78,10 @@ void GameView::render()
 
   const auto& images = level->images();
 
-
-  SDL_Rect insideRect = { offset.x, offset.y, level->width()* tileSize, level->height() * tileSize };
-  gvm->fillRect(insideRect, colors.inside);
+  {
+    const SDL_Rect insideRect = { offset.x + tileSize, offset.y + tileSize, (level->width() - 2)* tileSize, (level->height() - 2)* tileSize };
+    gvm->fillRect(insideRect, colors.inside);
+  }
 
   for (const auto& image : images)
   {
@@ -120,7 +122,7 @@ void GameView::render()
               variant = 0;
 
             SDL_Rect src = gfx.sprites[variant];
-            const SDL_Rect dest = { offset.x + x * tileSize + tileSize/2 - src.w/2, offset.y + y * tileSize + tileSize/2 - src.h/2, src.w * ratio, src.h * ratio };
+            const SDL_Rect dest = { offset.x + x * tileSize + tileSize/2 - (src.w*ratio)/2, offset.y + y * tileSize + tileSize/2 - (src.h*ratio)/2, src.w * ratio, src.h * ratio };
 
             src.x += tick * src.w;
 
@@ -131,6 +133,8 @@ void GameView::render()
     }
   }
 
+  drawGrid(offset, { tileSize, tileSize }, { level->width() + 1, level->height() + 1 });
+
   const auto& rulesList = level->rules().rules();
   for (coord_t i = 0; i < rulesList.size(); ++i)
     gvm->text(rulesList[i].name(), 5, 5 + i * 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
@@ -140,11 +144,23 @@ void GameView::render()
   else if (level->isDefeat())
     gvm->text("Defeat!", size.w - 5, 5, { 255, 0, 0 }, ui::TextAlign::RIGHT, 1.0f);
 
-  gvm->text(level->name(), size.w / 2, size.h - 20, { 255, 255, 255 }, ui::TextAlign::CENTER, 2.0f);
+  gvm->text(level->filename() + " - " + level->name(), size.w / 2, size.h - 20, { 255, 255, 255 }, ui::TextAlign::CENTER, 2.0f);
 
 #if MOUSE_ENABLED
   gvm->text(hoverInfo, 5, size.h - 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
 #endif
+}
+
+void GameView::drawGrid(point_t b, size2d_t size, size2d_t count)
+{
+  if (colors.grid.a)
+  {
+    for (int i = 0; i < count.h; ++i)
+      gvm->line(b.x, b.y + size.h * i, b.x + size.w * count.w, b.y + size.h * i, colors.grid);
+
+    for (int i = 0; i < count.w; ++i)
+      gvm->line(b.x + size.w * i, b.y, b.x + size.w * i, b.y + size.h * count.h, colors.grid);
+  }
 }
 
 void GameView::updateMoveBounds()
@@ -360,8 +376,15 @@ void GameView::handleKeyboardEvent(const SDL_Event& event)
     case SDLK_UP: movement(D::UP); updateMoveBounds(); break;
     case SDLK_DOWN: movement(D::DOWN); updateMoveBounds(); break;
 
-    case SDLK_KP_PLUS: nextLevel(); break;
-    case SDLK_KP_MINUS: prevLevel(); break;
+    case SDLK_g:
+    {
+      if (colors.grid.a) colors.grid.a = 0;
+      else colors.grid = colors.outside;
+      break;
+    }
+
+    case SDLK_KP_PLUS: { levelRenderer->flushCache(); nextLevel(); break; }
+    case SDLK_KP_MINUS: { levelRenderer->flushCache(); prevLevel(); break; }
 
     case SDLK_z:
       if (!history.empty())
