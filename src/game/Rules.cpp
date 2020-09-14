@@ -110,6 +110,8 @@ void Rules::apply()
       _state[object].properties.set(ObjectProperty::DEFEAT);
     else if (property->spec->name == "text_move")
       _state[object].properties.set(ObjectProperty::MOVE);
+    else if (property->spec->name == "text_sink")
+      _state[object].properties.set(ObjectProperty::SINK);
     else
       assert(false);
 

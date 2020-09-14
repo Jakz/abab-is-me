@@ -20,10 +20,14 @@ namespace baba
     void add(Object object) { objects.push_back(object); }
     const Object* object() const { return !objects.empty() ? &objects[0] : nullptr; }
 
+    void remove(const Object* object);
+
     bool empty() const { return objects.empty(); }
 
     bool has(const ObjectSpec* spec) const;
     bool has(ObjectProperty property) const;
+    Object* find(ObjectProperty property);
+
 
     bool any_of(const std::function<bool(const Object&)>& predicate) const;
     Object* find(const std::function<bool(const Object&)>& predicate);

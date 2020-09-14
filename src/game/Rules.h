@@ -14,6 +14,8 @@ namespace baba
     WIN     = 0x00000008ULL,
     DEFEAT  = 0x00000010ULL,
     MOVE    = 0x00000020ULL,
+    FLOAT   = 0x00000040ULL,
+    SINK    = 0x00000080ULL,
   };
 
   using ObjectProperties = bit_mask<ObjectProperty>;

@@ -217,6 +217,16 @@ bool movement(MoveInfo info, D d)
         tile->objects.erase(it);
         return false;
       }
+
+      //TODO: if it has SINK this should be done too
+      auto sink = next->find(ObjectProperty::SINK);
+      if (sink) //TODO: only on same float level
+      {
+        tile->objects.erase(it);
+        next->remove(sink);
+        level->computeTiling(); //TODO: expensive, just do it around affected tile
+        return false;
+      }
       
       /* next is stop, just break from the cycle, we can't move */
       if (nit->spec && ObjectProperty::STOP)
