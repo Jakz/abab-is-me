@@ -71,7 +71,7 @@ struct size2d_t
 using path = std::string;
 
 #if _WIN32
-static const path DATA_FOLDER = R"(E:\Games\Portable\Baba.Is.You.v01.08.2019\Data\)";
+static const path DATA_FOLDER = R"(data\)";
 #define MOUSE_ENABLED true
 #else
 static const path DATA_FOLDER = R"(/media/SD/baba/Data/)";
