@@ -123,7 +123,7 @@ const LevelRenderer::ObjectGfx& LevelRenderer::objectGfx(const baba::ObjectSpec*
       }
     }
 
-    auto cacheSize = std::accumulate(objectGfxs.begin(), objectGfxs.end(), 0ULL, [](uint64_t val, const auto& entry) { return entry.second.w * entry.second.h * 4 + val; });
+    auto cacheSize = std::accumulate(objectGfxs.begin(), objectGfxs.end(), 0ULL, [](uint64_t val, const decltype(objectGfxs)::value_type& entry) { return entry.second.w * entry.second.h * 4 + val; });
     cacheSize += surface->w * surface->h * 4;
     LOGD("Caching gfx for %s (%s) in a %dx%d texture, total cache size: %.2f", spec->name.c_str(), spec->sprite.c_str(), surface->w, surface->h, cacheSize / 1024.0f);
 
@@ -153,7 +153,9 @@ const LevelRenderer::ObjectGfx& LevelRenderer::imageGfx(const std::string& image
 
   for (size_t i = 0; i < 3; ++i)
   {
-    auto image = IMG_Load((path + "_" + std::to_string(i + 1) + ".png").c_str());
+    char buffer[128];
+    sprintf(buffer, "%s_%d.png", path.c_str(), i + 1);
+    auto image = IMG_Load(buffer);
     assert(image);
 
     if (!surface)

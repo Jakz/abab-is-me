@@ -16,6 +16,9 @@ int levelIndex = 0;
 io::Loader loader;
 ui::ViewManager vm;
 
+
+char buffer[256];
+
 void nextLevel()
 {
   delete level;
@@ -24,7 +27,8 @@ void nextLevel()
   while (!level)
   {
     ++levelIndex;
-    level = loader.load(std::to_string(levelIndex) + "level", data);
+    sprintf(buffer, "%dlevel", levelIndex);
+    level = loader.load(buffer, data);
   }
 
   level->computeTiling();
@@ -39,7 +43,8 @@ void prevLevel()
   while (!level)
   {
     --levelIndex;
-    level = loader.load(std::to_string(levelIndex) + "level", data);
+    sprintf(buffer, "%dlevel", levelIndex);
+    level = loader.load(buffer, data);
   }
 
   level->computeTiling();
@@ -49,7 +54,8 @@ void prevLevel()
 int main(int argc, char* argv[])
 {
   data = loader.loadGameData();
-  level = loader.load(std::to_string(levelIndex) + "level", data);
+  sprintf(buffer, "%dlevel", levelIndex);
+  level = loader.load(buffer, data);
   level->computeTiling();
   
   if (!vm.init())

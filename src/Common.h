@@ -74,7 +74,7 @@ using path = std::string;
 static const path DATA_FOLDER = R"(data\)";
 #define MOUSE_ENABLED true
 #else
-static const path DATA_FOLDER = R"(/media/SD/baba/Data/)";
+static const path DATA_FOLDER = R"(/media/sdcard/baba/Data/)";
 #define MOUSE_ENABLED false
 #endif
 

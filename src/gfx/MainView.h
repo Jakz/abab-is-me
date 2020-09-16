@@ -3,6 +3,8 @@
 #include "ViewManager.h"
 #include "Common.h"
 
+#include <memory>
+
 class LevelRenderer;
 
 namespace ui

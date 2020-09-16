@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Game
+Name=AbabIsMe
+Comment=Baba Is You Engine
+Terminal=false
+StartupNotify=true
+Exec=abab-is-me %f
+Icon=icon
+Categories=emulators;
+X-OD-Filter=.ld
+Name[en_US]=abab-is-me

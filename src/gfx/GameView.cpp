@@ -7,6 +7,8 @@
 
 #include "LevelRenderer.h"
 
+#include <algorithm>
+
 using namespace ui;
 using namespace baba;
 
@@ -400,6 +402,7 @@ void GameView::handleKeyboardEvent(const SDL_Event& event)
 
 void GameView::handleMouseEvent(const SDL_Event& event)
 {
+#if MOUSE_ENABLED
   if (event.type == SDL_MOUSEMOTION)
   {
     coord_t x = (event.motion.x - offset.x) / tileSize;
@@ -426,6 +429,7 @@ void GameView::handleMouseEvent(const SDL_Event& event)
   }
   else
     hoverInfo = "";
+#endif
 }
 
 

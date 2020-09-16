@@ -74,16 +74,18 @@ namespace sutils
     return lines;
   }
 
+
   static inline std::vector<path> contentsOfFolder(const path& base, bool recursive, std::function<bool(path)> filter)
   {
     std::vector<path> files;
 
+#if _WIN32
     for (const auto& entry : std::filesystem::directory_iterator(base))
     {
       if (entry.is_regular_file() && filter(entry.path().filename().string()))
         files.push_back(entry.path().filename().string());
     }
-
+#endif
     return files;
     
     /*DIR *d;

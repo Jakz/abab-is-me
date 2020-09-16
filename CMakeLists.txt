@@ -17,7 +17,7 @@ find_package(SDL2_image REQUIRED)
 find_package(ZLIB REQUIRED)
 
 add_compile_options(-Wno-unused-parameter -Wno-missing-field-initializers
-  -Wno-sign-compare -Wno-parentheses -Wno-unused-variable
+  -Wno-sign-compare -Wno-parentheses -Wno-unused-variable -Wno-narrowing
 )
 
 # add_compile_options(-g -O2 -W -Wall -Wextra)
@@ -39,6 +39,6 @@ file(GLOB SOURCES_VM "${SRC_ROOT}/io/*.cpp")
 
 set(SOURCES ${SOURCES_ROOT} ${SOURCES_VIEWS} ${SOURCES_IO} ${SOURCES_VM} ${SOURCES_LUA})
 
-add_executable(abab ${SOURCES})
+add_executable(ababisme ${SOURCES})
 
-target_link_libraries(abab ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARIES} ${ZLIB_LIBRARIES})
+target_link_libraries(ababisme ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARIES} ${ZLIB_LIBRARIES})
