@@ -112,6 +112,8 @@ void Rules::apply()
       _state[object].properties.set(ObjectProperty::MOVE);
     else if (property->spec->name == "text_sink")
       _state[object].properties.set(ObjectProperty::SINK);
+    else if (property->spec->name == "text_shift")
+      _state[object].properties.set(ObjectProperty::SHIFT);
     else
       assert(false);
 

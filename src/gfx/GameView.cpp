@@ -9,6 +9,19 @@
 
 #include <algorithm>
 
+#define KEY_LEFT (SDLK_LEFT)
+#define KEY_RIGHT (SDLK_RIGHT)
+#define KEY_UP (SDLK_UP)
+#define KEY_DOWN (SDLK_DOWN)
+#define KEY_X (SDLK_LSHIFT)
+#define KEY_Y (SDLK_SPACE)
+#define KEY_A (SDLK_LCTRL)
+#define KEY_B (SDLK_LALT)
+#define KEY_L (SDLK_TAB)
+#define KEY_R (SDLK_BACKSPACE)
+#define KEY_SELECT (SDLK_ESCAPE)
+#define KEY_START (SDLK_RETURN)
+
 using namespace ui;
 using namespace baba;
 
@@ -146,7 +159,7 @@ void GameView::render()
   else if (level->isDefeat())
     gvm->text("Defeat!", size.w - 5, 5, { 255, 0, 0 }, ui::TextAlign::RIGHT, 1.0f);
 
-  gvm->text(level->filename() + " - " + level->name(), size.w / 2, size.h - 20, { 255, 255, 255 }, ui::TextAlign::CENTER, 2.0f);
+  gvm->text(level->filename() + " - " + level->name(), size.w / 2, size.h - 20, { 255, 255, 255 }, ui::TextAlign::CENTER, 1.0f);
 
 #if MOUSE_ENABLED
   gvm->text(hoverInfo, 5, size.h - 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
@@ -288,6 +301,9 @@ bool movement(MoveInfo info, D d)
     }
   }
 
+  // TODO: shift
+  /* for each object which has SHIFT move all object on it according to the direction */
+
   if (!isStopped)
   {
     Object object = *info.it;
@@ -385,8 +401,20 @@ void GameView::handleKeyboardEvent(const SDL_Event& event)
       break;
     }
 
-    case SDLK_KP_PLUS: { levelRenderer->flushCache(); nextLevel(); break; }
-    case SDLK_KP_MINUS: { levelRenderer->flushCache(); prevLevel(); break; }
+    case KEY_R:
+    case SDLK_KP_PLUS: 
+    { 
+      levelRenderer->flushCache();
+      nextLevel();
+      break;
+    }
+    case KEY_L:
+    case SDLK_KP_MINUS:
+    { 
+      levelRenderer->flushCache();
+      prevLevel();
+      break;
+    }
 
     case SDLK_z:
       if (!history.empty())

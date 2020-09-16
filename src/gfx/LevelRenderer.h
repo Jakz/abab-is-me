@@ -84,6 +84,7 @@ const LevelRenderer::ObjectGfx& LevelRenderer::objectGfx(const baba::ObjectSpec*
       frames.push_back(24);
       break;
     case baba::ObjectSpec::Tiling::Character:
+    case baba::ObjectSpec::Tiling::Belt:
       //int32_t f[] = { 31, 0, 1, 2, 3, 7, 8, 9, 10, 11, 15, 16, 17, 18, 19, 23, 24, 25, 26, 27 };
       int32_t f[] = { 0, 1, 2, 3, 8, 9, 10, 11, 16, 17, 18, 19, 24, 25, 26, 27 };
       for (int32_t i : f)
