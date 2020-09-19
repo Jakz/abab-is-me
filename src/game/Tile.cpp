@@ -36,7 +36,7 @@ Object* Tile::find(const std::function<bool(const Object&)>& predicate)
 
 void Tile::remove(const Object* object)
 {
-  for (auto it = begin(); it != end(); ++it)
+  for (auto it = begin(); it != end(); /**/)
     if (object == &(*it))
     {
       it = objects.erase(it);

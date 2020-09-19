@@ -17,6 +17,12 @@ namespace baba
     FLOAT   = 0x00000040ULL,
     SINK    = 0x00000080ULL,
     SHIFT   = 0x00000100ULL,
+    BEST    = 0x00000200ULL,
+    HOT     = 0x00000400ULL,
+    MELT    = 0x00000800ULL,
+    TEXT    = 0x00001000ULL,
+    SHUT    = 0x00002000ULL,
+    OPEN    = 0x00004000ULL,
   };
 
   using ObjectProperties = bit_mask<ObjectProperty>;
@@ -24,6 +30,7 @@ namespace baba
   struct ObjectState
   {
     ObjectProperties properties;
+    std::vector<const baba::ObjectSpec*> products;
 
     void clear() { properties.clear(); }
   };
@@ -60,7 +67,7 @@ namespace baba
 
     void clear();
     void generate(baba::Level* level);
-    void apply();
+    void apply(baba::Level* level);
 
     void resolve(baba::Level* level);
   };

@@ -11,7 +11,9 @@
 
 baba::GameData data;
 baba::Level* level = nullptr;
-int levelIndex = 0;
+int levelIndex = 17;
+
+//TODO: on index 15 check layer ordering
 
 io::Loader loader;
 ui::ViewManager vm;

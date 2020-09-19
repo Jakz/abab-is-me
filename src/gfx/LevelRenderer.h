@@ -84,10 +84,16 @@ const LevelRenderer::ObjectGfx& LevelRenderer::objectGfx(const baba::ObjectSpec*
       frames.push_back(24);
       break;
     case baba::ObjectSpec::Tiling::Character:
-    case baba::ObjectSpec::Tiling::Belt:
+    case baba::ObjectSpec::Tiling::Animated:
+    {
       //int32_t f[] = { 31, 0, 1, 2, 3, 7, 8, 9, 10, 11, 15, 16, 17, 18, 19, 23, 24, 25, 26, 27 };
       int32_t f[] = { 0, 1, 2, 3, 8, 9, 10, 11, 16, 17, 18, 19, 24, 25, 26, 27 };
       for (int32_t i : f)
+        frames.push_back(i);
+      break;
+    }
+    case baba::ObjectSpec::Tiling::SingleAnimated:
+      for (int32_t i = 0; i < 4; ++i)
         frames.push_back(i);
       break;
     }
@@ -108,11 +114,7 @@ const LevelRenderer::ObjectGfx& LevelRenderer::objectGfx(const baba::ObjectSpec*
           LOGD("Error: missing graphics file %s", buffer);
 
         if (!surface)
-        {
-          if (tmp->w != 24)
-            printf("asad\n");
           surface = SDL_CreateRGBSurface(0, tmp->w * 3 * frames.size(), tmp->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
-        }
 
         SDL_Rect dest = { (i * 3 + f) * tmp->w, 0, tmp->w, tmp->h };
         SDL_BlitSurface(tmp, nullptr, surface, &dest);

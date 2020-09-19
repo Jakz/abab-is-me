@@ -167,8 +167,8 @@ namespace sutils
     case 0: return baba::ObjectSpec::Tiling::Directions;
     case 1: return baba::ObjectSpec::Tiling::Tiled;
     case 2: return baba::ObjectSpec::Tiling::Character;
-    case 3: return baba::ObjectSpec::Tiling::Belt;
-    case 4: return baba::ObjectSpec::Tiling::Unknown;
+    case 3: return baba::ObjectSpec::Tiling::Animated;
+    case 4: return baba::ObjectSpec::Tiling::SingleAnimated;
     default: assert(false); return baba::ObjectSpec::Tiling::None;
     }
   }
@@ -431,8 +431,9 @@ baba::Level* Loader::readLayer(uint16_t version, baba::Level* level)
 
       if (object.spec && object.spec->tiling == ObjectSpec::Tiling::Character)
       {
-        if (object.variant == 0)
+        if (object.variant >= 0 && object.variant <= 3)
           object.direction = D::RIGHT;
+        //TODO: other facings
       }
     }
   }

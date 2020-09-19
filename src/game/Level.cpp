@@ -117,5 +117,5 @@ void Level::updateRules()
 {
   _rules.clear();
   _rules.generate(this);
-  _rules.apply();
+  _rules.apply(this);
 }

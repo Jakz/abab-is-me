@@ -63,9 +63,15 @@ void GameView::levelLoaded()
 
 void GameView::render()
 {
+  //TODO: particles
+  //TODO BEST property
+  
   SDL_Renderer* renderer = gvm->renderer();
 
-  auto tick = (SDL_GetTicks() / 180) % 3;
+  int32_t tick = (SDL_GetTicks() / 180) % 3;
+  constexpr int32_t fspan = 2, fcount = 1 + fspan * 4;
+  int32_t ftick = ((SDL_GetTicks() / 300) % fspan);
+  
 
   constexpr coord_t GFX_TILE_SIZE = 24;
   scaler = Scaler::SCALE_TO_FIT;
@@ -136,8 +142,15 @@ void GameView::render()
             if (obj.spec->tiling == ObjectSpec::Tiling::None)
               variant = 0;
 
+            bool isFloat = obj.spec && ObjectProperty::FLOAT;
+            float dy = ratio * ftick;
+
             SDL_Rect src = gfx.sprites[variant];
-            const SDL_Rect dest = { offset.x + x * tileSize + tileSize/2 - (src.w*ratio)/2, offset.y + y * tileSize + tileSize/2 - (src.h*ratio)/2, src.w * ratio, src.h * ratio };
+
+            int fy = offset.y + y * tileSize + tileSize / 2 - (src.h*ratio) / 2;
+            if (isFloat) fy += dy;
+
+            const SDL_Rect dest = { offset.x + x * tileSize + tileSize/2 - (src.w*ratio)/2, fy, src.w * ratio, src.h * ratio };
 
             src.x += tick * src.w;
 
@@ -264,25 +277,28 @@ bool movement(MoveInfo info, D d)
       {
         if (info.type == MoveInfo::Type::MOVE)
         {
-          if (it->direction == D::DOWN) it->direction = D::UP;
-          else if (it->direction == D::UP) it->direction = D::DOWN;
-          else if (it->direction == D::LEFT) it->direction = D::RIGHT;
-          else if (it->direction == D::RIGHT) it->direction = D::LEFT;
+          it->direction = ~it->direction;
           updateVariant = true;
         }
-
+        
         isStopped = true;
+
         break;
       }
       /* it's push, it could move must we must see if it can be moved too*/
-      else if (info.type == MoveInfo::Type::YOU && (nit->spec && ObjectProperty::PUSH || nit->spec->isText))
+      else if (nit->spec && ObjectProperty::PUSH || nit->spec->isText)
       {
         /* if current can be moved we check next, otherwise we can stop */
         isStopped |= !movement(MoveInfo(info.type, next, nit), d);
         if (!isStopped && next->begin() != next->end())
           nit = next->begin(); // restart
         else
+        {
+          if (isStopped && info.type == MoveInfo::Type::MOVE)
+            it->direction = ~it->direction;
+
           break;
+        }
       }
     }
   }
@@ -357,8 +373,9 @@ void movement(D d)
   {
     history.push(level->state());
 
-    for (const auto& pair : you)
-      movement(pair, d);
+    if (d != D::NONE)
+      for (const auto& pair : you)
+        movement(pair, d);
 
     for (const auto& pair : move)
       movement(pair.first, pair.second);
@@ -368,6 +385,21 @@ void movement(D d)
 
     level->forEachObject([](Object& object) { object.active = false; });
     level->updateRules();
+
+    for (auto& tile : *level)
+    {
+      bool hasHot = tile.any_of([](const Object& o) { return o.spec && ObjectProperty::HOT; });
+
+      if (hasHot)
+      {
+        const Object* o = nullptr;
+        while ((o = tile.find(ObjectProperty::MELT)))
+        {
+          tile.remove(o);
+          /* burn particle + sound */
+        }
+      }
+    }
 
     for (const auto& props : level->rules())
     {
@@ -393,6 +425,7 @@ void GameView::handleKeyboardEvent(const SDL_Event& event)
     case SDLK_RIGHT: movement(D::RIGHT); updateMoveBounds(); break;
     case SDLK_UP: movement(D::UP); updateMoveBounds(); break;
     case SDLK_DOWN: movement(D::DOWN); updateMoveBounds(); break;
+    case SDLK_SPACE: movement(D::NONE); updateMoveBounds(); break;
 
     case SDLK_g:
     {

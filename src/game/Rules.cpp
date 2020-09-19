@@ -27,6 +27,8 @@ void Rules::generate(baba::Level* level)
 {
   /* search trivial rules NOUN IS PROPERTY */
 
+  std::vector<std::vector<const Object*>> sentences;
+
   for (coord_t y = 0; y < level->height(); ++y)
   {
     for (coord_t x = 0; x < level->width(); ++x)
@@ -37,7 +39,7 @@ void Rules::generate(baba::Level* level)
       Tile* up = level->get(tile, D::UP);
       Tile* down = level->get(tile, D::DOWN);
 
-      auto is = tile->find(_data->IS);
+      baba::Object* is = tile->find(_data->IS);
 
       if (is)
       {
@@ -86,7 +88,7 @@ void Rules::generate(baba::Level* level)
   }
 }
 
-void Rules::apply()
+void Rules::apply(baba::Level* level)
 {
   for (const Rule& rule : _rules)
   {
@@ -114,6 +116,18 @@ void Rules::apply()
       _state[object].properties.set(ObjectProperty::SINK);
     else if (property->spec->name == "text_shift")
       _state[object].properties.set(ObjectProperty::SHIFT);
+    else if (property->spec->name == "text_best")
+      _state[object].properties.set(ObjectProperty::BEST);
+    else if (property->spec->name == "text_hot")
+      _state[object].properties.set(ObjectProperty::HOT);
+    else if (property->spec->name == "text_melt")
+      _state[object].properties.set(ObjectProperty::MELT);
+    else if (property->spec->name == "text_float")
+      _state[object].properties.set(ObjectProperty::FLOAT);
+    else if (property->spec->name == "text_shut")
+      _state[object].properties.set(ObjectProperty::SHUT);
+    else if (property->spec->name == "text_open")
+      _state[object].properties.set(ObjectProperty::OPEN);
     else
       assert(false);
 
@@ -121,6 +135,11 @@ void Rules::apply()
     verb->active = true;
     property->active = true;
   }
+
+  level->forEachObject([this](Object& o) {
+    if (o.spec->isText)
+      _state[o.spec].properties.set(ObjectProperty::TEXT);
+  });
 }
 
 void Rules::resolve(baba::Level* level)

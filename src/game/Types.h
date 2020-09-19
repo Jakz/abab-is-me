@@ -7,12 +7,24 @@
 
 namespace baba
 {
-  enum class D { UP, DOWN, LEFT, RIGHT };
+  enum class D { UP, DOWN, LEFT, RIGHT, NONE };
+
+  static inline D operator~(D d)
+  {
+    switch (d)
+    { 
+      case D::DOWN: return D::UP; 
+      case D::UP: return D::DOWN; 
+      case D::LEFT: return D::RIGHT; 
+      case D::RIGHT: return D::LEFT;
+      case D::NONE: return D::NONE;
+    }
+  }
 
   struct ObjectSpec
   {
     enum class Type { Noun = 0, Verb, Property, Adjective, Negative, Unused, Conjunction, Preposition };
-    enum class Tiling { None = -1, Directions, Tiled, Character, Belt, Unknown }; //TODO: unknown, eg cog in 7level
+    enum class Tiling { None = -1, Directions, Tiled, Character, Animated, SingleAnimated }; //TODO: unknown, eg cog in 7level
 
     Type type;
     int32_t id;
@@ -36,6 +48,7 @@ namespace baba
     std::unordered_map<std::string, const ObjectSpec*> objectsByName;
     std::unordered_map<point_t, const ObjectSpec*, point_t::hash> objectsByGrid;
 
+    const ObjectSpec* HAS = nullptr;
     const ObjectSpec* IS = nullptr;
     const ObjectSpec* EDGE = nullptr;
 
@@ -67,6 +80,7 @@ namespace baba
       }
 
       mapDefault(IS, "text_is");
+      mapDefault(HAS, "text_has");
       mapDefault(EDGE, "edge");
     }
 
