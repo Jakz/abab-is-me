@@ -107,7 +107,7 @@ namespace baba
     D direction;
     uint32_t variant;
     bool alreadyMoved;
-    bool active;
+    mutable bool active;
 
     Object(const ObjectSpec* spec) : spec(spec), variant(0), alreadyMoved(false), active(false) { }
   };

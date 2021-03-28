@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <string>
+#include "Config.h"
 
 #define LOGD(x, ...) printf(x "\n", __VA_ARGS__)
 #define LOGDD(x) printf(x "\n")
@@ -67,25 +68,6 @@ struct size2d_t
 {
   coord_t w, h;
 };
-
-using path = std::string;
-
-#if _WIN32
-static const path DATA_FOLDER = R"(data\)";
-#define MOUSE_ENABLED true
-#else
-static const path DATA_FOLDER = R"(/media/sdcard/baba/Data/)";
-#define MOUSE_ENABLED false
-#endif
-
-
-#if !_WIN32
-constexpr int32_t WIDTH = 320;
-constexpr int32_t HEIGHT = 240;
-#else
-constexpr int32_t WIDTH = 1024;
-constexpr int32_t HEIGHT = 768;
-#endif
 
 namespace baba
 {

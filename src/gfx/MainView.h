@@ -12,7 +12,8 @@ namespace ui
   enum class Scaler
   {
     SCALE_TO_FIT,
-    KEEP_AT_MOST_NATIVE
+    SCALE_TO_ATMOST_NATIVE,
+    NATIVE_WITH_SCROLL
   };
 
   
@@ -32,9 +33,9 @@ namespace ui
     struct
     {
       SDL_Surface* palette;
-      SDL_Color outside;
-      SDL_Color inside;
-      SDL_Color grid;
+      color_t outside;
+      color_t inside;
+      color_t grid;
     } colors;
 
     point_t moveBounds[2];

@@ -8,21 +8,24 @@ namespace baba
 {
   enum class ObjectProperty : uint64_t
   {
-    YOU     = 0x00000001ULL,
-    STOP    = 0x00000002ULL,
-    PUSH    = 0x00000004ULL,
-    WIN     = 0x00000008ULL,
-    DEFEAT  = 0x00000010ULL,
-    MOVE    = 0x00000020ULL,
-    FLOAT   = 0x00000040ULL,
-    SINK    = 0x00000080ULL,
-    SHIFT   = 0x00000100ULL,
-    BEST    = 0x00000200ULL,
-    HOT     = 0x00000400ULL,
-    MELT    = 0x00000800ULL,
-    TEXT    = 0x00001000ULL,
-    SHUT    = 0x00002000ULL,
-    OPEN    = 0x00004000ULL,
+    YOU       = 0x00000001ULL,
+    STOP      = 0x00000002ULL,
+    PUSH      = 0x00000004ULL,
+    WIN       = 0x00000008ULL,
+    DEFEAT    = 0x00000010ULL,
+    MOVE      = 0x00000020ULL,
+    FLOAT     = 0x00000040ULL,
+    SINK      = 0x00000080ULL,
+    SHIFT     = 0x00000100ULL,
+    BEST      = 0x00000200ULL,
+    HOT       = 0x00000400ULL,
+    MELT      = 0x00000800ULL,
+    TEXT      = 0x00001000ULL,
+    SHUT      = 0x00002000ULL,
+    OPEN      = 0x00004000ULL,
+    WEAK      = 0x00008000ULL,
+    MORE      = 0x00010000ULL,
+    TELE      = 0x00020000ULL,
   };
 
   using ObjectProperties = bit_mask<ObjectProperty>;
@@ -38,10 +41,10 @@ namespace baba
 
   struct Rule
   {
-    std::vector<Object*> terms;
+    std::vector<const Object*> terms;
     std::string name() const;
 
-    Object* operator[](size_t i) const { return terms[i]; }
+    const Object* operator[](size_t i) const { return terms[i]; }
   };
 
   struct Rules
@@ -71,5 +74,4 @@ namespace baba
 
     void resolve(baba::Level* level);
   };
-
 }

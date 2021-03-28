@@ -9,10 +9,9 @@
 
 #include <algorithm>
 
-#define KEY_LEFT (SDLK_LEFT)
-#define KEY_RIGHT (SDLK_RIGHT)
-#define KEY_UP (SDLK_UP)
-#define KEY_DOWN (SDLK_DOWN)
+constexpr coord_t GFX_TILE_SIZE = 24;
+
+
 #define KEY_X (SDLK_LSHIFT)
 #define KEY_Y (SDLK_SPACE)
 #define KEY_A (SDLK_LCTRL)
@@ -31,7 +30,7 @@ extern void nextLevel();
 
 History history;
 
-GameView::GameView(ViewManager* gvm) : gvm(gvm), levelRenderer(new LevelRenderer(gvm)), colors({ nullptr })
+GameView::GameView(ViewManager* gvm) : gvm(gvm), levelRenderer(new LevelRenderer(gvm)), colors({ nullptr }), scaler(Scaler::NATIVE_WITH_SCROLL)
 {
   colors.grid.a = 0;
 }
@@ -66,29 +65,37 @@ void GameView::render()
   //TODO: particles
   //TODO BEST property
   
-  SDL_Renderer* renderer = gvm->renderer();
-
   int32_t tick = (SDL_GetTicks() / 180) % 3;
   constexpr int32_t fspan = 2, fcount = 1 + fspan * 4;
   int32_t ftick = ((SDL_GetTicks() / 300) % fspan);
   
-
-  constexpr coord_t GFX_TILE_SIZE = 24;
-  scaler = Scaler::SCALE_TO_FIT;
-  offset = { 0, 0 };
+  point_t offset = this->offset;
   size = gvm->getWindowSize();
 
   float bestWidth = size.w / level->width();
   float bestHeight = size.h / level->height();
 
-  float bestScale = std::min(bestWidth, bestHeight);
+  float bestScale;
 
-  if (scaler == Scaler::KEEP_AT_MOST_NATIVE)
-    bestScale = std::min(bestScale, float(GFX_TILE_SIZE));
+  if (scaler == Scaler::SCALE_TO_ATMOST_NATIVE)
+  {
+    bestScale = std::min(std::min(bestWidth, bestHeight), float(GFX_TILE_SIZE));
+    offset.x = (size.w - level->width() * bestScale) / 2;
+    offset.y = (size.h - level->height() * bestScale) / 2;
+  }
+  else if (scaler == Scaler::SCALE_TO_FIT)
+  {
+    bestScale = std::min(bestWidth, bestHeight);
+    offset.x = (size.w - level->width() * bestScale) / 2;
+    offset.y = (size.h - level->height() * bestScale) / 2;
+  }
+  else if (scaler == Scaler::NATIVE_WITH_SCROLL)
+    bestScale = GFX_TILE_SIZE;
+  else
+    assert(false);
 
   tileSize = bestScale;
-  offset.x = (size.w - level->width() * bestScale) / 2;
-  offset.y = (size.h - level->height() * bestScale) / 2;
+
   const float ratio = bestScale / GFX_TILE_SIZE;
 
 
@@ -111,7 +118,7 @@ void GameView::render()
     //SDL_Rect dest = { offset.x + level->width()*tileSize / 2 - gfx.sprites[tick].w / 2, offset.y + level->height()*tileSize / 2 - gfx.sprites[tick].h / 2, gfx.sprites[tick].w, gfx.sprites[tick].h };
     SDL_Rect dest = { offset.x + tileSize, offset.y + tileSize, (level->width() - 2) * tileSize, (level->height() - 2) * tileSize };
 
-    SDL_RenderCopy(renderer, gfx.texture, &gfx.sprites[tick], &dest);
+    gvm->blit(gfx.texture, gfx.sprites[tick], dest);
   }
 
   for (int y = 0; y < size.h / tileSize; ++y)
@@ -126,7 +133,7 @@ void GameView::render()
 
         for (const auto& obj : *tile)
         {
-          SDL_Color color;
+          color_t color;
           const auto& ocolor = obj.active ? obj.spec->active : obj.spec->color;
           SDL_GetRGB(*(((uint32_t*)colors.palette->pixels) + ocolor.y * colors.palette->w + ocolor.x), colors.palette->format, &color.r, &color.g, &color.b);
 
@@ -145,16 +152,16 @@ void GameView::render()
             bool isFloat = obj.spec && ObjectProperty::FLOAT;
             float dy = ratio * ftick;
 
-            SDL_Rect src = gfx.sprites[variant];
+            rect_t src = gfx.sprites[variant];
 
             int fy = offset.y + y * tileSize + tileSize / 2 - (src.h*ratio) / 2;
             if (isFloat) fy += dy;
 
-            const SDL_Rect dest = { offset.x + x * tileSize + tileSize/2 - (src.w*ratio)/2, fy, src.w * ratio, src.h * ratio };
+            const rect_t dest = { offset.x + x * tileSize + tileSize/2 - (src.w*ratio)/2, fy, src.w * ratio, src.h * ratio };
 
             src.x += tick * src.w;
 
-            SDL_RenderCopy(renderer, gfx.texture, &src, &dest);
+            gvm->blit(gfx.texture, src, dest);
           }
         }
       }
@@ -420,43 +427,82 @@ void GameView::handleKeyboardEvent(const SDL_Event& event)
   {
     switch (event.key.keysym.sym)
     {
-    case SDLK_ESCAPE: gvm->exit(); break;
-    case SDLK_LEFT: movement(D::LEFT); updateMoveBounds(); break;
-    case SDLK_RIGHT: movement(D::RIGHT); updateMoveBounds(); break;
-    case SDLK_UP: movement(D::UP); updateMoveBounds(); break;
-    case SDLK_DOWN: movement(D::DOWN); updateMoveBounds(); break;
-    case SDLK_SPACE: movement(D::NONE); updateMoveBounds(); break;
+      case SDLK_ESCAPE: gvm->exit(); break;
+      case KEY_LEFT: movement(D::LEFT); updateMoveBounds(); break;
+      case KEY_RIGHT: movement(D::RIGHT); updateMoveBounds(); break;
+      case KEY_UP: movement(D::UP); updateMoveBounds(); break;
+      case KEY_DOWN: movement(D::DOWN); updateMoveBounds(); break;
+      case KEY_WAIT: movement(D::NONE); updateMoveBounds(); break;
 
-    case SDLK_g:
-    {
-      if (colors.grid.a) colors.grid.a = 0;
-      else colors.grid = colors.outside;
-      break;
-    }
-
-    case KEY_R:
-    case SDLK_KP_PLUS: 
-    { 
-      levelRenderer->flushCache();
-      nextLevel();
-      break;
-    }
-    case KEY_L:
-    case SDLK_KP_MINUS:
-    { 
-      levelRenderer->flushCache();
-      prevLevel();
-      break;
-    }
-
-    case SDLK_z:
-      if (!history.empty())
+      case SDLK_g:
       {
-        level->restore(history.pop());
-        level->updateRules();
+        if (colors.grid.a) colors.grid.a = 0;
+        else colors.grid = colors.outside;
+        break;
       }
+
+      case KEY_R:
+      case SDLK_KP_PLUS: 
+      { 
+        levelRenderer->flushCache();
+        nextLevel();
+        break;
+      }
+      case KEY_L:
+      case SDLK_KP_MINUS:
+      { 
+        levelRenderer->flushCache();
+        prevLevel();
+        break;
+      }
+
+      case SDLK_z:
+        if (!history.empty())
+        {
+          level->restore(history.pop());
+          level->updateRules();
+        }
       
-      break;
+        break;
+
+      case SDLK_m:
+      {
+        if (scaler == Scaler::NATIVE_WITH_SCROLL)
+          scaler = Scaler::SCALE_TO_ATMOST_NATIVE;
+        else if (scaler == Scaler::SCALE_TO_ATMOST_NATIVE)
+          scaler = Scaler::NATIVE_WITH_SCROLL;
+        break;
+      }
+
+      case SDLK_w:
+      {        
+        //if (offset.y >= GFX_TILE_SIZE)
+          offset.y -= GFX_TILE_SIZE;
+        break;
+      }
+
+      case SDLK_s:
+      {
+        size2d_t size = gvm->getWindowSize();
+
+        //if (offset.y + size.h / GFX_TILE_SIZE <= GFX_TILE_SIZE * level->height())
+          offset.y += GFX_TILE_SIZE;
+      }
+
+      case SDLK_a:
+      {
+        //if (offset.x >= GFX_TILE_SIZE)
+          offset.x -= GFX_TILE_SIZE;
+        break;
+      }
+
+      case SDLK_d:
+      {
+        size2d_t size = gvm->getWindowSize();
+        
+        //if (offset.x + size.w / GFX_TILE_SIZE <= GFX_TILE_SIZE * level->width())
+          offset.x += GFX_TILE_SIZE;
+      }
     }
   }
 }
@@ -484,8 +530,6 @@ void GameView::handleMouseEvent(const SDL_Event& event)
       }
       else
         snprintf(hoverInfo.data(), 256, "%d,%d: empty", x, y);
-
-
     }
   }
   else

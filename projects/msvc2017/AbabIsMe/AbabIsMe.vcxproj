@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\Common.h" />
+    <ClInclude Include="..\..\..\src\Config.h" />
     <ClInclude Include="..\..\..\src\game\Level.h" />
     <ClInclude Include="..\..\..\src\game\Rules.h" />
     <ClInclude Include="..\..\..\src\game\Tile.h" />

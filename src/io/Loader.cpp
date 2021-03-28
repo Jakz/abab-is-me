@@ -560,6 +560,7 @@ void ValuesParser::generateObject()
     edge.id = tile.x | (tile.y << 8);
 
     edge.name = "edge";
+    edge.isText = false;
 
     data.objects.push_back(edge);
   }

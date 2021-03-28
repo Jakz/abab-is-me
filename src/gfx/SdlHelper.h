@@ -10,8 +10,6 @@
 #include <cassert>
 
 using u32 = uint32_t;
-using color_t = SDL_Color;
-using rect_t = SDL_Rect;
 
 template<typename EventHandler, typename Renderer>
 class SDL
@@ -63,6 +61,8 @@ public:
   void exit() { willQuit = true; }
 
   void blit(SDL_Texture* texture, const SDL_Rect& src, int dx, int dy);
+  void blit(SDL_Texture* texture, const SDL_Rect& src, const SDL_Rect& dest);
+
   void blit(SDL_Texture* texture, int sx, int sy, int w, int h, int dx, int dy);
   void blit(SDL_Texture* texture, int sx, int sy, int w, int h, int dx, int dy, int dw, int dh);
   void blit(SDL_Texture* texture, int dx, int dy);
@@ -214,14 +214,14 @@ inline void SDL<EventHandler, Renderer>::blit(SDL_Texture* texture, int sx, int 
 {
   SDL_Rect from = { sx, sy, w, h };
   SDL_Rect to = { dx, dy, dw, dh };
-  SDL_RenderCopy(_renderer, texture, &from, &to);
+  blit(_renderer, texture, from, to);
 }
 
 template<typename EventHandler, typename Renderer>
 inline void SDL<EventHandler, Renderer>::blit(SDL_Texture* texture, const SDL_Rect& from, int dx, int dy)
 {
   SDL_Rect to = { dx, dy, from.w, from.h };
-  SDL_RenderCopy(_renderer, texture, &from, &to);
+  blit(_renderer, texture, from, to);
 }
 
 template<typename EventHandler, typename Renderer>
@@ -229,6 +229,13 @@ inline void SDL<EventHandler, Renderer>::blit(SDL_Texture* texture, int sx, int 
 {
   blit(texture, { sx, sy, w, h }, dx, dy);
 }
+
+template<typename EventHandler, typename Renderer>
+inline void SDL<EventHandler, Renderer>::blit(SDL_Texture* texture, const SDL_Rect& src, const SDL_Rect& dest)
+{
+  SDL_RenderCopy(_renderer, texture, &src, &dest);
+}
+
 
 
 template<typename EventHandler, typename Renderer>

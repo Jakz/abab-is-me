@@ -57,6 +57,9 @@
     <ClInclude Include="..\..\..\src\gfx\LevelRenderer.h">
       <Filter>src\gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\Config.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp">

@@ -53,9 +53,9 @@ void ui::ViewManager::text(const std::string& text, int32_t x, int32_t y)
 
   for (size_t i = 0; i < text.length(); ++i)
   {
-    SDL_Rect src = { 6 * (text[i] % GLYPHS_PER_ROW), 9 * (text[i] / GLYPHS_PER_ROW), 5, 8 };
-    SDL_Rect dest = { x + 6 * i * scale, y, 5 * scale, 8 * scale };
-    SDL_RenderCopy(_renderer, _font, &src, &dest);
+    rect_t src = { 6 * (text[i] % GLYPHS_PER_ROW), 9 * (text[i] / GLYPHS_PER_ROW), 5, 8 };
+    rect_t dest = { x + 6 * i * scale, y, 5 * scale, 8 * scale };
+    blit(_font, src, dest);
   }
 }
 
@@ -74,9 +74,9 @@ void ViewManager::text(const std::string& text, int32_t x, int32_t y, SDL_Color 
 
   for (size_t i = 0; i < text.length(); ++i)
   {
-    SDL_Rect src = { 6 * (text[i] % GLYPHS_PER_ROW), 9 * (text[i] / GLYPHS_PER_ROW), 5, 8 };
-    SDL_Rect dest = { x + 6 * i * scale, y, 5 * scale, 8 * scale };
-    SDL_RenderCopy(_renderer, _font, &src, &dest);
+    rect_t src = { 6 * (text[i] % GLYPHS_PER_ROW), 9 * (text[i] / GLYPHS_PER_ROW), 5, 8 };
+    rect_t dest = { x + 6 * i * scale, y, 5 * scale, 8 * scale };
+    blit(_font, src, dest);
   }
 
   SDL_SetTextureColorMod(_font, 255, 255, 255);

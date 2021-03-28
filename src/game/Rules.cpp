@@ -25,9 +25,55 @@ void Rules::clear()
 
 void Rules::generate(baba::Level* level)
 {
-  /* search trivial rules NOUN IS PROPERTY */
-
   std::vector<std::vector<const Object*>> sentences;
+  std::vector<const Object*> sentence;
+
+  auto isText = [](const Object& obj) { return obj.spec->isText; };
+  auto pushSentence = [&sentence, &sentences]() {
+    if (!sentence.empty())
+    {
+      if (sentence.size() >= 3)
+        sentences.push_back(sentence);
+      sentence.clear();
+    }
+  };
+
+  auto tileLambda = [&pushSentence, &isText, &sentence, &sentences](Tile* tile) {
+    auto* term = tile->find(isText);
+
+    if (term)
+      sentence.push_back(term);
+    else pushSentence();
+  };
+
+  for (coord_t y = 0; y < level->height(); ++y)
+  {
+    for (coord_t x = 0; x < level->width(); ++x)
+    {
+      tileLambda(level->get(x,y)); 
+    }
+
+    pushSentence();
+  }
+
+  for (coord_t x = 0; x < level->width(); ++x)
+  {
+    for (coord_t y = 0; y < level->height(); ++y)
+    {
+      tileLambda(level->get(x, y));
+    }
+
+    pushSentence();
+  }
+
+  for (const auto& sentence : sentences)
+  {
+    Rule rule = Rule();
+    rule.terms = sentence;
+    printf("Rule: %s\n", rule.name().c_str());
+  }
+
+  /* search trivial rules NOUN IS PROPERTY */
 
   for (coord_t y = 0; y < level->height(); ++y)
   {
@@ -43,8 +89,8 @@ void Rules::generate(baba::Level* level)
 
       if (is)
       {
-        std::vector<Object*> horizontal;
-        std::vector<Object*> vertical;
+        std::vector<const Object*> horizontal;
+        std::vector<const Object*> vertical;
 
         if (left)
         {
@@ -128,6 +174,12 @@ void Rules::apply(baba::Level* level)
       _state[object].properties.set(ObjectProperty::SHUT);
     else if (property->spec->name == "text_open")
       _state[object].properties.set(ObjectProperty::OPEN);
+    else if (property->spec->name == "text_weak")
+      _state[object].properties.set(ObjectProperty::WEAK);
+    else if (property->spec->name == "text_more")
+      _state[object].properties.set(ObjectProperty::MORE);
+    else if (property->spec->name == "text_tele")
+      _state[object].properties.set(ObjectProperty::TELE);
     else
       assert(false);
 
@@ -148,3 +200,28 @@ void Rules::resolve(baba::Level* level)
     const bool hasDefeat = tile.any_of([this](const Object& object) { return hasProperty(object.spec, ObjectProperty::DEFEAT); });
   });
 }
+
+namespace baba
+{
+  using Noun = Object;
+}
+
+struct RuleParser
+{
+private:
+  using token_sequence = std::vector<const Object*>;
+  using token_t = const Object*;
+
+
+  token_sequence tokens;
+  token_sequence::const_iterator token;
+
+public:
+
+public:
+  RuleParser(const token_sequence& tokens) : tokens(tokens), token(tokens.begin()) { }
+
+  const Noun* noun();
+};
+
+const Noun* RuleParser::noun() { return token != tokens.end() && (*token)->spec->type == ObjectSpec::Type::Noun ? *token : nullptr; }
