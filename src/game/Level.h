@@ -16,6 +16,9 @@ namespace baba
     std::string name;
     std::string subtitle;
     std::string filename;
+
+    bool isMetalevel = false;
+    point_t selectorPosition = { -1, -1 };
   };
 
   struct Level
@@ -37,6 +40,9 @@ namespace baba
     const std::string& name() const { return _info.name; }
     const std::string& subtitle() const { return _info.subtitle; }
     const std::string& filename() const { return _info.filename; }
+
+    const LevelInfo& info() const { return _info; }
+
     const decltype(_images)& images() const { return _images; }
 
     const GameData* data() const { return &_data; }
@@ -51,6 +57,8 @@ namespace baba
     decltype(_tiles)::iterator end() { return _tiles.end(); }
 
     Tile* get(coord_t i) { return &_tiles[i]; }
+
+    Tile* get(const point_t& p) { return get(p.x, p.y); }
 
     Tile* get(coord_t x, coord_t y) { return x >= 0 && x < _width && y >= 0 && y < _height ? &_tiles[y*_width + x] : nullptr; }
     const Tile* get(coord_t x, coord_t y) const { return x >= 0 && x < _width && y >= 0 && y < _height ? &_tiles[y*_width + x] : nullptr; }

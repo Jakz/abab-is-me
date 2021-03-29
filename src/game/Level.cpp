@@ -31,7 +31,9 @@ Tile* Level::get(const Tile* t, D d)
   case D::DOWN: return get(t->x(), t->y() + 1); break;
   case D::LEFT: return get(t->x() - 1, t->y()); break;
   case D::RIGHT: return get(t->x() + 1, t->y()); break;
-  default: assert(false);
+  default: 
+    assert(false);
+    return nullptr;
   }
 }
 
@@ -43,7 +45,9 @@ const Tile* Level::get(const Tile* t, D d) const
   case D::DOWN: return get(t->x(), t->y() + 1); break;
   case D::LEFT: return get(t->x() - 1, t->y()); break;
   case D::RIGHT: return get(t->x() + 1, t->y()); break;
-  default: assert(false);
+  default: 
+    assert(false);
+    return nullptr;
   }
 }
 

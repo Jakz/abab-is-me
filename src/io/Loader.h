@@ -4,6 +4,8 @@
 
 namespace io
 {
+  struct TempData;
+  
   class Loader
   {
   private:
@@ -11,7 +13,7 @@ namespace io
 
     baba::Level* readLayer(uint16_t version, baba::Level* level);
 
-    void loadLD(const path& path, baba::Level* level, bool headerOnly = false);
+    void loadLD(const path& path, baba::Level* level, TempData& tempData, bool headerOnly = false);
 
   public:
     Loader();

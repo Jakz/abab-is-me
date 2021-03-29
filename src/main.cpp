@@ -11,7 +11,7 @@
 
 baba::GameData data;
 baba::Level* level = nullptr;
-int levelIndex = 17;
+int levelIndex = 106;
 
 //TODO: on index 15 check layer ordering
 

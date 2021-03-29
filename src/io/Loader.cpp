@@ -143,6 +143,21 @@ namespace sutils
     return std::make_pair(std::stoi(number), v.substr(i));
   }
 
+  static std::pair<std::string, int32_t> parseKeyNumberValue(const std::string& v)
+  {
+    std::string value = "";
+
+    size_t i = 0;
+
+    while (v[i] < '0' || v[i] > '9')
+    {
+      value += v[i];
+      ++i;
+    }
+
+    return std::make_pair(value, std::stoi(v.substr(i)));
+  }
+
   static point_t parseCoordinate(std::string v)
   {
     //TODO: optimizable
@@ -177,6 +192,19 @@ namespace sutils
 using namespace io;
 using namespace baba;
 
+struct io::TempData
+{
+  struct Path
+  {
+    std::string objectID;
+    coord_t x, y, z;
+    D dir;
+    int32_t style;
+  };
+
+  std::unordered_map<coord_t, Path> paths;
+};
+
 Loader::Loader()
 {
 
@@ -197,7 +225,7 @@ size_t flength(FILE* in) { fseek(in, 0, SEEK_END); size_t ot = ftell(in); fseek(
 
 */
 
-void Loader::loadLD(const path& path, baba::Level* level, bool headerOnly)
+void Loader::loadLD(const path& path, baba::Level* level, TempData& tempData, bool headerOnly)
 {
   enum class S { NONE, GENERAL, IMAGES, SPECIALS, ICONS, PATHS, TILES, LEVELS };
   S s = S::NONE;
@@ -220,7 +248,9 @@ void Loader::loadLD(const path& path, baba::Level* level, bool headerOnly)
         s = S::SPECIALS;
       else if (l == "[images]")
         s = S::IMAGES;
-      else if (l == "[icons]" || l == "[levels]" || l == "[paths]")
+      else if (l == "[paths]")
+        s = S::PATHS;
+      else if (l == "[icons]" || l == "[levels]")
         s = S::NONE;
       else
         assert(false);
@@ -235,6 +265,16 @@ void Loader::loadLD(const path& path, baba::Level* level, bool headerOnly)
         level->_palette = pair.second;
       else if (pair.first == "subtitle")
         level->_info.subtitle = pair.second;
+      else if (pair.first == "leveltype")
+      {
+        assert(pair.second == "0" || pair.second == "1");
+        level->_info.isMetalevel = pair.second == "1";
+      }
+      else if (pair.first == "selectorX")
+        level->_info.selectorPosition.x = std::stoi(pair.second);
+      else if (pair.first == "selectorY")
+        level->_info.selectorPosition.y = std::stoi(pair.second);
+        
     }
     else if (!headerOnly)
     {
@@ -290,9 +330,40 @@ void Loader::loadLD(const path& path, baba::Level* level, bool headerOnly)
             spec->tiling = sutils::valueToTiling(std::stoi(p.second));
           else if (f.second == "root")
             spec->spriteInRoot = p.second == "1" ? true : false;
-          break;
         }
+
+        break;
       }
+      case S::PATHS:
+      {
+        auto p = sutils::parseKeyValue(l);
+        auto nv = sutils::parseNumberKeyValue(p.first);
+
+        auto& path = tempData.paths[nv.first];
+
+        if (nv.second == "object")
+          path.objectID = p.second;
+        else if (nv.second == "X")
+          path.x = std::stoi(p.second);
+        else if (nv.second == "Y")
+          path.y = std::stoi(p.second);
+        else if (nv.second == "Z")
+          path.z = std::stoi(p.second);
+        else if (nv.second == "dir")
+          ; //TODO path.dir = (D)std::stoi(p.second);
+        else if (nv.second == "style")
+          ; //TODO
+        else if (nv.second == "gate")
+          ; //TODO
+        else if (nv.second == "requirement")
+          ; //TODO
+        else
+          assert(false);
+
+
+        break;
+      }
+
       default: { }
       }
     }
@@ -306,8 +377,10 @@ baba::Level* Loader::load(const std::string& name, const GameData& baseData)
 
   level->_info.filename = name;
 
+  TempData tempData;
+
   path ldPath = DATA_FOLDER + R"(Worlds/baba/)" + name + ".ld";
-  loadLD(ldPath, level);
+  loadLD(ldPath, level, tempData);
 
   path fullPath = DATA_FOLDER + R"(Worlds/baba/)" + name + ".l";
   in = fopen(fullPath.c_str(), "rb");
@@ -356,6 +429,19 @@ baba::Level* Loader::load(const std::string& name, const GameData& baseData)
   }
 
   fclose(in);
+
+  const GameData* data = level->data();
+  for (const auto& path : tempData.paths)
+  {
+    Tile* tile = level->get(path.second.x, path.second.y);
+    tile->add(Object(data->objectsByKey.find(path.second.objectID)->second));
+  }
+  assert((level->info().isMetalevel ^ level->info().selectorPosition == point_t{-1, -1}) != 0);
+
+  if (level->info().isMetalevel)
+  {
+    level->get(level->info().selectorPosition)->add(Object(data->objectsByName.find("cursor")->second));
+  }
 
   return level;
 }

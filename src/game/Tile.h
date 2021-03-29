@@ -6,7 +6,7 @@
 #include <functional>
 
 namespace baba
-{
+{  
   struct Tile
   {
     const Level* level;

@@ -53,10 +53,8 @@ struct point_t
 {
   coord_t x, y;
 
-  bool operator==(const point_t& o) const
-  {
-    return x == o.x && y == o.y;
-  }
+  bool operator==(const point_t& o) const { return x == o.x && y == o.y; }
+  bool operator!=(const point_t& o) const { return x != o.x || y != o.y; }
 
   struct hash
   {

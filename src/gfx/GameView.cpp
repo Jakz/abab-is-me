@@ -30,7 +30,7 @@ extern void nextLevel();
 
 History history;
 
-GameView::GameView(ViewManager* gvm) : gvm(gvm), levelRenderer(new LevelRenderer(gvm)), colors({ nullptr }), scaler(Scaler::NATIVE_WITH_SCROLL)
+GameView::GameView(ViewManager* gvm) : gvm(gvm), levelRenderer(new LevelRenderer(gvm)), colors({ nullptr }), scaler(Scaler::SCALE_TO_ATMOST_NATIVE)
 {
   colors.grid.a = 0;
 }
@@ -69,7 +69,7 @@ void GameView::render()
   constexpr int32_t fspan = 2, fcount = 1 + fspan * 4;
   int32_t ftick = ((SDL_GetTicks() / 300) % fspan);
   
-  point_t offset = this->offset;
+  //point_t offset = this->offset;
   size = gvm->getWindowSize();
 
   float bestWidth = size.w / level->width();
