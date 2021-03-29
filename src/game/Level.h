@@ -21,6 +21,12 @@ namespace baba
     point_t selectorPosition = { -1, -1 };
   };
 
+  struct MetaLevelData
+  {
+    std::vector<Icon> _icons;
+    std::vector<LevelLink> _levels;
+  };
+
   struct Level
   {
   private:
@@ -29,8 +35,8 @@ namespace baba
     coord_t _width, _height;
     LevelState _tiles;
     LevelInfo _info;
+    MetaLevelData _metalevel;
     std::string _palette;
-
     std::vector<std::string> _images;
 
   public:
@@ -43,6 +49,7 @@ namespace baba
 
     const LevelInfo& info() const { return _info; }
 
+    const decltype(_metalevel)& metalevel() const { return _metalevel; }
     const decltype(_images)& images() const { return _images; }
 
     const GameData* data() const { return &_data; }

@@ -26,6 +26,7 @@ namespace baba
     WEAK      = 0x00008000ULL,
     MORE      = 0x00010000ULL,
     TELE      = 0x00020000ULL,
+    SELECT    = 0x00040000ULL,
   };
 
   using ObjectProperties = bit_mask<ObjectProperty>;
@@ -53,6 +54,8 @@ namespace baba
     const GameData* _data;
     mutable std::unordered_map<const ObjectSpec*, ObjectState> _state;
     std::vector<Rule> _rules;
+
+    void generateBaseRules(baba::Level* level);
 
   public:
     Rules(const GameData* data) : _data(data) { }

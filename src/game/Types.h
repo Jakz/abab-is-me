@@ -111,4 +111,23 @@ namespace baba
 
     Object(const ObjectSpec* spec) : spec(spec), variant(0), alreadyMoved(false), active(false) { }
   };
+
+  struct Icon
+  {
+    std::string sprite;
+    bool spriteInRoot;
+
+    Icon(const std::string& sprite, bool spriteInRoot) : sprite(sprite), spriteInRoot(spriteInRoot) { }
+    Icon() : Icon("", false) { }
+  };
+
+  struct LevelLink
+  {
+    enum class Style { NUMBER, ICON };
+    
+    coord_t x, y, z;
+    int32_t number;
+    point_t color;
+    Style style;
+  };
 }

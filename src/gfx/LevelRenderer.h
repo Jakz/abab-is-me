@@ -26,11 +26,13 @@ private:
 
   mutable std::unordered_map<const baba::ObjectSpec*, ObjectGfx> objectGfxs;
   mutable std::unordered_map<std::string, ObjectGfx> imageGfxs;
+  mutable std::unordered_map<const baba::Icon*, ObjectGfx> iconGfxs;
   ui::ViewManager* gvm;
 
 public:
   const ObjectGfx& objectGfx(const baba::ObjectSpec* spec) const;
   const ObjectGfx& imageGfx(const std::string& image) const;
+  const ObjectGfx& iconGfx(const baba::Icon* spec) const;
 
   void flushCache();
 
@@ -49,6 +51,7 @@ void LevelRenderer::flushCache()
 {
   objectGfxs.clear();
   imageGfxs.clear();
+  iconGfxs.clear();
 }
 
 const LevelRenderer::ObjectGfx& LevelRenderer::objectGfx(const baba::ObjectSpec* spec) const
@@ -149,6 +152,7 @@ const LevelRenderer::ObjectGfx& LevelRenderer::imageGfx(const std::string& image
     return it->second;
 
 
+  //TODO: make it relative to world name
   std::string path = DATA_FOLDER + R"(Worlds\baba\Images\)" + image;
 
   SDL_Surface* surface = nullptr;
@@ -181,6 +185,40 @@ const LevelRenderer::ObjectGfx& LevelRenderer::imageGfx(const std::string& image
   SDL_FreeSurface(surface);
 
   auto rit = imageGfxs.emplace(std::make_pair(image, gfx));
+
+  return rit.first->second;
+}
+
+const LevelRenderer::ObjectGfx& LevelRenderer::iconGfx(const baba::Icon* spec) const
+{
+  auto it = iconGfxs.find(spec);
+
+  if (it != iconGfxs.end())
+    return it->second;
+
+  assert(!spec->spriteInRoot);
+
+  std::string path;
+
+  if (spec->spriteInRoot)
+    path = DATA_FOLDER + R"(Sprites\)" + spec->sprite + ".png";
+  else /* TODO: use world folder, not hardcoded one */
+    path = DATA_FOLDER + R"(Worlds\baba\Sprites\)" + spec->sprite + ".png";
+
+  SDL_Surface* image = IMG_Load(path.c_str());
+  assert(image);
+
+  ObjectGfx gfx;
+
+  gfx.sprites.push_back({ 0, 0, image->w, image->h });
+  gfx.texture = SDL_CreateTextureFromSurface(gvm->renderer(), image);
+
+  SDL_FreeSurface(image);
+
+  gfx.w = image->w;
+  gfx.h = image->h;
+
+  auto rit = iconGfxs.emplace(std::make_pair(spec, gfx));
 
   return rit.first->second;
 }

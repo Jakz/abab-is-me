@@ -23,8 +23,17 @@ void Rules::clear()
   _state[_data->EDGE].properties.set(ObjectProperty::STOP);
 }
 
+void Rules::generateBaseRules(baba::Level* level)
+{
+  const ObjectSpec* cursor = level->data()->objectsByName.find("cursor")->second;
+
+  _state[cursor].properties.set(ObjectProperty::SELECT);
+}
+
 void Rules::generate(baba::Level* level)
 {
+  generateBaseRules(level);
+  
   std::vector<std::vector<const Object*>> sentences;
   std::vector<const Object*> sentence;
 
@@ -190,7 +199,7 @@ void Rules::apply(baba::Level* level)
 
   level->forEachObject([this](Object& o) {
     if (o.spec->isText)
-      _state[o.spec].properties.set(ObjectProperty::TEXT);
+      _state[o.spec].properties.set(ObjectProperty::PUSH);
   });
 }
 

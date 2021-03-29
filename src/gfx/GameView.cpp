@@ -168,6 +168,27 @@ void GameView::render()
     }
   }
 
+  for (const auto& levelLink : level->metalevel()._levels)
+  {
+    if (levelLink.style == LevelLink::Style::ICON)
+    {
+      const baba::Icon* icon = &level->metalevel()._icons[levelLink.number];
+      const auto& gfx = levelRenderer->iconGfx(icon);
+      auto x = levelLink.x, y = levelLink.y;
+
+      const rect_t& src = gfx.sprites[0];
+
+      int fy = offset.y + y * tileSize + tileSize / 2 - (src.h * ratio) / 2;
+      const rect_t dest = { offset.x + x * tileSize + tileSize / 2 - (src.w * ratio) / 2, fy, src.w * ratio, src.h * ratio };
+
+      color_t color;
+      const auto& ocolor = levelLink.color;
+      SDL_GetRGB(*(((uint32_t*)colors.palette->pixels) + ocolor.y * colors.palette->w + ocolor.x), colors.palette->format, &color.r, &color.g, &color.b);
+      SDL_SetTextureColorMod(gfx.texture, color.r, color.g, color.b);
+      gvm->blit(gfx.texture, src, dest);
+    }
+  }
+
   drawGrid(offset, { tileSize, tileSize }, { level->width() + 1, level->height() + 1 });
 
   const auto& rulesList = level->rules().rules();
@@ -220,7 +241,7 @@ bool operator&&(const ObjectSpec* spec, ObjectProperty prop)
 
 struct MoveInfo
 {
-  enum class Type { YOU, MOVE } type;
+  enum class Type { YOU, MOVE, CURSOR } type;
   Tile* tile;
   decltype(Tile::objects)::iterator it;
   MoveInfo(Type type, Tile* tile, decltype(it) it) : type(type), tile(tile), it(it) { }
@@ -256,6 +277,18 @@ bool movement(MoveInfo info, D d)
   bool isStopped = false;
   bool updateVariant = false;
 
+  //TODO: move in its own method
+  if (info.type == MoveInfo::Type::CURSOR)
+  {
+    Object object = *info.it;
+    Tile* tile = info.tile;
+
+    tile->objects.erase(info.it);
+    level->get(tile, d)->objects.push_back(object);
+
+    return true;
+  }
+  
   if (next->empty())
   {
   }
@@ -293,7 +326,7 @@ bool movement(MoveInfo info, D d)
         break;
       }
       /* it's push, it could move must we must see if it can be moved too*/
-      else if (nit->spec && ObjectProperty::PUSH || nit->spec->isText)
+      else if (nit->spec && ObjectProperty::PUSH)
       {
         /* if current can be moved we check next, otherwise we can stop */
         isStopped |= !movement(MoveInfo(info.type, next, nit), d);
@@ -371,6 +404,8 @@ void movement(D d)
       {
         if (it->spec && ObjectProperty::YOU)
           you.emplace_back(MoveInfo::Type::YOU, tile, it);
+        if (it->spec && ObjectProperty::SELECT)
+          you.emplace_back(MoveInfo::Type::CURSOR, tile, it);
         if (it->spec && ObjectProperty::MOVE)
           move.emplace_back(MoveInfo(MoveInfo::Type::MOVE, tile, it), it->direction);
       }

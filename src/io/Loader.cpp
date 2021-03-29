@@ -250,8 +250,10 @@ void Loader::loadLD(const path& path, baba::Level* level, TempData& tempData, bo
         s = S::IMAGES;
       else if (l == "[paths]")
         s = S::PATHS;
-      else if (l == "[icons]" || l == "[levels]")
-        s = S::NONE;
+      else if (l == "[icons]")
+        s = S::ICONS;
+      else if (l == "[levels]")
+        s = S::LEVELS;
       else
         assert(false);
     }
@@ -274,6 +276,8 @@ void Loader::loadLD(const path& path, baba::Level* level, TempData& tempData, bo
         level->_info.selectorPosition.x = std::stoi(pair.second);
       else if (pair.first == "selectorY")
         level->_info.selectorPosition.y = std::stoi(pair.second);
+      else if (pair.first == "levels")
+        level->_metalevel._levels.resize(std::stoi(pair.second));
         
     }
     else if (!headerOnly)
@@ -360,9 +364,69 @@ void Loader::loadLD(const path& path, baba::Level* level, TempData& tempData, bo
         else
           assert(false);
 
+        break;
+      }
+      case S::ICONS:
+      {
+        auto p = sutils::parseKeyValue(l);
+        auto nv = sutils::parseNumberKeyValue(p.first);
+
+        auto index = nv.first;
+        auto& icons = level->_metalevel._icons;
+
+        if (index >= icons.size())
+          icons.resize(index + 1);
+
+        if (nv.second == "root")
+        {
+          assert(p.second == "1" || p.second == "0");
+          icons[index].spriteInRoot = p.second == "1";
+        }
+        else if (nv.second == "file")
+          icons[index].sprite = p.second;
+        else
+          assert(false);
 
         break;
       }
+
+      case S::LEVELS:
+      {
+        auto p = sutils::parseKeyValue(l);
+        auto nv = sutils::parseNumberKeyValue(p.first);
+
+        auto index = nv.first;
+
+        if (index < level->_metalevel._levels.size())
+        {
+          auto& llevel = level->_metalevel._levels[index];
+
+          auto field = nv.second;
+
+          if (field == "X")
+            llevel.x = std::stoi(p.second);
+          else if (field == "Y")
+            llevel.y = std::stoi(p.second);
+          else if (field == "Z")
+            llevel.z = std::stoi(p.second);
+          else if (field == "style")
+          {
+            if (p.second == "-1")
+              llevel.style = LevelLink::Style::ICON;
+            else if (p.second == "0")
+              llevel.style = LevelLink::Style::NUMBER;
+            else if (p.second == "2")
+              llevel.style = LevelLink::Style::NUMBER;
+            else
+              assert(false);
+          }
+          else if (field == "number")
+            llevel.number = std::stoi(p.second);
+          else if (field == "colour")
+            llevel.color = sutils::parseCoordinate(p.second);
+        }
+      }
+
 
       default: { }
       }
@@ -495,6 +559,8 @@ baba::Level* Loader::readLayer(uint16_t version, baba::Level* level)
         objects.push_back({ it->second });
       else
         objects.push_back({ nullptr }); //TODO: EMPTY object
+
+      
     }
   }
 
