@@ -11,7 +11,7 @@
 
 baba::GameData data;
 baba::Level* level = nullptr;
-int levelIndex = 106;
+int levelIndex = 5;
 
 //TODO: on index 15 check layer ordering
 
@@ -77,6 +77,6 @@ int main(int argc, char* argv[])
 
   //loader.load("1level.l");
 
-  getchar();
+  //getchar();
   return 0;
 }

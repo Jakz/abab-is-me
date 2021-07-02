@@ -187,6 +187,14 @@ void GameView::render()
       SDL_SetTextureColorMod(gfx.texture, color.r, color.g, color.b);
       gvm->blit(gfx.texture, src, dest);
     }
+    else
+    {
+      auto x = levelLink.x, y = levelLink.y;
+      int fy = offset.y + y * tileSize + tileSize / 2 - (GFX_TILE_SIZE * ratio) / 2;
+      const rect_t dest = { offset.x + x * tileSize + tileSize / 2 - (GFX_TILE_SIZE * ratio) / 2, fy, GFX_TILE_SIZE * ratio, GFX_TILE_SIZE * ratio };
+
+      gvm->text(std::to_string(levelLink.number), dest.x, dest.y);
+    }
   }
 
   drawGrid(offset, { tileSize, tileSize }, { level->width() + 1, level->height() + 1 });
