@@ -11,7 +11,6 @@
 
 constexpr coord_t GFX_TILE_SIZE = 24;
 
-
 #define KEY_X (SDLK_LSHIFT)
 #define KEY_Y (SDLK_SPACE)
 #define KEY_A (SDLK_LCTRL)
@@ -31,7 +30,7 @@ extern void nextLevel();
 History history;
 
 GameView::GameView(ViewManager* gvm) : gvm(gvm), levelRenderer(new LevelRenderer(gvm)), colors({ nullptr }), scaler(Scaler::SCALE_TO_ATMOST_NATIVE)
-{
+{ 
   colors.grid.a = 0;
 }
 

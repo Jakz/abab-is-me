@@ -26,7 +26,7 @@ static constexpr auto KEY_WAIT = SDLK_SPACE;
   constexpr int32_t WIDTH = 1024;
   constexpr int32_t HEIGHT = 768;
 
-  static const path DATA_FOLDER = R"(data\)";
+  static const path DATA_FOLDER = R"(E:\Games\Steam\steamapps\common\Baba Is You\Data\)";
 
   #define MOUSE_ENABLED true
 

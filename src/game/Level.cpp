@@ -97,7 +97,7 @@ void Level::forEachTile(std::function<void(Tile&)> lambda)
 bool Level::isDefeat()
 {
   bool anyYou = false;
-  forEachObject([&anyYou, this](Object& object) {
+  forEachObject([&anyYou, this](const Object& object) {
     anyYou |= _rules.hasProperty(object.spec, ObjectProperty::YOU);
   });
 
@@ -107,7 +107,7 @@ bool Level::isDefeat()
 bool Level::isVictory()
 {
   bool anyVictory = false;
-  forEachTile([&anyVictory](Tile& tile) {
+  forEachTile([&anyVictory](const Tile& tile) {
     const bool hasYou = tile.has(ObjectProperty::YOU);
     const bool hasWin = tile.has(ObjectProperty::WIN);
 
