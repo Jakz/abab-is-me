@@ -22,32 +22,32 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{BDBDD5F3-1E50-4F99-8D7D-E7D10037992E}</ProjectGuid>
     <RootNamespace>AbabIsMe</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -77,9 +77,10 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;D:\dev\openmom\libs\sdl2\win\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <EnableModules>true</EnableModules>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(SolutionDir)..\..\libs\zlib\lib\win_x64\zlib.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2_image.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -92,13 +93,14 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;D:\dev\openmom\libs\sdl2\win\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;C:\Users\Jack\Documents\dev\lifecraft\libs\zlib\include;C:\Users\Jack\Documents\dev\libs\sdl\SDL2-2.28.3\include;C:\Users\Jack\Documents\dev\libs\sdl\SDL2_image-2.6.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <EnableModules>true</EnableModules>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(SolutionDir)..\..\libs\zlib\lib\win_x64\zlib.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2_image.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\Users\Jack\Documents\dev\lifecraft\libs\zlib\lib\win_x64\zlib.lib;C:\Users\Jack\Documents\dev\libs\sdl\SDL2-2.28.3\lib\x64\SDL2.lib;C:\Users\Jack\Documents\dev\libs\sdl\SDL2_image-2.6.3\lib\x64\SDL2_image.lib;C:\Users\Jack\Documents\dev\libs\sdl\SDL2-2.28.3\lib\x64\SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
@@ -111,9 +113,10 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;D:\dev\openmom\libs\sdl2\win\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <EnableModules>true</EnableModules>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -130,15 +133,16 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;D:\dev\openmom\libs\sdl2\win\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;C:\Users\Jack\Documents\dev\lifecraft\libs\zlib\include;C:\Users\Jack\Documents\dev\libs\sdl\SDL2-2.28.3\include;C:\Users\Jack\Documents\dev\libs\sdl\SDL2_image-2.6.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <EnableModules>true</EnableModules>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(SolutionDir)..\..\libs\zlib\lib\win_x64\zlib.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2_image.lib;D:\dev\openmom\libs\sdl2\win\lib\x64\SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\Users\Jack\Documents\dev\lifecraft\libs\zlib\lib\win_x64\zlib.lib;C:\Users\Jack\Documents\dev\libs\sdl\SDL2-2.28.3\lib\x64\SDL2.lib;C:\Users\Jack\Documents\dev\libs\sdl\SDL2_image-2.6.3\lib\x64\SDL2_image.lib;C:\Users\Jack\Documents\dev\libs\sdl\SDL2-2.28.3\lib\x64\SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
@@ -153,6 +157,7 @@
     <ClInclude Include="..\..\..\src\gfx\MainView.h" />
     <ClInclude Include="..\..\..\src\gfx\SdlHelper.h" />
     <ClInclude Include="..\..\..\src\gfx\ViewManager.h" />
+    <ClInclude Include="..\..\..\src\io\Assets.h" />
     <ClInclude Include="..\..\..\src\io\Loader.h" />
     <ClInclude Include="..\..\..\src\io\Zip.h" />
     <ClInclude Include="..\..\..\src\io\zip\ioapi.h" />
@@ -165,6 +170,7 @@
     <ClCompile Include="..\..\..\src\gfx\GameView.cpp" />
     <ClCompile Include="..\..\..\src\gfx\LevelSelectView.cpp" />
     <ClCompile Include="..\..\..\src\gfx\ViewManager.cpp" />
+    <ClCompile Include="..\..\..\src\io\Assets.cpp" />
     <ClCompile Include="..\..\..\src\io\Loader.cpp" />
     <ClCompile Include="..\..\..\src\io\Zips.cpp" />
     <ClCompile Include="..\..\..\src\io\zip\ioapi.cpp" />

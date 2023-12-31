@@ -53,8 +53,13 @@ void prevLevel()
   vm.gameView()->levelLoaded();
 }
 
+#include "io/Assets.h"
+
 int main(int argc, char* argv[])
 {
+  AssetsLoader aloader;
+  aloader.decode(R"(E:\Games\Steam\SteamApps\common\Baba Is You\Assets.dat)", "assets");
+  
   data = loader.loadGameData();
   sprintf(buffer, "%dlevel", levelIndex);
   level = loader.load(buffer, data);
@@ -80,3 +85,6 @@ int main(int argc, char* argv[])
   //getchar();
   return 0;
 }
+
+
+

@@ -16,6 +16,9 @@
     <Filter Include="src\gfx">
       <UniqueIdentifier>{1858cc6f-a60f-49f1-9948-eeaf6c285a06}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\core">
+      <UniqueIdentifier>{3af60957-7178-4f43-b849-ab75b83de0e0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\io\Loader.h">
@@ -60,6 +63,9 @@
     <ClInclude Include="..\..\..\src\Config.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\io\Assets.h">
+      <Filter>src\io</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp">
@@ -94,6 +100,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\LevelSelectView.cpp">
       <Filter>src\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\io\Assets.cpp">
+      <Filter>src\io</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

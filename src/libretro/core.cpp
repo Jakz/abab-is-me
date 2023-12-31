@@ -29,6 +29,7 @@ struct RetroArchEnv
 };
 
 RetroArchEnv env;
+uint32_t* data;
 
 extern "C"
 {
@@ -39,7 +40,12 @@ extern "C"
 
   void retro_init()
   {
+    data = new uint32_t[480 * 480];
+  }
 
+  void retro_deinit()
+  {
+    delete[] data;
   }
 
   void retro_get_system_info(struct retro_system_info* info)
@@ -48,7 +54,7 @@ extern "C"
     info->library_version = "0.1";
     info->need_fullpath = false;
     info->valid_extensions = "zip";
-    info->block_extract = false;
+    info->block_extract = true;
   }
 
   void retro_get_system_av_info(struct retro_system_av_info* info)
@@ -89,14 +95,23 @@ extern "C"
   void* retro_get_memory_data(unsigned id) { return nullptr; }
   size_t retro_get_memory_size(unsigned id) { return 0; }
 
+  bool retro_load_game_special(unsigned game_type, const struct retro_game_info* info, size_t num_info) { return false; }
   bool retro_load_game(const struct retro_game_info* game)
   {
     return true;
   }
 
+  void retro_unload_game()
+  {
+
+  }
+
+
   void retro_run()
   {
-    //env.video()
+    std::fill(data, data + 480 * 480, 0x00ff0000);
+    env.video(data, 480, 480, 480 * 4);
+    
     ++env.frameCounter;
 
     //env.audioBatch(nullptr, 0);
