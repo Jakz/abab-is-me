@@ -99,6 +99,7 @@ constexpr int32_t HEIGHT = 768;
 
 #include "SDL.h"
 #include "SDL_image.h"
+#include "SDL_mixer.h"
 
 using color_t = SDL_Color;
 using rect_t = SDL_Rect;
@@ -139,6 +140,45 @@ public:
   }
 };
 
+struct SoundNativeData
+{
+  SDL_RWops* _rw;
+  Mix_Chunk* _chunk;
+  
+  SoundNativeData() : _rw(nullptr), _chunk(nullptr) { }
+  SoundNativeData(const std::vector<uint8_t>& data) : SoundNativeData()
+  {
+    _rw = SDL_RWFromConstMem(data.data(), data.size());
+    _chunk = Mix_LoadWAV_RW(_rw, false);
+  }
+  
+  ~SoundNativeData()
+  {
+    if (_rw)
+      SDL_RWclose(_rw);
+    _rw = nullptr;
+    
+    if (_chunk)
+      Mix_FreeChunk(_chunk);
+    _chunk = nullptr;
+  }
+
+  SoundNativeData(SoundNativeData&& other) noexcept
+  {
+    std::swap(_rw, other._rw);
+    std::swap(_chunk, other._chunk);
+  }
+
+  SoundNativeData& operator=(SoundNativeData&& other) noexcept
+  {
+    std::swap(_rw, other._rw);
+    std::swap(_chunk, other._chunk);
+    return *this;
+  }
+
+  auto chunk() const { return _chunk; }
+};
+
 enum class KeyCode
 {
   KeyA = SDLK_a,
@@ -169,6 +209,8 @@ enum class KeyCode
 
 #else
 
+#include "libretro.h"
+
 struct color_t
 {
   uint8_t r, g, b, a;
@@ -178,6 +220,34 @@ struct rect_t
 {
   int x, y;
   int w, h;
+};
+
+enum class KeyCode
+{
+  KeyA = RETROK_a,
+  KeyD = RETROK_d,
+  KeyG = RETROK_g,
+  KeyL = RETROK_l,
+  KeyM = RETROK_m,
+  KeyR = RETROK_r,
+  KeyS = RETROK_s,
+  KeyW = RETROK_w,
+  KeyZ = RETROK_z,
+
+  KeyKpPlus = RETROK_KP_PLUS,
+  KeyKpMinus = RETROK_KP_MINUS ,
+
+  KeySpace = RETROK_SPACE,
+  KeyEsc = RETROK_ESCAPE,
+
+  BindLeft = KeyCode::KeyA,
+  BindRight = KeyCode::KeyD,
+  BindUp = KeyCode::KeyW,
+  BindDown = KeyCode::KeyS,
+
+  BindWait = KeyCode::KeySpace,
+  BindExit = KeyCode::KeyEsc,
+  BindUndo = KeyCode::KeyZ,
 };
 
 #endif
@@ -192,3 +262,18 @@ enum class KeyBind
   Wait = KeyCode::KeySpace,
   Exit = KeyCode::KeyEsc,
 };
+
+
+namespace events
+{
+  struct KeyEvent
+  { 
+    KeyCode code;
+    bool press;
+  };
+
+  struct MouseEvent
+  {
+    int32_t x, y;
+  };
+}

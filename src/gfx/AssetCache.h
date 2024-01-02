@@ -2,6 +2,8 @@
 
 #include "Common.h"
 
+#include "io/Assets.h"
+
 #include <unordered_map>
 #include <numeric>
 #include <memory>
@@ -24,6 +26,24 @@ struct Palette
 
 };
 
+struct SoundData
+{
+  std::vector<uint8_t> data;
+  SoundNativeData nativeData;
+
+  SoundData() { }
+  SoundData(const std::vector<uint8_t>& data) : data(std::move(data)), nativeData(this->data)
+  {
+
+  }
+};
+
+class SoundDataCache
+{
+public:
+  std::unordered_map<uint32_t, SoundData> _sounds;
+};
+
 class AssetCache
 {
 private:
@@ -35,7 +55,11 @@ private:
   
   mutable std::unordered_map<std::string, std::unique_ptr<Palette>> _palettes;
 
+  SoundDataCache _sounds;
+
   path _dataFolder;
+
+  AssetLoader _loader;
 
 public:
   const Texture* objectGfx(const baba::ObjectSpec* spec) const;
@@ -44,12 +68,13 @@ public:
 
   const Palette* palette(const std::string& name) const;
 
+  const SoundData& sound(uint32_t index);
+
   void flushCache();
+  void loadPalettes();
 
 public:
   AssetCache();
 
-  void loadPalettes();
-
-  void setDataFolder(const path& dataFolder) { _dataFolder = dataFolder; }
+  void init(const path& baseFolder);
 };

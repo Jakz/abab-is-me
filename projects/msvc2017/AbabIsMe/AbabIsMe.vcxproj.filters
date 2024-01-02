@@ -19,6 +19,9 @@
     <Filter Include="src\core">
       <UniqueIdentifier>{3af60957-7178-4f43-b849-ab75b83de0e0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\gfx\views">
+      <UniqueIdentifier>{5ab524cc-f37a-44d9-9392-cd22307dd89c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\io\Loader.h">
@@ -32,9 +35,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\game\Types.h">
       <Filter>src\game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gfx\MainView.h">
-      <Filter>src\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gfx\SdlHelper.h">
       <Filter>src\gfx</Filter>
@@ -66,6 +66,9 @@
     <ClInclude Include="..\..\..\src\gfx\AssetCache.h">
       <Filter>src\gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\views\Views.h">
+      <Filter>src\gfx\views</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp">
@@ -76,9 +79,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\io\Zips.cpp">
       <Filter>src\io</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\GameView.cpp">
-      <Filter>src\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\ViewManager.cpp">
       <Filter>src\gfx</Filter>
@@ -92,9 +92,6 @@
     <ClCompile Include="..\..\..\src\game\Rules.cpp">
       <Filter>src\game</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\LevelSelectView.cpp">
-      <Filter>src\gfx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\io\Assets.cpp">
       <Filter>src\io</Filter>
     </ClCompile>
@@ -106,6 +103,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\AssetCache.cpp">
       <Filter>src\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\views\GameView.cpp">
+      <Filter>src\gfx\views</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\views\LevelSelectView.cpp">
+      <Filter>src\gfx\views</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\views\MainMenuView.cpp">
+      <Filter>src\gfx\views</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

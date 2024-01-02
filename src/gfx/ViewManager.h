@@ -11,8 +11,8 @@ namespace ui
   {
   public:
     virtual void render() = 0;
-    virtual void handleKeyboardEvent(const SDL_Event& event) = 0;
-    virtual void handleMouseEvent(const SDL_Event& event) = 0;
+    virtual void handleKeyboardEvent(const events::KeyEvent& event) { };
+    virtual void handleMouseEvent(const events::MouseEvent& event) { };
   };
 
   enum TextAlign
@@ -22,6 +22,7 @@ namespace ui
 
   class GameView;
   class LevelSelectView;
+  class MainMenuView;
 
   class ViewManager : public SDL<ViewManager, ViewManager>
   {
@@ -33,6 +34,13 @@ namespace ui
   private:
     LevelSelectView* _levelSelectView;
     GameView* _gameView;
+    
+    struct
+    {
+      MainMenuView* _mainMenu;
+      
+    } _views;
+
     view_t* _view;
 
   public:
@@ -40,8 +48,8 @@ namespace ui
 
     bool loadData();
 
-    void handleKeyboardEvent(const SDL_Event& event, bool press);
-    void handleMouseEvent(const SDL_Event& event);
+    void handleKeyboardEvent(const events::KeyEvent& event);
+    void handleMouseEvent(const events::MouseEvent& event);
     void render();
 
     void deinit();

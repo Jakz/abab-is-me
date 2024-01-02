@@ -1,5 +1,7 @@
 #include "Assets.h"
 
+#include "Common.h"
+
 #include <iostream>
 #include <vector>
 #include <cstring>
@@ -8,8 +10,8 @@
 #include <filesystem>
 #include <fstream>
 
-#include <SDL.h>
-#include <SDL_image.h>
+#include "SDL.h"
+#include "SDL_image.h"
 
 using namespace std;
 
@@ -73,8 +75,8 @@ bool AssetLoader::decode(const std::string& assets, const std::string& outFolder
 
 void AssetLoader::cacheOffsets()
 {
-  out << "Reading table of contents..." << endl;
-
+  file = fopen(_path.c_str(), "rb");
+  
   uint32_t prev = 0;
   uint32_t offset;
 
@@ -92,6 +94,37 @@ void AssetLoader::cacheOffsets()
     prev = offset;
 
   } while (true);
+
+  LOGD("Cached %zu asset offsets", offsets.size());
+
+  fclose(file);
+  file = nullptr;
+}
+
+std::vector<uint8_t> AssetLoader::loadSound(uint32_t index)
+{
+  if (index < offsets.size())
+  {
+    auto offset = offsets[index];
+    file = fopen(_path.c_str(), "rb");
+
+    int32_t length;
+
+    fseek(file, offset, SEEK_SET);
+    fseek(file, 4, SEEK_CUR);
+    fread(&length, sizeof(int32_t), 1, file);
+
+    /* read and write data */
+    std::vector<uint8_t> buffer(length);
+
+    fread(buffer.data(), 1, length, file);
+
+    fclose(file);
+
+    return buffer;
+  }
+  
+  return { };
 }
 
 bool AssetLoader::tryExtractImage(uint32_t offset, const std::string& folder, size_t index)

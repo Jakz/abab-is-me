@@ -4,6 +4,7 @@
 
 #include "SDL.h"
 #include "SDL_image.h"
+#include "SDL_mixer.h"
 
 #include <cstdint>
 #include <cstdio>
@@ -66,6 +67,7 @@ public:
   void blit(const Texture* texture, int sx, int sy, int w, int h, int dx, int dy);
   void blit(const Texture* texture, int sx, int sy, int w, int h, int dx, int dy, int dw, int dh);
   void blit(const Texture* texture, int dx, int dy);
+  void blit(const Texture* texture, color_t color, const rect_t& src, const rect_t& dest);
 
   void drawRect(int x, int y, int w, int h, color_t color);
   void fillRect(int x, int y, int w, int h, color_t color);
@@ -93,6 +95,18 @@ bool SDL<EventHandler, Renderer>::init()
   if (IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG)
   {
     printf("Error on IMG_Init().\n");
+    return false;
+  }
+
+  if (Mix_Init(MIX_INIT_OGG) != MIX_INIT_OGG)
+  {
+    printf("Error on Mix_Init.\n");
+    return false;
+  }
+
+  if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096))
+  {
+    printf("Error on Mix_OpenAudio.\n");
     return false;
   }
 
@@ -137,6 +151,8 @@ void SDL<EventHandler, Renderer>::capFPS()
 template<typename EventHandler, typename Renderer>
 void SDL<EventHandler, Renderer>::deinit()
 {
+  Mix_CloseAudio();
+  Mix_Quit();
   IMG_Quit();
 
   SDL_DestroyRenderer(_renderer);
@@ -158,11 +174,11 @@ void SDL<EventHandler, Renderer>::handleEvents()
       break;
 
     case SDL_KEYDOWN:
-      eventHandler.handleKeyboardEvent(event, true);
+      eventHandler.handleKeyboardEvent({ KeyCode(event.key.keysym.sym), true });
       break;
 
     case SDL_KEYUP:
-      eventHandler.handleKeyboardEvent(event, false);
+      eventHandler.handleKeyboardEvent({ KeyCode(event.key.keysym.sym), false });
       break;
 
 #if MOUSE_ENABLED
@@ -236,6 +252,12 @@ inline void SDL<EventHandler, Renderer>::blit(const Texture* texture, const rect
   SDL_RenderCopy(_renderer, texture->texture(), &src, &dest);
 }
 
+template<typename EventHandler, typename Renderer>
+inline void SDL<EventHandler, Renderer>::blit(const Texture* texture, color_t color, const rect_t& src, const rect_t& dest)
+{
+  SDL_SetTextureColorMod(texture->texture(), color.r, color.g, color.b);
+  SDL_RenderCopy(_renderer, texture->texture(), &src, &dest);
+}
 
 
 template<typename EventHandler, typename Renderer>
@@ -254,3 +276,4 @@ inline void SDL<EventHandler, Renderer>::blit(const Texture* texture, int dx, in
 
   SDL_RenderCopy(_renderer, texture->texture(), &from, &to);
 }
+

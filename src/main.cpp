@@ -2,7 +2,7 @@
 #include <cstdlib>
 
 #include "gfx/ViewManager.h"
-#include "gfx/MainView.h"
+#include "gfx/views/Views.h"
 
 #include "io/Loader.h"
 
@@ -62,9 +62,8 @@ int main(int argc, char* argv[])
   //AssetLoader aloader;
   //aloader.decode(R"(E:\Games\Steam\SteamApps\common\Baba Is You\Assets.dat)", "assets");
   
-  gfx::Gfx::i.cache()->setDataFolder(R"(E:\Games\Steam\SteamApps\common\Baba Is You\Data\)");
-  gfx::Gfx::i.cache()->loadPalettes();
-
+  gfx::Gfx::i.cache()->init(R"(E:\Games\Steam\SteamApps\common\Baba Is You)");
+  
   loader.setDataFolder(R"(E:\Games\Steam\SteamApps\common\Baba Is You\Data\)");
 
   data = loader.loadGameData();

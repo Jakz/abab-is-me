@@ -21,6 +21,30 @@ void AssetCache::flushCache()
   _iconGfxs.clear();
 }
 
+void AssetCache::init(const path& baseFolder)
+{
+  _dataFolder = baseFolder + "/Data/";
+  loadPalettes();
+
+  _loader.setPath(baseFolder + "/Assets.dat");
+  _loader.cacheOffsets();
+}
+
+const SoundData& AssetCache::sound(uint32_t index)
+{
+  auto it = _sounds._sounds.find(index);
+
+  if (it != _sounds._sounds.end())
+    return it->second;
+  else
+  {
+    auto data = _loader.loadSound(index);
+    auto ptr = data.data();
+    _sounds._sounds[index] = SoundData(data);
+    return _sounds._sounds[index];
+  }
+}
+
 void AssetCache::loadPalettes()
 {
   auto folder = _dataFolder + R"(Palettes/)";

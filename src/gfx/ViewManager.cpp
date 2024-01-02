@@ -1,6 +1,6 @@
 #include "ViewManager.h"
 
-#include "MainView.h"
+#include "gfx/views/Views.h"
 
 #include "gfx/Gfx.h"
 
@@ -10,6 +10,8 @@ ui::ViewManager::ViewManager() : SDL<ui::ViewManager, ui::ViewManager>(*this, *t
 _gameView(new GameView(this)), _levelSelectView(new LevelSelectView(this))
 {
   _view = _gameView;
+
+  _views._mainMenu = new MainMenuView(this);
 }
 
 void ui::ViewManager::deinit()
@@ -32,12 +34,12 @@ bool ui::ViewManager::loadData()
   return true;
 }
 
-void ui::ViewManager::handleKeyboardEvent(const SDL_Event& event, bool press)
+void ui::ViewManager::handleKeyboardEvent(const events::KeyEvent& event)
 {
   _view->handleKeyboardEvent(event);
 }
 
-void ui::ViewManager::handleMouseEvent(const SDL_Event& event)
+void ui::ViewManager::handleMouseEvent(const events::MouseEvent& event)
 {
   _view->handleMouseEvent(event);
 }
