@@ -13,8 +13,6 @@
 #include <SDL.h>
 #include <string>
 
-using path = std::string;
-
 static constexpr auto KEY_LEFT = SDLK_LEFT;
 static constexpr auto KEY_RIGHT = SDLK_RIGHT;
 static constexpr auto KEY_UP = SDLK_UP;
@@ -26,7 +24,7 @@ static constexpr auto KEY_WAIT = SDLK_SPACE;
   constexpr int32_t WIDTH = 1024;
   constexpr int32_t HEIGHT = 768;
 
-  static const path DATA_FOLDER = R"(E:\Games\Steam\steamapps\common\Baba Is You\Data\)";
+  static const std::string DATA_FOLDER = R"(E:\Games\Steam\steamapps\common\Baba Is You\Data\)";
 
   #define MOUSE_ENABLED true
 
@@ -46,20 +44,4 @@ static constexpr auto KEY_WAIT = SDLK_SPACE;
 
   #define MOUSE_ENABLED false;
 
-#endif
-
-#if defined(SDL_VERSIONNUM)
-  using color_t = SDL_Color;
-  using rect_t = SDL_Rect;
-#else
-  struct color_t
-  {
-    u8 r, g, b, a;
-  };
-
-  struct rect_t
-  {
-    int x, y;
-    int w, h;
-  };
 #endif

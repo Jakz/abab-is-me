@@ -9,6 +9,7 @@ namespace io
   class Loader
   {
   private:
+    path _dataFolder;
     FILE* in;
 
     baba::Level* readLayer(uint16_t version, baba::Level* level);
@@ -18,6 +19,8 @@ namespace io
   public:
     Loader();
 
+    void setDataFolder(const path& dataFolder) { _dataFolder = dataFolder; }
+    
     baba::Level* load(const std::string& name, const baba::GameData& baseData);
     baba::GameData loadGameData();
   };

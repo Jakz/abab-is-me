@@ -5,7 +5,7 @@
 
 #include <memory>
 
-class LevelRenderer;
+class AssetCache;
 
 namespace ui
 {
@@ -20,7 +20,6 @@ namespace ui
   class GameView : public View
   {
   private:
-    std::unique_ptr<LevelRenderer> levelRenderer;
     ViewManager* gvm;
 
     void render();
@@ -32,7 +31,7 @@ namespace ui
 
     struct
     {
-      SDL_Surface* palette;
+      const Palette* palette;
       color_t outside;
       color_t inside;
       color_t grid;

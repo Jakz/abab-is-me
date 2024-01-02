@@ -6,13 +6,17 @@
 #include <cstdlib>
 #include <sys/stat.h>
 #include <filesystem>
+#include <fstream>
 
 #include <SDL.h>
 #include <SDL_image.h>
 
 using namespace std;
 
-bool AssetsLoader::decode(const std::string& assets, const std::string& outFolder)
+bool verbose = false;
+auto out = std::fstream("output.txt", std::ios_base::out);//std::cout;
+
+bool AssetLoader::decode(const std::string& assets, const std::string& outFolder)
 {
   std::filesystem::create_directory(outFolder);
 
@@ -24,15 +28,14 @@ bool AssetsLoader::decode(const std::string& assets, const std::string& outFolde
     return false;
   }
 
-  vector<uint32_t> offsets;
-  readToc(offsets);
+  cacheOffsets();
   int data_index = 0;
 
-  cout << "Extracting images..." << endl;
+  out << "Extracting images..." << endl;
   string image_folder = outFolder + "/images";
   std::filesystem::create_directory(image_folder.c_str());
   int image_index = 0;
-  while (data_index < offsets.size() && tryExtractImage(offsets[data_index], image_folder, image_index))
+  while (data_index < offsets.size() && tryExtractImage(offsets[data_index], image_folder, data_index))
   {
     data_index++;
     image_index++;
@@ -41,17 +44,17 @@ bool AssetsLoader::decode(const std::string& assets, const std::string& outFolde
     //  return true;
   }
 
-  cout << "Extracting sounds..." << endl;
+  out << "Extracting sounds..." << endl;
   string sound_folder = outFolder + "/sounds";
   std::filesystem::create_directory(sound_folder.c_str());
   int sound_index = 0;
-  while (data_index < offsets.size() && tryExtractSound(offsets[data_index], sound_folder + "/" + to_string(sound_index) + ".ogg"))
+  while (data_index < offsets.size() && tryExtractSound(offsets[data_index], sound_folder + "/" + to_string(data_index) + ".ogg"))
   {
     data_index++;
     sound_index++;
   }
 
-  cout << "Extracting shaders..." << endl;
+  out << "Extracting shaders..." << endl;
   string shader_folder = outFolder + "/shaders";
   std::filesystem::create_directory(shader_folder.c_str());
   int shader_index = 0;
@@ -61,16 +64,16 @@ bool AssetsLoader::decode(const std::string& assets, const std::string& outFolde
     shader_index++;
   }
 
-  cout << "Done!" << endl;
+  out << "Done!" << endl;
 
   fclose(file);
 
   return true;
 }
 
-void AssetsLoader::readToc(vector<uint32_t>& dataOffsets)
+void AssetLoader::cacheOffsets()
 {
-  cout << "Reading table of contents..." << endl;
+  out << "Reading table of contents..." << endl;
 
   uint32_t prev = 0;
   uint32_t offset;
@@ -85,16 +88,18 @@ void AssetsLoader::readToc(vector<uint32_t>& dataOffsets)
       break;
     }
 
-    dataOffsets.push_back(offset);
+    offsets.push_back(offset);
     prev = offset;
 
   } while (true);
 }
 
-bool AssetsLoader::tryExtractImage(uint32_t offset, const std::string& folder, size_t index)
+bool AssetLoader::tryExtractImage(uint32_t offset, const std::string& folder, size_t index)
 {
   uint16_t width, height;
   int32_t length;
+
+  verbose = index == 1824;
 
   fseek(file, offset, SEEK_SET);
   fread(&width, sizeof(width), 1, file);
@@ -110,7 +115,8 @@ bool AssetsLoader::tryExtractImage(uint32_t offset, const std::string& folder, s
     return false;
   }
 
-  std::cout << " Image " << width << "x" << height << " at offset " << offset << " (length " << length << ")" << std::endl;
+  if (verbose)
+    out << " Image " << index << " " << width << "x" << height << " at offset " << offset << " (length " << length << ")" << std::endl;
 
   std::vector<uint8_t> uncompressed;
 
@@ -121,7 +127,8 @@ bool AssetsLoader::tryExtractImage(uint32_t offset, const std::string& folder, s
     int32_t blockSize = read<uint32_t>();
     int32_t blockStart = ftell(file);
 
-    //std::cout << "blockSize: " << blockSize << " blockStart: " << blockStart << std::endl;
+    if (verbose)
+      out << "blockSize: " << blockSize << " blockStart: " << blockStart << std::endl;
 
     std::vector<uint8_t> data;
     data.resize(blockSize);
@@ -149,11 +156,12 @@ bool AssetsLoader::tryExtractImage(uint32_t offset, const std::string& folder, s
 
       uint8_t split = read<uint8_t>();
 
-      //cout << "split 0x" << std::hex << (int)split << std::dec << std::endl;
+      if (verbose)
+        out << "split 0x" << std::hex << (int)split << std::dec << std::endl;
 
       if (split >= 0x10)
       {
-        uint8_t take = split >> 4;
+        uint32_t take = split >> 4;
 
         if (take == 0x0f)
         {
@@ -172,11 +180,8 @@ bool AssetsLoader::tryExtractImage(uint32_t offset, const std::string& folder, s
         uncompressed.resize(currentSize + take);
         fread(&uncompressed[currentSize], 1, take, file);
 
-        /*if (true || take > 1)
-          cout << startOffset << ": taking " << (int)take << " bytes (" << tell() - blockStart << ")" << std::endl;
-        else
-          cout << startOffset << ": taking byte " << (int)uncompressed[currentSize] << " bytes (" << tell() - blockStart << ")" << std::endl;
-          */
+        if (verbose)
+          out << startOffset << ": taking " << (int)take << " bytes (" << tell() - blockStart << ")" << std::endl;        
       }
 
       if (tell() >= blockStart + blockSize)
@@ -186,11 +191,6 @@ bool AssetsLoader::tryExtractImage(uint32_t offset, const std::string& folder, s
       //cout << "repeatOffset: " << repeatOffset << endl;
       int32_t repeatIndex = uncompressed.size() - repeatOffset;
       uint32_t repeat = split & 0x0f;
-
-      if (repeatIndex < 0)
-      {
-        fseek(file, blockStart + blockSize, SEEK_SET);
-      }
 
       if (repeat == 0x0f)
       {
@@ -204,7 +204,8 @@ bool AssetsLoader::tryExtractImage(uint32_t offset, const std::string& folder, s
         }
       }
 
-      //cout << startOffset << ": repeating " << (repeat + 4) << " bytes from " << repeatIndex << endl;
+      if (verbose)
+        out << startOffset << ": repeating " << (repeat + 4) << " bytes from " << repeatIndex << endl;
 
       for (size_t i = 0; i < repeat + 4; ++i)
         uncompressed.push_back(uncompressed[repeatIndex + i]);
@@ -222,12 +223,13 @@ bool AssetsLoader::tryExtractImage(uint32_t offset, const std::string& folder, s
   memcpy(surface->pixels, &uncompressed[0], uncompressed.size());
   IMG_SavePNG(surface, outPath.c_str());
   SDL_FreeSurface(surface);
+  
 
 
   return true;
 }
 
-bool AssetsLoader::tryExtractSound(uint32_t offset, const string& outPath)
+bool AssetLoader::tryExtractSound(uint32_t offset, const string& outPath)
 {
   uint32_t length;
   char header[4];
@@ -260,7 +262,7 @@ bool AssetsLoader::tryExtractSound(uint32_t offset, const string& outPath)
   return true;
 }
 
-bool AssetsLoader::tryExtractShader(uint32_t offset, const string& vert_path, const string& frag_path)
+bool AssetLoader::tryExtractShader(uint32_t offset, const string& vert_path, const string& frag_path)
 {
   uint32_t length;
   char header[8];

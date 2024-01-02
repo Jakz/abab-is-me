@@ -55,11 +55,18 @@ void prevLevel()
 
 #include "io/Assets.h"
 
+#include "gfx/Gfx.h"
+
 int main(int argc, char* argv[])
 {
-  AssetsLoader aloader;
-  aloader.decode(R"(E:\Games\Steam\SteamApps\common\Baba Is You\Assets.dat)", "assets");
+  //AssetLoader aloader;
+  //aloader.decode(R"(E:\Games\Steam\SteamApps\common\Baba Is You\Assets.dat)", "assets");
   
+  gfx::Gfx::i.cache()->setDataFolder(R"(E:\Games\Steam\SteamApps\common\Baba Is You\Data\)");
+  gfx::Gfx::i.cache()->loadPalettes();
+
+  loader.setDataFolder(R"(E:\Games\Steam\SteamApps\common\Baba Is You\Data\)");
+
   data = loader.loadGameData();
   sprintf(buffer, "%dlevel", levelIndex);
   level = loader.load(buffer, data);
@@ -67,6 +74,10 @@ int main(int argc, char* argv[])
   
   if (!vm.init())
     return -1;
+
+
+
+  gfx::Gfx::i.renderer = vm.renderer();
 
   if (!vm.loadData())
   {

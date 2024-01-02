@@ -2,9 +2,11 @@
 
 #include "MainView.h"
 
+#include "gfx/Gfx.h"
+
 using namespace ui;
 
-ui::ViewManager::ViewManager() : SDL<ui::ViewManager, ui::ViewManager>(*this, *this), _font(nullptr),
+ui::ViewManager::ViewManager() : SDL<ui::ViewManager, ui::ViewManager>(*this, *this),
 _gameView(new GameView(this)), _levelSelectView(new LevelSelectView(this))
 {
   _view = _gameView;
@@ -12,8 +14,7 @@ _gameView(new GameView(this)), _levelSelectView(new LevelSelectView(this))
 
 void ui::ViewManager::deinit()
 {
-  SDL_DestroyTexture(_font);
-
+  _font.reset();
   SDL::deinit();
 }
 
@@ -22,10 +23,11 @@ bool ui::ViewManager::loadData()
   SDL_Surface* font = IMG_Load("font.png");
   assert(font);
 
-  _font = SDL_CreateTextureFromSurface(_renderer, font);
-
-  SDL_SetTextureBlendMode(_font, SDL_BLENDMODE_BLEND);
+  auto fontTexture = SDL_CreateTextureFromSurface(_renderer, font);
   SDL_FreeSurface(font);
+
+  _font.reset(new Texture(fontTexture, { font->w, font->h }, { }));
+  SDL_SetTextureBlendMode(_font->texture(), SDL_BLENDMODE_BLEND);
 
   return true;
 }
@@ -55,7 +57,7 @@ void ui::ViewManager::text(const std::string& text, int32_t x, int32_t y)
   {
     rect_t src = { 6 * (text[i] % GLYPHS_PER_ROW), 9 * (text[i] / GLYPHS_PER_ROW), 5, 8 };
     rect_t dest = { x + 6 * i * scale, y, 5 * scale, 8 * scale };
-    blit(_font, src, dest);
+    blit(_font.get(), src, dest);
   }
 }
 
@@ -70,14 +72,14 @@ void ViewManager::text(const std::string& text, int32_t x, int32_t y, SDL_Color 
   else if (align == TextAlign::RIGHT)
     x -= width;
 
-  SDL_SetTextureColorMod(_font, color.r, color.g, color.b);
+  SDL_SetTextureColorMod(_font->texture(), color.r, color.g, color.b);
 
   for (size_t i = 0; i < text.length(); ++i)
   {
     rect_t src = { 6 * (text[i] % GLYPHS_PER_ROW), 9 * (text[i] / GLYPHS_PER_ROW), 5, 8 };
     rect_t dest = { x + 6 * i * scale, y, 5 * scale, 8 * scale };
-    blit(_font, src, dest);
+    blit(_font.get(), src, dest);
   }
 
-  SDL_SetTextureColorMod(_font, 255, 255, 255);
+  SDL_SetTextureColorMod(_font->texture(), 255, 255, 255);
 }

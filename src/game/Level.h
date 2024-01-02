@@ -4,6 +4,7 @@
 
 #include "Tile.h"
 #include "Rules.h"
+#include "Common.h"
 
 namespace baba
 {

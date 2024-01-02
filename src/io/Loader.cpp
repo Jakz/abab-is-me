@@ -9,6 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <filesystem>
 
 #if !_WIN32
 namespace std
@@ -443,10 +444,10 @@ baba::Level* Loader::load(const std::string& name, const GameData& baseData)
 
   TempData tempData;
 
-  path ldPath = DATA_FOLDER + R"(Worlds/baba/)" + name + ".ld";
+  path ldPath = _dataFolder + R"(Worlds/baba/)" + name + ".ld";
   loadLD(ldPath, level, tempData);
 
-  path fullPath = DATA_FOLDER + R"(Worlds/baba/)" + name + ".l";
+  path fullPath = _dataFolder + R"(Worlds/baba/)" + name + ".l";
   in = fopen(fullPath.c_str(), "rb");
   
   if (!in)
@@ -617,7 +618,7 @@ private:
 public:
   ValuesParser(baba::GameData& data) : data(data) { }
 
-  void init();
+  void init(const path& dataFolder);
   void parse();
 };
 
@@ -719,10 +720,10 @@ void ValuesParser::generateObject()
 }
 
 
-void ValuesParser::init()
+void ValuesParser::init(const path& dataFolder)
 {
   LOGDD("Loading game data from values.lua..");
-  const path valuesFile = DATA_FOLDER + "values.lua";
+  const path valuesFile = dataFolder + "values.lua";
 
   lines = sutils::readFileToLines(valuesFile);
   count = lines.size();
@@ -804,7 +805,7 @@ GameData Loader::loadGameData()
   
   GameData data;
   ValuesParser parser(data);
-  parser.init();
+  parser.init(_dataFolder);
   parser.parse();
   data.finalize();
   return data;

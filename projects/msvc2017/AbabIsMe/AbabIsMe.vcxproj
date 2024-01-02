@@ -78,7 +78,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;D:\dev\openmom\libs\sdl2\win\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;USE_SDL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <EnableModules>true</EnableModules>
     </ClCompile>
@@ -95,7 +95,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;C:\Users\Jack\Documents\dev\lifecraft\libs\zlib\include;C:\Users\Jack\Documents\dev\libs\sdl\SDL2-2.28.3\include;C:\Users\Jack\Documents\dev\libs\sdl\SDL2_image-2.6.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;USE_SDL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <EnableModules>true</EnableModules>
     </ClCompile>
@@ -114,7 +114,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\libs\zlib\include;D:\dev\openmom\libs\sdl2\win\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;USE_SDL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <EnableModules>true</EnableModules>
     </ClCompile>
@@ -135,7 +135,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;C:\Users\Jack\Documents\dev\lifecraft\libs\zlib\include;C:\Users\Jack\Documents\dev\libs\sdl\SDL2-2.28.3\include;C:\Users\Jack\Documents\dev\libs\sdl\SDL2_image-2.6.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;USE_SDL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <EnableModules>true</EnableModules>
     </ClCompile>
@@ -153,28 +153,29 @@
     <ClInclude Include="..\..\..\src\game\Rules.h" />
     <ClInclude Include="..\..\..\src\game\Tile.h" />
     <ClInclude Include="..\..\..\src\game\Types.h" />
-    <ClInclude Include="..\..\..\src\gfx\LevelRenderer.h" />
+    <ClInclude Include="..\..\..\src\gfx\AssetCache.h" />
+    <ClInclude Include="..\..\..\src\gfx\Gfx.h" />
     <ClInclude Include="..\..\..\src\gfx\MainView.h" />
     <ClInclude Include="..\..\..\src\gfx\SdlHelper.h" />
     <ClInclude Include="..\..\..\src\gfx\ViewManager.h" />
     <ClInclude Include="..\..\..\src\io\Assets.h" />
     <ClInclude Include="..\..\..\src\io\Loader.h" />
     <ClInclude Include="..\..\..\src\io\Zip.h" />
-    <ClInclude Include="..\..\..\src\io\zip\ioapi.h" />
-    <ClInclude Include="..\..\..\src\io\zip\unzip.h" />
+    <ClInclude Include="..\..\..\src\io\zip\miniz.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\game\Level.cpp" />
     <ClCompile Include="..\..\..\src\game\Rules.cpp" />
     <ClCompile Include="..\..\..\src\game\Tile.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\AssetCache.cpp" />
     <ClCompile Include="..\..\..\src\gfx\GameView.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\Gfx.cpp" />
     <ClCompile Include="..\..\..\src\gfx\LevelSelectView.cpp" />
     <ClCompile Include="..\..\..\src\gfx\ViewManager.cpp" />
     <ClCompile Include="..\..\..\src\io\Assets.cpp" />
     <ClCompile Include="..\..\..\src\io\Loader.cpp" />
     <ClCompile Include="..\..\..\src\io\Zips.cpp" />
-    <ClCompile Include="..\..\..\src\io\zip\ioapi.cpp" />
-    <ClCompile Include="..\..\..\src\io\zip\unzip.cpp" />
+    <ClCompile Include="..\..\..\src\io\zip\miniz.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
   </ItemGroup>
   <ItemGroup>

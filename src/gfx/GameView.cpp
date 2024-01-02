@@ -5,20 +5,11 @@
 #include "game/Level.h"
 #include "game/Rules.h"
 
-#include "LevelRenderer.h"
+#include "gfx/Gfx.h"
 
 #include <algorithm>
 
 constexpr coord_t GFX_TILE_SIZE = 24;
-
-#define KEY_X (SDLK_LSHIFT)
-#define KEY_Y (SDLK_SPACE)
-#define KEY_A (SDLK_LCTRL)
-#define KEY_B (SDLK_LALT)
-#define KEY_L (SDLK_TAB)
-#define KEY_R (SDLK_BACKSPACE)
-#define KEY_SELECT (SDLK_ESCAPE)
-#define KEY_START (SDLK_RETURN)
 
 using namespace ui;
 using namespace baba;
@@ -29,33 +20,22 @@ extern void nextLevel();
 
 History history;
 
-GameView::GameView(ViewManager* gvm) : gvm(gvm), levelRenderer(new LevelRenderer(gvm)), colors({ nullptr }), scaler(Scaler::SCALE_TO_ATMOST_NATIVE)
+GameView::GameView(ViewManager* gvm) : gvm(gvm), colors({ nullptr }), scaler(Scaler::SCALE_TO_ATMOST_NATIVE)
 { 
   colors.grid.a = 0;
 }
 
 void GameView::levelLoaded()
 {
-  auto& palette = colors.palette;
-  
+  auto* palette = gfx::Gfx::i.cache()->palette(level->palette());
+
   if (palette)
-    SDL_FreeSurface(palette);
-
-  palette = IMG_Load((DATA_FOLDER + R"(Palettes/)" + level->palette()).c_str());
-  assert(palette);
-  SDL_Surface* tmp = SDL_ConvertSurfaceFormat(palette, SDL_PIXELFORMAT_BGRA8888, 0);
-  SDL_FreeSurface(palette);
-  palette = tmp;
-
-  //rules.state(data.objectsByName["baba"]).properties.set(baba::ObjectProperty::YOU);
-  //rules.state(data.objectsByName["wall"]).properties.set(baba::ObjectProperty::STOP);
-
-  SDL_GetRGB(*(((uint32_t*)palette->pixels) + 0 * palette->w + 1), palette->format, &colors.outside.r, &colors.outside.g, &colors.outside.b);
-  SDL_GetRGB(*(((uint32_t*)palette->pixels) + 4 * palette->w + 0), palette->format, &colors.inside.r, &colors.inside.g, &colors.inside.b);
-
-  colors.outside.a = 255;
-  colors.inside.a = 255;
-
+  {
+    colors.palette = palette;
+    colors.outside = palette->at(1, 0);
+    colors.inside = palette->at(0, 4);
+  }
+  
   level->updateRules();
 }
 
@@ -63,6 +43,8 @@ void GameView::render()
 {
   //TODO: particles
   //TODO BEST property
+
+  auto cache = gfx::Gfx::i.cache();
   
   int32_t tick = (SDL_GetTicks() / 180) % 3;
   constexpr int32_t fspan = 2, fcount = 1 + fspan * 4;
@@ -112,12 +94,12 @@ void GameView::render()
 
   for (const auto& image : images)
   {
-    const auto& gfx = levelRenderer->imageGfx(image);
+    const auto* asset = cache->imageGfx(image);
 
     //SDL_Rect dest = { offset.x + level->width()*tileSize / 2 - gfx.sprites[tick].w / 2, offset.y + level->height()*tileSize / 2 - gfx.sprites[tick].h / 2, gfx.sprites[tick].w, gfx.sprites[tick].h };
     SDL_Rect dest = { offset.x + tileSize, offset.y + tileSize, (level->width() - 2) * tileSize, (level->height() - 2) * tileSize };
 
-    gvm->blit(gfx.texture, gfx.sprites[tick], dest);
+    gvm->blit(asset, asset->rect(tick), dest);
   }
 
   for (int y = 0; y < size.h / tileSize; ++y)
@@ -132,9 +114,8 @@ void GameView::render()
 
         for (const auto& obj : *tile)
         {
-          color_t color;
-          const auto& ocolor = obj.active ? obj.spec->active : obj.spec->color;
-          SDL_GetRGB(*(((uint32_t*)colors.palette->pixels) + ocolor.y * colors.palette->w + ocolor.x), colors.palette->format, &color.r, &color.g, &color.b);
+          const point_t& ocolor = obj.active ? obj.spec->active : obj.spec->color;
+          color_t color = colors.palette->at(ocolor.x, ocolor.y);
 
           if (obj.spec == level->data()->EDGE)
           {
@@ -142,8 +123,8 @@ void GameView::render()
           }
           else
           {
-            const auto& gfx = levelRenderer->objectGfx(obj.spec);
-            SDL_SetTextureColorMod(gfx.texture, color.r, color.g, color.b);
+            const auto* asset = cache->objectGfx(obj.spec);
+            SDL_SetTextureColorMod(asset->texture(), color.r, color.g, color.b);
             auto variant = obj.variant;
             if (obj.spec->tiling == ObjectSpec::Tiling::None)
               variant = 0;
@@ -151,7 +132,7 @@ void GameView::render()
             bool isFloat = obj.spec && ObjectProperty::FLOAT;
             float dy = ratio * ftick;
 
-            rect_t src = gfx.sprites[variant];
+            rect_t src = asset->rect(variant);
 
             int fy = offset.y + y * tileSize + tileSize / 2 - (src.h*ratio) / 2;
             if (isFloat) fy += dy;
@@ -160,7 +141,7 @@ void GameView::render()
 
             src.x += tick * src.w;
 
-            gvm->blit(gfx.texture, src, dest);
+            gvm->blit(asset, src, dest);
           }
         }
       }
@@ -172,19 +153,19 @@ void GameView::render()
     if (levelLink.style == LevelLink::Style::ICON)
     {
       const baba::Icon* icon = &level->metalevel()._icons[levelLink.number];
-      const auto& gfx = levelRenderer->iconGfx(icon);
+      const auto* asset = cache->iconGfx(icon);
       auto x = levelLink.x, y = levelLink.y;
 
-      const rect_t& src = gfx.sprites[0];
+      const rect_t& src = asset->rect(0);
 
       int fy = offset.y + y * tileSize + tileSize / 2 - (src.h * ratio) / 2;
       const rect_t dest = { offset.x + x * tileSize + tileSize / 2 - (src.w * ratio) / 2, fy, src.w * ratio, src.h * ratio };
 
-      color_t color;
       const auto& ocolor = levelLink.color;
-      SDL_GetRGB(*(((uint32_t*)colors.palette->pixels) + ocolor.y * colors.palette->w + ocolor.x), colors.palette->format, &color.r, &color.g, &color.b);
-      SDL_SetTextureColorMod(gfx.texture, color.r, color.g, color.b);
-      gvm->blit(gfx.texture, src, dest);
+      color_t color = colors.palette->at(ocolor.x, ocolor.y);
+      
+      SDL_SetTextureColorMod(asset->texture(), color.r, color.g, color.b);
+      gvm->blit(asset, src, dest);
     }
     else
     {
@@ -465,40 +446,46 @@ void movement(D d)
 
 void GameView::handleKeyboardEvent(const SDL_Event& event)
 {
+  
+  
   if (event.type == SDL_KEYDOWN)
   {
-    switch (event.key.keysym.sym)
+    KeyCode key = KeyCode(event.key.keysym.sym);
+    
+    switch (key)
     {
-      case SDLK_ESCAPE: gvm->exit(); break;
-      case KEY_LEFT: movement(D::LEFT); updateMoveBounds(); break;
-      case KEY_RIGHT: movement(D::RIGHT); updateMoveBounds(); break;
-      case KEY_UP: movement(D::UP); updateMoveBounds(); break;
-      case KEY_DOWN: movement(D::DOWN); updateMoveBounds(); break;
-      case KEY_WAIT: movement(D::NONE); updateMoveBounds(); break;
+      case KeyCode::BindExit: gvm->exit(); break;
 
-      case SDLK_g:
+        
+      case KeyCode::BindLeft: movement(D::LEFT); updateMoveBounds(); break;
+      case KeyCode::BindRight: movement(D::RIGHT); updateMoveBounds(); break;
+      case KeyCode::BindUp: movement(D::UP); updateMoveBounds(); break;
+      case KeyCode::BindDown: movement(D::DOWN); updateMoveBounds(); break;
+      case KeyCode::BindWait: movement(D::NONE); updateMoveBounds(); break;
+
+      case KeyCode::KeyG:
       {
         if (colors.grid.a) colors.grid.a = 0;
         else colors.grid = colors.outside;
         break;
       }
 
-      case KEY_R:
-      case SDLK_KP_PLUS: 
+      case KeyCode::KeyR:
+      case KeyCode::KeyKpPlus:
       { 
-        levelRenderer->flushCache();
+        gfx::Gfx::i.cache()->flushCache();
         nextLevel();
         break;
       }
-      case KEY_L:
-      case SDLK_KP_MINUS:
+      case KeyCode::KeyL:
+      case KeyCode::KeyKpMinus:
       { 
-        levelRenderer->flushCache();
+        gfx::Gfx::i.cache()->flushCache();
         prevLevel();
         break;
       }
 
-      case SDLK_z:
+      case KeyCode::BindUndo:
         if (!history.empty())
         {
           level->restore(history.pop());
@@ -507,7 +494,7 @@ void GameView::handleKeyboardEvent(const SDL_Event& event)
       
         break;
 
-      case SDLK_m:
+      case KeyCode::KeyM:
       {
         if (scaler == Scaler::NATIVE_WITH_SCROLL)
           scaler = Scaler::SCALE_TO_ATMOST_NATIVE;
@@ -516,6 +503,7 @@ void GameView::handleKeyboardEvent(const SDL_Event& event)
         break;
       }
 
+      /*
       case SDLK_w:
       {        
         //if (offset.y >= GFX_TILE_SIZE)
@@ -544,7 +532,7 @@ void GameView::handleKeyboardEvent(const SDL_Event& event)
         
         //if (offset.x + size.w / GFX_TILE_SIZE <= GFX_TILE_SIZE * level->width())
           offset.x += GFX_TILE_SIZE;
-      }
+      }*/
     }
   }
 }

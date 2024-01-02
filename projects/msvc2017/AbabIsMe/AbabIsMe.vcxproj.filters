@@ -27,12 +27,6 @@
     <ClInclude Include="..\..\..\src\Common.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\io\zip\unzip.h">
-      <Filter>src\io\zip</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\io\zip\ioapi.h">
-      <Filter>src\io\zip</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\io\Zip.h">
       <Filter>src\io</Filter>
     </ClInclude>
@@ -57,14 +51,20 @@
     <ClInclude Include="..\..\..\src\game\Tile.h">
       <Filter>src\game</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gfx\LevelRenderer.h">
-      <Filter>src\gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\Config.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\io\Assets.h">
       <Filter>src\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\io\zip\miniz.h">
+      <Filter>src\io\zip</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\Gfx.h">
+      <Filter>src\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\AssetCache.h">
+      <Filter>src\gfx</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -73,12 +73,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\io\Loader.cpp">
       <Filter>src\io</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\io\zip\unzip.cpp">
-      <Filter>src\io\zip</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\io\zip\ioapi.cpp">
-      <Filter>src\io\zip</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\io\Zips.cpp">
       <Filter>src\io</Filter>
@@ -103,6 +97,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\io\Assets.cpp">
       <Filter>src\io</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\io\zip\miniz.cpp">
+      <Filter>src\io\zip</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\Gfx.cpp">
+      <Filter>src\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\AssetCache.cpp">
+      <Filter>src\gfx</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

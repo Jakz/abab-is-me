@@ -1,8 +1,9 @@
 #pragma once
 
 #include "SdlHelper.h"
+#include "Common.h"
 
-#include <array>
+#include <memory>
 
 namespace ui
 {
@@ -27,7 +28,7 @@ namespace ui
   public:
     using view_t = View;
 
-    SDL_Texture* _font;
+    std::unique_ptr<Texture> _font;
 
   private:
     LevelSelectView* _levelSelectView;
@@ -45,7 +46,7 @@ namespace ui
 
     void deinit();
 
-    SDL_Texture* font() { return _font; }
+    Texture* font() { return _font.get(); }
 
     //TODO: hacky cast to avoid header inclusion
     GameView* gameView() { return _gameView; }

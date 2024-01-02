@@ -2,7 +2,7 @@
 
 #include <cassert>
 #include <string>
-#include "Config.h"
+#include <vector>
 
 #define LOGD(x, ...) printf(x "\n", __VA_ARGS__)
 #define LOGDD(x) printf(x "\n")
@@ -47,7 +47,11 @@ private:
   bit_mask<T>(utype value) : value(value) { }
 };
 
+using path = std::string;
+
 using coord_t = int32_t;
+
+struct Palette;
 
 struct point_t
 {
@@ -73,8 +77,11 @@ namespace baba
   struct Level;
   struct GameData;
   struct Rules;
-
+ 
   enum class ObjectProperty : uint64_t;
+
+  struct Icon;
+  struct ObjectGfx;
 }
 
 namespace io
@@ -83,3 +90,105 @@ namespace io
 }
 
 bool operator&&(const baba::ObjectSpec* spec, baba::ObjectProperty prop);
+
+
+constexpr int32_t WIDTH = 1024;
+constexpr int32_t HEIGHT = 768;
+
+#if USE_SDL
+
+#include "SDL.h"
+#include "SDL_image.h"
+
+using color_t = SDL_Color;
+using rect_t = SDL_Rect;
+
+struct Texture
+{
+public:
+  SDL_Texture* _texture;
+
+  std::vector<rect_t> _rects;
+  coord_t _width, _height;
+
+public:
+  Texture(SDL_Texture* texture, size2d_t size, const std::vector<rect_t>& rects) :
+    _texture(texture), _width(size.w), _height(size.h), _rects(rects)
+  {
+
+  }
+
+  ~Texture()
+  {
+    destroy();
+  }
+
+  coord_t height() const { return _height; }
+  coord_t width() const { return _width; }
+
+  size_t count() const { return _rects.size(); }
+  const rect_t& rect(size_t index) const { return _rects[index]; }
+
+  SDL_Texture* texture() const { return _texture; }
+
+  void destroy()
+  {
+    if (_texture)
+      SDL_DestroyTexture(_texture); 
+    _texture = nullptr; 
+  }
+};
+
+enum class KeyCode
+{
+  KeyA = SDLK_a,
+  KeyD = SDLK_d,
+  KeyG = SDLK_g,
+  KeyL = SDLK_l,
+  KeyM = SDLK_m,
+  KeyR = SDLK_r,
+  KeyS = SDLK_s,
+  KeyW = SDLK_w,
+  KeyZ = SDLK_z,
+
+  KeyKpPlus = SDLK_KP_PLUS,
+  KeyKpMinus = SDLK_KP_MINUS,
+  
+  KeySpace = SDLK_SPACE,
+  KeyEsc = SDLK_ESCAPE,
+
+  BindLeft = KeyCode::KeyA,
+  BindRight = KeyCode::KeyD,
+  BindUp = KeyCode::KeyW,
+  BindDown = KeyCode::KeyS,
+
+  BindWait = KeyCode::KeySpace,
+  BindExit = KeyCode::KeyEsc,
+  BindUndo = KeyCode::KeyZ,
+};
+
+#else
+
+struct color_t
+{
+  uint8_t r, g, b, a;
+};
+
+struct rect_t
+{
+  int x, y;
+  int w, h;
+};
+
+#endif
+
+enum class KeyBind
+{
+  Left = KeyCode::KeyA,
+  Right = KeyCode::KeyD,
+  Up = KeyCode::KeyW,
+  Down = KeyCode::KeyS,
+
+  Wait = KeyCode::KeySpace,
+  Exit = KeyCode::KeyEsc,
+};

@@ -1,6 +1,6 @@
 #include "Zip.h"
 
-#include <zlib.h>
+#include "io/zip/miniz.h"
 
 #include <cstdio>
 #include <unordered_map>
@@ -13,11 +13,11 @@ Zip::unique_cptr Zip::compress(byte *data, u32 length, u32& flength, u32 bufferS
     return unique_cptr(data, 0);
   }
 
-  z_stream strm;
+  mz_stream strm;
 
-  strm.zalloc = Z_NULL;
-  strm.zfree = Z_NULL;
-  strm.opaque = Z_NULL;
+  strm.zalloc = nullptr;
+  strm.zfree = nullptr;
+  strm.opaque = nullptr;
   strm.total_out = 0;
   strm.next_in = data;
   strm.avail_in = length;
@@ -28,7 +28,7 @@ Zip::unique_cptr Zip::compress(byte *data, u32 length, u32& flength, u32 bufferS
   //   Z_BEST_COMPRESSION
   //   Z_DEFAULT_COMPRESSION
 
-  if (deflateInit2(&strm, Z_DEFAULT_COMPRESSION, Z_DEFLATED, (15+16), 8, Z_DEFAULT_STRATEGY) != Z_OK) return unique_cptr(nullptr, 0);
+  if (mz_deflateInit2(&strm, MZ_DEFAULT_COMPRESSION, MZ_DEFLATED, (15+16), 8, MZ_DEFAULT_STRATEGY) != MZ_OK) return unique_cptr(nullptr, 0);
 
   byte *compressed = (byte*)std::calloc(bufferSize,sizeof(byte));
   u32 tlength = bufferSize;
@@ -42,13 +42,13 @@ Zip::unique_cptr Zip::compress(byte *data, u32 length, u32& flength, u32 bufferS
     }
 
     strm.next_out = compressed + strm.total_out;
-    strm.avail_out = static_cast<uInt>(tlength - strm.total_out);
+    strm.avail_out = static_cast<uint32_t>(tlength - strm.total_out);
 
-    deflate(&strm, Z_FINISH);
+    mz_deflate(&strm, MZ_FINISH);
 
   } while (strm.avail_out == 0);
 
-  deflateEnd(&strm);
+  mz_deflateEnd(&strm);
 
   //JJ_DEBUG("COMPRESSION: %d -> %d (%2.4f)",length, strm.total_out, strm.total_out/(float)length)
 
@@ -63,30 +63,30 @@ void Zip::uncompress(byte *data, u32 length, byte *dest, u32 tlength)
 
   bool done = false;
 
-  z_stream strm;
+  mz_stream strm;
   strm.next_in = data;
   strm.avail_in = length;
   strm.total_out = 0;
-  strm.zalloc = Z_NULL;
-  strm.zfree = Z_NULL;
+  strm.zalloc = nullptr;
+  strm.zfree = nullptr;
 
-  if (inflateInit2(&strm, (15+32)) != Z_OK)
+  if (mz_inflateInit2(&strm, (15+32)) != MZ_OK)
     return;
 
   while (!done)
   {
     strm.next_out = dest + strm.total_out;
-    strm.avail_out = static_cast<uInt>(tlength - strm.total_out);
+    strm.avail_out = static_cast<uint32_t>(tlength - strm.total_out);
 
     // Inflate another chunk.
-    int status = inflate (&strm, Z_SYNC_FLUSH);
-    if (status == Z_STREAM_END)
+    int status = mz_inflate(&strm, MZ_SYNC_FLUSH);
+    if (status == MZ_STREAM_END)
       done = true;
-    else if (status != Z_OK)
+    else if (status != MZ_OK)
       break;
   }
 
-  if (inflateEnd (&strm) != Z_OK)
+  if (mz_inflateEnd(&strm) != MZ_OK)
     return;
 
   return;
@@ -95,16 +95,16 @@ void Zip::uncompress(byte *data, u32 length, byte *dest, u32 tlength)
 int Zip::inflateInternal(const byte* dataIn, size_t length, byte** dataOut, size_t* outLength, size_t outLenghtHint)
 {
   static constexpr size_t FACTOR = 2;
-  int err = Z_OK;
+  int err = MZ_OK;
 
   size_t bufferSize = outLenghtHint ;
   byte *out = static_cast<unsigned char*>(malloc(bufferSize));
   *dataOut = out;
 
-  z_stream d_stream; /* decompression stream */
-  d_stream.zalloc = (alloc_func)0;
-  d_stream.zfree = (free_func)0;
-  d_stream.opaque = (voidpf)0;
+  mz_stream d_stream; /* decompression stream */
+  d_stream.zalloc = nullptr;
+  d_stream.zfree = nullptr;
+  d_stream.opaque = nullptr;
 
   d_stream.next_in  = const_cast<byte*>(dataIn);
   d_stream.avail_in = static_cast<unsigned int>(length);
@@ -114,9 +114,9 @@ int Zip::inflateInternal(const byte* dataIn, size_t length, byte** dataOut, size
   d_stream.total_out = 0;
 
   if (!out)
-    return Z_BUF_ERROR;
+    return MZ_BUF_ERROR;
 
-  if ((err = inflateInit2(&d_stream, MAX_WBITS)) != Z_OK)
+  if ((err = mz_inflateInit2(&d_stream, 15)) != MZ_OK)
   {
     free(out);
     return err;
@@ -124,37 +124,37 @@ int Zip::inflateInternal(const byte* dataIn, size_t length, byte** dataOut, size
 
   for (;;)
   {
-    err = inflate(&d_stream, Z_NO_FLUSH);
+    err = mz_inflate(&d_stream, MZ_NO_FLUSH);
 
-    if (err == Z_STREAM_END)
+    if (err == MZ_STREAM_END)
       break;
 
     switch (err)
     {
-      case Z_NEED_DICT:
+      case MZ_NEED_DICT:
         printf("Need Dict: %s\n", d_stream.msg);
-        inflateEnd(&d_stream);
+        mz_inflateEnd(&d_stream);
         return err;
         break;
-      case Z_DATA_ERROR:
+      case MZ_DATA_ERROR:
         printf("Data Error: %s\n", d_stream.msg);
-        inflateEnd(&d_stream);
+        mz_inflateEnd(&d_stream);
         return err;
         break;
-      case Z_MEM_ERROR:
-        inflateEnd(&d_stream);
+      case MZ_MEM_ERROR:
+        mz_inflateEnd(&d_stream);
         return err;
     }
 
-    if (err != Z_STREAM_END)
+    if (err != MZ_STREAM_END)
     {
       auto newOut = static_cast<byte*>(realloc(out, bufferSize * FACTOR));
 
       if (!newOut)
       {
         free(out);
-        inflateEnd(&d_stream);
-        return Z_MEM_ERROR;
+        mz_inflateEnd(&d_stream);
+        return MZ_MEM_ERROR;
       }
       else
         out = newOut;
@@ -167,7 +167,7 @@ int Zip::inflateInternal(const byte* dataIn, size_t length, byte** dataOut, size
 
   *outLength = bufferSize - d_stream.avail_out;
   *dataOut = reinterpret_cast<byte*>(realloc(out, *outLength));
-  err = inflateEnd(&d_stream);
+  err = mz_inflateEnd(&d_stream);
   return err;
 }
 
@@ -178,13 +178,13 @@ Zip::unique_cptr Zip::uncompress(const byte* data, size_t length)
 
   int result = inflateInternal(data, length, &dataOut, &dataOutLength, 64 * 1024);
 
-  if (result != Z_OK || !dataOut)
+  if (result != MZ_OK || !dataOut)
   {
     switch (result)
     {
-      case Z_MEM_ERROR: printf("Zip: Out of memory while decompressing map data!" "\n"); break;
-      case Z_VERSION_ERROR: printf("Zip: Incompatible zlib version!" "\n"); break;
-      case Z_DATA_ERROR: printf("Zip: Incorrect zlib compressed data!" "\n"); break;
+      case MZ_MEM_ERROR: printf("Zip: Out of memory while decompressing map data!" "\n"); break;
+      case MZ_VERSION_ERROR: printf("Zip: Incompatible zlib version!" "\n"); break;
+      case MZ_DATA_ERROR: printf("Zip: Incorrect zlib compressed data!" "\n"); break;
       default: printf("Zip: Unknown error while decompressing map data!" "\n");
     }
 
