@@ -126,9 +126,14 @@ namespace baba
   {
     enum class Style { Number, Icon, Letter, Dot };
     
-    coord_t x, y, z;
+    point_t coord;
+    coord_t z;
     int32_t number;
     point_t color;
     Style style;
+    std::string file;
+
+    coord_t x() const { return coord.x; }
+    coord_t y() const { return coord.y; }
   };
 }

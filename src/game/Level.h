@@ -48,6 +48,8 @@ namespace baba
     const std::string& subtitle() const { return _info.subtitle; }
     const std::string& filename() const { return _info.filename; }
 
+    bool isMeta() const { return !_metalevel._levels.empty(); }
+
     const LevelInfo& info() const { return _info; }
 
     const decltype(_metalevel)& metalevel() const { return _metalevel; }

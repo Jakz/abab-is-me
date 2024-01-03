@@ -58,6 +58,9 @@ struct point_t
 {
   coord_t x, y;
 
+  point_t(coord_t x, coord_t y) : x(x), y(y) { }
+  point_t() : point_t(0, 0) { }
+
   bool operator==(const point_t& o) const { return x == o.x && y == o.y; }
   bool operator!=(const point_t& o) const { return x != o.x || y != o.y; }
 
@@ -221,9 +224,13 @@ enum class KeyCode
   KeyW = SDLK_w,
   KeyZ = SDLK_z,
 
+
+  
   KeyKpPlus = SDLK_KP_PLUS,
   KeyKpMinus = SDLK_KP_MINUS,
   
+  KeyReturn = SDLK_RETURN,
+
   KeySpace = SDLK_SPACE,
   KeyEsc = SDLK_ESCAPE,
 
@@ -235,6 +242,7 @@ enum class KeyCode
   BindWait = KeyCode::KeySpace,
   BindExit = KeyCode::KeyEsc,
   BindUndo = KeyCode::KeyZ,
+  BindAction = KeyCode::KeyReturn,
 };
 
 #else

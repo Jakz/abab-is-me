@@ -17,6 +17,8 @@ using namespace baba;
 extern Level* level;
 extern void prevLevel();
 extern void nextLevel();
+extern void enterLevel(std::string file);
+extern void exitLevel();
 
 History history;
 
@@ -148,9 +150,9 @@ void GameView::render()
     }
   }
 
-  for (const auto& levelLink : level->metalevel()._levels)
+  for (const baba::LevelLink& levelLink : level->metalevel()._levels)
   {
-    auto x = levelLink.x, y = levelLink.y;
+    auto x = levelLink.x(), y = levelLink.y();
     
     auto* bgAsset = cache->numberedGfx("level_link_box");
     const auto& src = bgAsset->rect(tick);
@@ -413,8 +415,8 @@ bool movement(MoveInfo info, D d)
 
 void movement(D d)
 {  
-  const auto& data = gfx::Gfx::i.cache()->sound(AssetMapping::BABA_STEP_SOUND.random());
-  Mix_PlayChannel(-1, data.nativeData.chunk(), 0);
+  //const auto& data = gfx::Gfx::i.cache()->sound(AssetMapping::BABA_STEP_SOUND.random());
+  //Mix_PlayChannel(-1, data.nativeData.chunk(), 0);
   
   level->forEachObject([](Object& object) { object.alreadyMoved = false; });
 
@@ -444,6 +446,25 @@ void movement(D d)
     if (d != D::NONE)
       for (const auto& pair : you)
         movement(pair, d);
+    /* wait you is select -> enter level */
+    else if (d == D::NONE && !you.empty() && you[0].type == MoveInfo::Type::CURSOR)
+    {
+      if (level->isMeta() && !level->metalevel()._levels.empty())
+      {
+        const auto& levels = level->metalevel()._levels;
+        auto it = std::find_if(levels.begin(), levels.end(), [coord = you[0].tile->coord] (const baba::LevelLink& link) {
+          return coord == link.coord;
+        });
+
+        if (it != levels.end())
+        {
+          enterLevel(it->file);
+          return;
+        }
+      }
+      
+      
+    }
 
     for (const auto& pair : move)
       movement(pair.first, pair.second);
@@ -489,14 +510,22 @@ void GameView::handleKeyboardEvent(const events::KeyEvent& event)
   { 
     switch (event.code)
     {
-      case KeyCode::BindExit: gvm->exit(); break;
+      case KeyCode::BindExit: 
+        exitLevel();
+        //gvm->exit(); 
+      break;
 
         
       case KeyCode::BindLeft: movement(D::LEFT); updateMoveBounds(); break;
       case KeyCode::BindRight: movement(D::RIGHT); updateMoveBounds(); break;
       case KeyCode::BindUp: movement(D::UP); updateMoveBounds(); break;
       case KeyCode::BindDown: movement(D::DOWN); updateMoveBounds(); break;
-      case KeyCode::BindWait: movement(D::NONE); updateMoveBounds(); break;
+      case KeyCode::BindWait: 
+      {
+        movement(D::NONE);
+        updateMoveBounds();
+        break;
+      }
 
       case KeyCode::KeyG:
       {

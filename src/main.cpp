@@ -10,8 +10,10 @@
 #include "game/Level.h"
 
 baba::GameData data;
+
+std::vector<std::string> levelStack;
 baba::Level* level = nullptr;
-int levelIndex = 16;
+int levelIndex = 106;
 
 //TODO: on index 15 check layer ordering
 
@@ -29,8 +31,7 @@ void nextLevel()
   while (!level)
   {
     ++levelIndex;
-    sprintf(buffer, "%dlevel", levelIndex);
-    level = loader.load(buffer, data);
+    level = loader.load(fmt::format("{}level", levelIndex), data);
   }
 
   level->computeTiling();
@@ -45,12 +46,41 @@ void prevLevel()
   while (!level)
   {
     --levelIndex;
-    sprintf(buffer, "%dlevel", levelIndex);
-    level = loader.load(buffer, data);
+    level = loader.load(fmt::format("{}level", levelIndex), data);
   }
 
   level->computeTiling();
   vm.gameView()->levelLoaded();
+}
+
+void enterLevel(std::string filename)
+{  
+  levelStack.push_back(level->info().filename);
+
+  delete level;
+  level = nullptr;
+  
+  level = loader.load(filename, data);
+
+  level->computeTiling();
+  vm.gameView()->levelLoaded();
+}
+
+void exitLevel()
+{
+  if (!levelStack.empty())
+  {
+    auto filename = levelStack.back();
+    levelStack.pop_back();
+
+    delete level;
+    level = nullptr;
+
+    level = loader.load(filename, data);
+
+    level->computeTiling();
+    vm.gameView()->levelLoaded();
+  }
 }
 
 #include "io/Assets.h"

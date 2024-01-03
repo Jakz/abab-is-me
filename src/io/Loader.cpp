@@ -255,6 +255,8 @@ void Loader::loadLD(const path& path, baba::Level* level, TempData& tempData, bo
         s = S::ICONS;
       else if (l == "[levels]")
         s = S::LEVELS;
+      else if (l == "[currobjlist]")
+        ; //TODO
       else
         assert(false);
     }
@@ -400,14 +402,14 @@ void Loader::loadLD(const path& path, baba::Level* level, TempData& tempData, bo
 
         if (index < level->_metalevel._levels.size())
         {
-          auto& llevel = level->_metalevel._levels[index];
+          baba::LevelLink& llevel = level->_metalevel._levels[index];
 
-          auto field = nv.second;
+          const auto& field = nv.second;
 
           if (field == "X")
-            llevel.x = std::stoi(p.second);
+            llevel.coord.x = std::stoi(p.second);
           else if (field == "Y")
-            llevel.y = std::stoi(p.second);
+            llevel.coord.y = std::stoi(p.second);
           else if (field == "Z")
             llevel.z = std::stoi(p.second);
           else if (field == "style")
@@ -427,6 +429,8 @@ void Loader::loadLD(const path& path, baba::Level* level, TempData& tempData, bo
             llevel.number = std::stoi(p.second);
           else if (field == "colour")
             llevel.color = sutils::parseCoordinate(p.second);
+          else if (field == "file")
+            llevel.file = p.second;
         }
       }
 
