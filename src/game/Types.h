@@ -124,7 +124,7 @@ namespace baba
 
   struct LevelLink
   {
-    enum class Style { NUMBER, ICON };
+    enum class Style { Number, Icon, Letter, Dot };
     
     coord_t x, y, z;
     int32_t number;

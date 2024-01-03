@@ -129,10 +129,20 @@ std::vector<uint8_t> AssetLoader::loadSound(uint32_t index)
 
 bool AssetLoader::tryExtractImage(uint32_t offset, const std::string& folder, size_t index)
 {
+  return false;
+}
+
+Surface* AssetLoader::loadImage(uint32_t index)
+{
+  if (index >= offsets.size())
+    return nullptr;
+  
+  auto offset = offsets[index];
+  
   uint16_t width, height;
   int32_t length;
 
-  verbose = index == 1824;
+  file = fopen(_path.c_str(), "rb");
 
   fseek(file, offset, SEEK_SET);
   fread(&width, sizeof(width), 1, file);
@@ -140,13 +150,13 @@ bool AssetLoader::tryExtractImage(uint32_t offset, const std::string& folder, si
   fseek(file, 9, SEEK_CUR);
   fread(&length, sizeof(length), 1, file);
 
-  if (length == 0)
+  /*if (length == 0)
     return true;
   else if (width == 0 || height == 0)
   {
     fseek(file, -17, SEEK_CUR);
     return false;
-  }
+  }*/
 
   if (verbose)
     out << " Image " << index << " " << width << "x" << height << " at offset " << offset << " (length " << length << ")" << std::endl;
@@ -248,18 +258,20 @@ bool AssetLoader::tryExtractImage(uint32_t offset, const std::string& folder, si
     }
   }
 
-  std::string outFolder = folder + "/" + std::to_string(width) + "x" + std::to_string(height);
+  /*std::string outFolder = folder + "/" + std::to_string(width) + "x" + std::to_string(height);
   std::filesystem::create_directory(outFolder);
-  std::string outPath = outFolder + "/" + std::to_string(index) + ".png";
+  std::string outPath = outFolder + "/" + std::to_string(index) + ".png";*/
 
   SDL_Surface* surface = SDL_CreateRGBSurface(0, width, height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
   memcpy(surface->pixels, &uncompressed[0], uncompressed.size());
-  IMG_SavePNG(surface, outPath.c_str());
-  SDL_FreeSurface(surface);
+  /*IMG_SavePNG(surface, outPath.c_str());
+  SDL_FreeSurface(surface);*/
   
+  fclose(file);
+  file = nullptr;
 
 
-  return true;
+  return new Surface(surface);
 }
 
 bool AssetLoader::tryExtractSound(uint32_t offset, const string& outPath)

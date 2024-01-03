@@ -11,6 +11,14 @@
 
 #include <array>
 
+using asset_index = int32_t;
+
+struct asset_list : public std::vector<asset_index>
+{
+  using vector::vector;
+  asset_index random() const { return (*this)[rand() % size()]; }
+};
+
 struct Palette
 {
   static constexpr int32_t W = 7, H = 5;
@@ -52,6 +60,9 @@ private:
   mutable std::unordered_map<const baba::ObjectSpec*, std::unique_ptr<Texture>> _objectGfxs;
   mutable std::unordered_map<std::string, std::unique_ptr<Texture>> _imageGfxs;
   mutable std::unordered_map<const baba::Icon*, std::unique_ptr<Texture>> _iconGfxs;
+
+  mutable std::unordered_map<std::string, asset_list> _numberedGfxIndices;
+  mutable std::unordered_map<std::string, std::unique_ptr<Texture>> _numberedGfxs;
   
   mutable std::unordered_map<std::string, std::unique_ptr<Palette>> _palettes;
 
@@ -66,6 +77,8 @@ public:
   const Texture* imageGfx(const std::string& image) const;
   const Texture* iconGfx(const baba::Icon* spec) const;
 
+  const Texture* numberedGfx(const std::string& key);
+
   const Palette* palette(const std::string& name) const;
 
   const SoundData& sound(uint32_t index);
@@ -77,4 +90,11 @@ public:
   AssetCache();
 
   void init(const path& baseFolder);
+};
+
+class AssetMapping
+{
+public:
+  static const asset_list BABA_STEP_SOUND;
+  static const asset_list DEFEAT_SOUND;
 };

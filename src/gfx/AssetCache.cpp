@@ -28,6 +28,36 @@ void AssetCache::init(const path& baseFolder)
 
   _loader.setPath(baseFolder + "/Assets.dat");
   _loader.cacheOffsets();
+
+  _numberedGfxIndices["level_link_number_00"] = { 10 };
+  _numberedGfxIndices["level_link_number_01"] = { 12 };
+  _numberedGfxIndices["level_link_number_02"] = { 16 };
+  _numberedGfxIndices["level_link_number_03"] = { 17 };
+  _numberedGfxIndices["level_link_number_04"] = { 22 };
+  _numberedGfxIndices["level_link_number_05"] = { 28 };
+  _numberedGfxIndices["level_link_number_06"] = { 29 };
+  _numberedGfxIndices["level_link_number_07"] = { 32 };
+  _numberedGfxIndices["level_link_number_08"] = { 36 };
+  _numberedGfxIndices["level_link_number_09"] = { 42 };
+  _numberedGfxIndices["level_link_number_10"] = { 44 };
+  _numberedGfxIndices["level_link_number_11"] = { 45 };
+  _numberedGfxIndices["level_link_number_12"] = { 46 };
+  _numberedGfxIndices["level_link_number_13"] = { 61 };
+  _numberedGfxIndices["level_link_number_14"] = { 64 };
+  _numberedGfxIndices["level_link_number_15"] = { 66 };
+                             
+  _numberedGfxIndices["level_link_letter_a"] = { 552 };
+  _numberedGfxIndices["level_link_letter_b"] = { 559 };
+  _numberedGfxIndices["level_link_letter_c"] = { 796 };
+  _numberedGfxIndices["level_link_letter_d"] = { 1034 };
+  _numberedGfxIndices["level_link_letter_e"] = { 1036 };
+
+  _numberedGfxIndices["level_link_dot"] = { 462, 463, 464, 465, 466, 470, 471 };
+
+
+  _numberedGfxIndices["level_link_box"] = { 49, 239, 240 };
+  _numberedGfxIndices["level_link_box_bg"] = { 38 };
+
 }
 
 const SoundData& AssetCache::sound(uint32_t index)
@@ -137,6 +167,8 @@ const Texture* AssetCache::objectGfx(const baba::ObjectSpec* spec) const
 
     std::vector<rect_t> rects;
 
+    int32_t spriteWidth = -1, spriteHeight = -1;
+
     for (uint32_t i = 0; i < frames.size(); ++i)
     {
       for (uint32_t f = 0; f < FRAMES; ++f)
@@ -146,14 +178,22 @@ const Texture* AssetCache::objectGfx(const baba::ObjectSpec* spec) const
         SDL_Surface* tmp = IMG_Load(buffer);
         if (!tmp)
           LOGD("Error: missing graphics file %s", buffer);
+        else
+        {
+          spriteWidth = tmp->w;
+          spriteHeight = tmp->h;
+        }
 
         if (!surface)
-          surface = SDL_CreateRGBSurface(0, tmp->w * 3 * frames.size(), tmp->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+          surface = SDL_CreateRGBSurface(0, spriteWidth * 3 * frames.size(), spriteHeight, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
 
-        SDL_Rect dest = { (i * 3 + f) * tmp->w, 0, tmp->w, tmp->h };
-        SDL_BlitSurface(tmp, nullptr, surface, &dest);
+        SDL_Rect dest = { (i * 3 + f) * spriteWidth, 0, spriteWidth, spriteHeight };
 
-        SDL_FreeSurface(tmp);
+        if (tmp)
+        {
+          SDL_BlitSurface(tmp, nullptr, surface, &dest);
+          SDL_FreeSurface(tmp);
+        }
 
         if (f == 0)
           rects.push_back(dest);
@@ -219,6 +259,55 @@ const Texture* AssetCache::imageGfx(const std::string& image) const
   return asset;
 }
 
+const Texture* AssetCache::numberedGfx(const std::string& key)
+{
+  auto it = _numberedGfxs.find(key);
+
+  if (it != _numberedGfxs.end())
+    return it->second.get();
+  else
+  {
+    auto nit = _numberedGfxIndices.find(key);
+
+    if (nit != _numberedGfxIndices.end())
+    {
+      SDL_Surface* surface = nullptr;
+      
+      std::vector<rect_t> rects;
+      const auto& indices = nit->second;
+
+      for (int32_t i = 0; i < indices.size(); ++i)
+      {        
+        Surface* image = _loader.loadImage(indices[i]);
+
+        if (!surface)
+        {
+          surface = SDL_CreateRGBSurface(0, image->width() * indices.size(), image->height(), 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+          assert(surface);
+        }
+
+        SDL_Rect dest = { i * image->width(), 0, image->width(), image->height() };
+        SDL_BlitSurface(image->_surface, nullptr, surface, &dest);
+        rects.push_back(dest);
+
+        delete image;
+      }
+
+      if (surface)
+      {
+        auto texture = SDL_CreateTextureFromSurface(gfx::Gfx::i.renderer, surface);
+        auto* asset = new Texture(texture, size2d_t(surface->w, surface->h), rects);
+        SDL_FreeSurface(surface);
+
+        _numberedGfxs[key].reset(asset);
+        return asset;
+      }
+    }
+  }
+
+  return nullptr;
+}
+
 const Texture* AssetCache::iconGfx(const baba::Icon* spec) const
 {
   auto it = _iconGfxs.find(spec);
@@ -246,3 +335,8 @@ const Texture* AssetCache::iconGfx(const baba::Icon* spec) const
 
   return asset;
 }
+
+
+
+const asset_list AssetMapping::BABA_STEP_SOUND = { 3237, 3238, 3239, 3240, 3241, 3242, 3243, 3244, 3245 };
+const asset_list AssetMapping::DEFEAT_SOUND = { 3196, 3197, 3199, 3200 };

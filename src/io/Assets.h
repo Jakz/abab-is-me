@@ -7,6 +7,8 @@
 #include <vector>
 #include <memory>
 
+struct Surface;
+
 class AssetLoader
 {
 protected:
@@ -31,4 +33,5 @@ public:
   
   void cacheOffsets();
   std::vector<uint8_t> loadSound(uint32_t index);
+  Surface* loadImage(uint32_t index);
 };

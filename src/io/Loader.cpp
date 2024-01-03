@@ -413,11 +413,13 @@ void Loader::loadLD(const path& path, baba::Level* level, TempData& tempData, bo
           else if (field == "style")
           {
             if (p.second == "-1")
-              llevel.style = LevelLink::Style::ICON;
+              llevel.style = LevelLink::Style::Icon;
             else if (p.second == "0")
-              llevel.style = LevelLink::Style::NUMBER;
+              llevel.style = LevelLink::Style::Number;
+            else if (p.second == "1")
+              llevel.style = LevelLink::Style::Letter;
             else if (p.second == "2")
-              llevel.style = LevelLink::Style::NUMBER;
+              llevel.style = LevelLink::Style::Dot;
             else
               assert(false);
           }

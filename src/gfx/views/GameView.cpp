@@ -150,13 +150,55 @@ void GameView::render()
 
   for (const auto& levelLink : level->metalevel()._levels)
   {
-    if (levelLink.style == LevelLink::Style::ICON)
-    {
-      const baba::Icon* icon = &level->metalevel()._icons[levelLink.number];
-      const auto* asset = cache->iconGfx(icon);
-      auto x = levelLink.x, y = levelLink.y;
+    auto x = levelLink.x, y = levelLink.y;
+    
+    auto* bgAsset = cache->numberedGfx("level_link_box");
+    const auto& src = bgAsset->rect(tick);
+    int fy = offset.y + y * tileSize + tileSize / 2 - (src.h * ratio) / 2;
+    const rect_t dest = { offset.x + x * tileSize + tileSize / 2 - (src.w * ratio) / 2, fy, src.w * ratio, src.h * ratio };
+    const auto& ocolor = levelLink.color;
+    color_t color = colors.palette->at(ocolor.x, ocolor.y);
+    gvm->blit(bgAsset, color, src, dest);
 
-      const rect_t& src = asset->rect(0);
+
+    const Texture* asset = nullptr;
+    size_t rectIndex = 0;
+
+    switch (levelLink.style)
+    {
+      case LevelLink::Style::Icon:
+      {
+        const baba::Icon* icon = &level->metalevel()._icons[levelLink.number];
+        asset = cache->iconGfx(icon);
+        break;
+      }
+
+      case LevelLink::Style::Number:
+      {
+        std::string key = fmt::format("level_link_number_{:02}", levelLink.number);
+        asset = cache->numberedGfx(key);
+        break;
+      }
+
+      case LevelLink::Style::Letter:
+      {
+        std::string key = fmt::format("level_link_letter_{}", (char)('a' + levelLink.number));
+        asset = cache->numberedGfx(key);
+        break;
+      }
+
+      case LevelLink::Style::Dot:
+      {
+        asset = cache->numberedGfx("level_link_dot");
+        rectIndex = levelLink.number;
+        break;
+      }
+    }
+
+    if (asset)
+    {
+
+      const rect_t& src = asset->rect(rectIndex);
 
       int fy = offset.y + y * tileSize + tileSize / 2 - (src.h * ratio) / 2;
       const rect_t dest = { offset.x + x * tileSize + tileSize / 2 - (src.w * ratio) / 2, fy, src.w * ratio, src.h * ratio };
@@ -164,14 +206,6 @@ void GameView::render()
       const auto& ocolor = levelLink.color;
       color_t color = colors.palette->at(ocolor.x, ocolor.y);
       gvm->blit(asset, color, src, dest);
-    }
-    else
-    {
-      auto x = levelLink.x, y = levelLink.y;
-      int fy = offset.y + y * tileSize + tileSize / 2 - (GFX_TILE_SIZE * ratio) / 2;
-      const rect_t dest = { offset.x + x * tileSize + tileSize / 2 - (GFX_TILE_SIZE * ratio) / 2, fy, GFX_TILE_SIZE * ratio, GFX_TILE_SIZE * ratio };
-
-      gvm->text(std::to_string(levelLink.number), dest.x, dest.y);
     }
   }
 
@@ -284,6 +318,9 @@ bool movement(MoveInfo info, D d)
     {
       if (it->spec && ObjectProperty::YOU && next->has(ObjectProperty::DEFEAT))
       {
+        const auto& data = gfx::Gfx::i.cache()->sound(AssetMapping::DEFEAT_SOUND.random());
+        Mix_PlayChannel(-1, data.nativeData.chunk(), 0);
+
         tile->objects.erase(it);
         return false;
       }
@@ -375,11 +412,8 @@ bool movement(MoveInfo info, D d)
 }
 
 void movement(D d)
-{
-  const std::vector<uint32_t> soundKeys = { 3237, 3238, 3239, 3240, 3241, 3242, 3243, 3244, 3245 };
-  auto sound = *(soundKeys.begin() + rand() % soundKeys.size());
-  
-  const auto& data = gfx::Gfx::i.cache()->sound(sound);
+{  
+  const auto& data = gfx::Gfx::i.cache()->sound(AssetMapping::BABA_STEP_SOUND.random());
   Mix_PlayChannel(-1, data.nativeData.chunk(), 0);
   
   level->forEachObject([](Object& object) { object.alreadyMoved = false; });

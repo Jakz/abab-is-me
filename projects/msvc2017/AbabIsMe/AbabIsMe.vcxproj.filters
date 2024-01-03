@@ -22,6 +22,12 @@
     <Filter Include="src\gfx\views">
       <UniqueIdentifier>{5ab524cc-f37a-44d9-9392-cd22307dd89c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\utils">
+      <UniqueIdentifier>{cc79e933-04d2-490b-a852-1a3f514f9db8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\utils\format">
+      <UniqueIdentifier>{dce27e1d-f514-4d5b-a60f-f20e8c7cc660}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\io\Loader.h">
@@ -69,6 +75,36 @@
     <ClInclude Include="..\..\..\src\gfx\views\Views.h">
       <Filter>src\gfx\views</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\utils\format\locale.h">
+      <Filter>src\utils\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\utils\format\ostream.h">
+      <Filter>src\utils\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\utils\format\printf.h">
+      <Filter>src\utils\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\utils\format\ranges.h">
+      <Filter>src\utils\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\utils\format\chrono.h">
+      <Filter>src\utils\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\utils\format\color.h">
+      <Filter>src\utils\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\utils\format\compile.h">
+      <Filter>src\utils\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\utils\format\core.h">
+      <Filter>src\utils\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\utils\format\format.h">
+      <Filter>src\utils\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\utils\format\format-inl.h">
+      <Filter>src\utils\format</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp">
@@ -112,6 +148,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\views\MainMenuView.cpp">
       <Filter>src\gfx\views</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\utils\format\format.cpp">
+      <Filter>src\utils\format</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

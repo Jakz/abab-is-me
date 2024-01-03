@@ -3,6 +3,7 @@
 #include <cassert>
 #include <string>
 #include <vector>
+#include "utils/format/format.h"
 
 #define LOGD(x, ...) printf(x "\n", __VA_ARGS__)
 #define LOGDD(x) printf(x "\n")
@@ -104,6 +105,35 @@ constexpr int32_t HEIGHT = 768;
 using color_t = SDL_Color;
 using rect_t = SDL_Rect;
 
+struct Surface
+{
+public:
+  SDL_Surface* _surface;
+
+  coord_t _width, _height;
+
+public:
+  Surface(SDL_Surface* surface) : _surface(surface), _width(surface->w), _height(surface->h)
+  {
+
+  }
+
+  ~Surface()
+  {
+    destroy();
+  }
+
+  coord_t height() const { return _height; }
+  coord_t width() const { return _width; }
+
+  void destroy()
+  {
+    if (_surface)
+      SDL_FreeSurface(_surface);
+    _surface = nullptr;
+  }
+};
+
 struct Texture
 {
 public:
@@ -128,7 +158,7 @@ public:
   coord_t width() const { return _width; }
 
   size_t count() const { return _rects.size(); }
-  const rect_t& rect(size_t index) const { return _rects[index]; }
+  const rect_t& rect(size_t index) const { return index < _rects.size() ? _rects[index] : _rects[0]; }
 
   SDL_Texture* texture() const { return _texture; }
 

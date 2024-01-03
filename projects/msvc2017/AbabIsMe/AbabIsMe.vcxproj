@@ -95,7 +95,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;C:\Users\Jack\Documents\dev\lifecraft\libs\zlib\include;C:\Users\Jack\Documents\dev\libs\sdl\SDL2-2.28.3\include;C:\Users\Jack\Documents\dev\libs\sdl\SDL2_image-2.6.3\include;%(AdditionalIncludeDirectories);C:\Users\Jack\Documents\dev\libs\sdl\SDL2_mixer-2.6.3\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;USE_SDL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS;USE_SDL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <EnableModules>true</EnableModules>
     </ClCompile>
@@ -135,7 +135,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\src;C:\Users\Jack\Documents\dev\lifecraft\libs\zlib\include;C:\Users\Jack\Documents\dev\libs\sdl\SDL2-2.28.3\include;C:\Users\Jack\Documents\dev\libs\sdl\SDL2_image-2.6.3\include;%(AdditionalIncludeDirectories);C:\Users\Jack\Documents\dev\libs\sdl\SDL2_mixer-2.6.3\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;USE_SDL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS;USE_SDL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <EnableModules>true</EnableModules>
     </ClCompile>
@@ -162,6 +162,16 @@
     <ClInclude Include="..\..\..\src\io\Loader.h" />
     <ClInclude Include="..\..\..\src\io\Zip.h" />
     <ClInclude Include="..\..\..\src\io\zip\miniz.h" />
+    <ClInclude Include="..\..\..\src\utils\format\chrono.h" />
+    <ClInclude Include="..\..\..\src\utils\format\color.h" />
+    <ClInclude Include="..\..\..\src\utils\format\compile.h" />
+    <ClInclude Include="..\..\..\src\utils\format\core.h" />
+    <ClInclude Include="..\..\..\src\utils\format\format-inl.h" />
+    <ClInclude Include="..\..\..\src\utils\format\format.h" />
+    <ClInclude Include="..\..\..\src\utils\format\locale.h" />
+    <ClInclude Include="..\..\..\src\utils\format\ostream.h" />
+    <ClInclude Include="..\..\..\src\utils\format\printf.h" />
+    <ClInclude Include="..\..\..\src\utils\format\ranges.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\game\Level.cpp" />
@@ -178,6 +188,7 @@
     <ClCompile Include="..\..\..\src\io\Zips.cpp" />
     <ClCompile Include="..\..\..\src\io\zip\miniz.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
+    <ClCompile Include="..\..\..\src\utils\format\format.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="Natvis.natvis">
