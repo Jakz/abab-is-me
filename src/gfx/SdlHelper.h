@@ -12,12 +12,19 @@
 
 using u32 = uint32_t;
 
-template<typename EventHandler, typename Renderer>
+class Director
+{
+public:
+  virtual void render() = 0;
+  virtual void handle(const events::KeyEvent& event) = 0;
+  virtual void handle(const events::MouseEvent& event) = 0;
+  virtual size2d_t windowSize() const = 0;
+};
+
 class SDL
 {
 protected:
-  EventHandler& eventHandler;
-  Renderer& loopRenderer;
+  Director* _director;
 
   SDL_Window* _window;
   SDL_Renderer* _renderer;
@@ -31,8 +38,7 @@ protected:
 
 
 public:
-  SDL(EventHandler& eventHandler, Renderer& loopRenderer) : eventHandler(eventHandler), loopRenderer(loopRenderer),
-    _window(nullptr), _renderer(nullptr), willQuit(false), ticks(0)
+  SDL(Director* director) : _director(director), _window(nullptr), _renderer(nullptr), willQuit(false), ticks(0)
   {
     setFrameRate(60);
   }
@@ -77,203 +83,13 @@ public:
   void fillRect(const rect_t& rect, color_t color) { fillRect(rect.x, rect.y, rect.w, rect.h, color); }
   void drawRect(const rect_t& rect, color_t color) { drawRect(rect.x, rect.y, rect.w, rect.h, color); }
 
-  //void slowTextBlit(TTF_Font* font, int dx, int dy, Align align, const std::string& string);
+  void blit(const Surface* src, const rect_t* srcRect, const Surface* dest, const rect_t* destRect);
+
+  Texture* loadImage(const path& path);
+  Texture* buildTexture(const Surface& surface);
+  Surface loadImageAsSurface(const path& path);
+  Surface generateSurface(size2d_t size);
 
   SDL_Window* window() { return _window; }
   SDL_Renderer* renderer() { return _renderer; }
 };
-
-template<typename EventHandler, typename Renderer>
-bool SDL<EventHandler, Renderer>::init()
-{
-  if (SDL_Init(SDL_INIT_EVERYTHING))
-  {
-    printf("Error on SDL_Init().\n");
-    return false;
-  }
-
-  if (IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG)
-  {
-    printf("Error on IMG_Init().\n");
-    return false;
-  }
-
-  if (Mix_Init(MIX_INIT_OGG) != MIX_INIT_OGG)
-  {
-    printf("Error on Mix_Init.\n");
-    return false;
-  }
-
-  if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096))
-  {
-    printf("Error on Mix_OpenAudio.\n");
-    return false;
-  }
-
-  // SDL_WINDOW_FULLSCREEN
-  _window = SDL_CreateWindow("Abab Is Me", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-  _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
-
-  return true;
-}
-
-template<typename EventHandler, typename Renderer>
-void SDL<EventHandler, Renderer>::loop()
-{
-  while (!willQuit)
-  {
-    loopRenderer.render();
-    SDL_RenderPresent(_renderer);
-
-    handleEvents();
-
-    capFPS();
-  }
-}
-
-template<typename EventHandler, typename Renderer>
-void SDL<EventHandler, Renderer>::capFPS()
-{
-  u32 ticks = SDL_GetTicks();
-  u32 elapsed = ticks - SDL::ticks;
-
-  _lastFrameTicks = elapsed;
-
-  if (elapsed < ticksPerFrame)
-  {
-    SDL_Delay(ticksPerFrame - elapsed);
-    _lastFrameTicks = ticksPerFrame;
-  }
-
-  SDL::ticks = SDL_GetTicks();
-}
-
-template<typename EventHandler, typename Renderer>
-void SDL<EventHandler, Renderer>::deinit()
-{
-  Mix_CloseAudio();
-  Mix_Quit();
-  IMG_Quit();
-
-  SDL_DestroyRenderer(_renderer);
-  SDL_DestroyWindow(_window);
-
-  SDL_Quit();
-}
-
-template<typename EventHandler, typename Renderer>
-void SDL<EventHandler, Renderer>::handleEvents()
-{
-  SDL_Event event;
-  while (SDL_PollEvent(&event))
-  {
-    switch (event.type)
-    {
-    case SDL_QUIT:
-      willQuit = true;
-      break;
-
-    case SDL_KEYDOWN:
-      eventHandler.handleKeyboardEvent({ KeyCode(event.key.keysym.sym), true });
-      break;
-
-    case SDL_KEYUP:
-      eventHandler.handleKeyboardEvent({ KeyCode(event.key.keysym.sym), false });
-      break;
-
-#if MOUSE_ENABLED
-    case SDL_MOUSEBUTTONDOWN:
-    case SDL_MOUSEBUTTONUP:
-    case SDL_MOUSEMOTION:
-#if defined(WINDOW_SCALE)
-      event.button.x /= WINDOW_SCALE;
-      event.button.y /= WINDOW_SCALE;
-#endif
-      eventHandler.handleMouseEvent(event);
-#endif
-    }
-  }
-}
-
-template<typename EventHandler, typename Renderer>
-inline void SDL<EventHandler, Renderer>::drawRect(int x, int y, int w, int h, color_t color)
-{
-  SDL_SetRenderDrawColor(_renderer, color.r, color.g, color.b, color.a);
-  SDL_Rect rect = { x, y, w, h };
-  SDL_RenderDrawRect(_renderer, &rect);
-}
-
-template<typename EventHandler, typename Renderer>
-inline void SDL<EventHandler, Renderer>::fillRect(int x, int y, int w, int h, color_t color)
-{
-  SDL_SetRenderDrawColor(_renderer, color.r, color.g, color.b, color.a);
-  SDL_Rect rect = { x, y, w, h };
-  SDL_RenderFillRect(_renderer, &rect);
-}
-
-template<typename EventHandler, typename Renderer>
-inline void SDL<EventHandler, Renderer>::line(int x1, int y1, int x2, int y2, color_t color)
-{
-  SDL_SetRenderDrawColor(_renderer, color.r, color.g, color.b, color.a);
-  SDL_RenderDrawLine(_renderer, x1, y1, x2, y2);
-}
-
-template<typename EventHandler, typename Renderer>
-inline void SDL<EventHandler, Renderer>::clear(color_t color)
-{
-  SDL_SetRenderDrawColor(_renderer, color.r, color.g, color.b, 255);
-  SDL_RenderClear(_renderer);
-}
-
-template<typename EventHandler, typename Renderer>
-inline void SDL<EventHandler, Renderer>::blit(const Texture* texture, int sx, int sy, int w, int h, int dx, int dy, int dw, int dh)
-{
-  SDL_Rect from = { sx, sy, w, h };
-  SDL_Rect to = { dx, dy, dw, dh };
-  blit(_renderer, texture, from, to);
-}
-
-template<typename EventHandler, typename Renderer>
-inline void SDL<EventHandler, Renderer>::blit(const Texture* texture, const rect_t& from, int dx, int dy)
-{
-  SDL_Rect to = { dx, dy, from.w, from.h };
-  blit(_renderer, texture, from, to);
-}
-
-template<typename EventHandler, typename Renderer>
-inline void SDL<EventHandler, Renderer>::blit(const Texture* texture, int sx, int sy, int w, int h, int dx, int dy)
-{
-  blit(texture, { sx, sy, w, h }, dx, dy);
-}
-
-template<typename EventHandler, typename Renderer>
-inline void SDL<EventHandler, Renderer>::blit(const Texture* texture, const rect_t& src, const rect_t& dest)
-{
-  SDL_RenderCopy(_renderer, texture->texture(), &src, &dest);
-}
-
-template<typename EventHandler, typename Renderer>
-inline void SDL<EventHandler, Renderer>::blit(const Texture* texture, color_t color, const rect_t& src, const rect_t& dest)
-{
-  SDL_SetTextureColorMod(texture->texture(), color.r, color.g, color.b);
-  SDL_RenderCopy(_renderer, texture->texture(), &src, &dest);
-}
-
-
-template<typename EventHandler, typename Renderer>
-inline void SDL<EventHandler, Renderer>::blit(const Texture* texture, int dx, int dy)
-{
-  u32 dummy;
-  int dummy2;
-
-  SDL_Rect from = { 0, 0, 0, 0 };
-  SDL_Rect to = { dx, dy, 0, 0 };
-
-  SDL_QueryTexture(texture->texture(), &dummy, &dummy2, &from.w, &from.h);
-
-  to.w = from.w;
-  to.h = from.h;
-
-  SDL_RenderCopy(_renderer, texture->texture(), &from, &to);
-}
-

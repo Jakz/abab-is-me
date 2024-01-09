@@ -4,7 +4,7 @@
 #include "game/Level.h"
 #include "gfx/Gfx.h"
 
-#include "SDL.h"
+#include "ViewManager.h"
 
 #include <filesystem>
 
@@ -21,8 +21,10 @@ void AssetCache::flushCache()
   _iconGfxs.clear();
 }
 
-void AssetCache::init(const path& baseFolder)
+void AssetCache::init(Renderer* renderer, const path& baseFolder)
 {
+  _renderer = renderer;
+  
   _dataFolder = baseFolder + "/Data/";
   loadPalettes();
 
@@ -163,7 +165,7 @@ const Texture* AssetCache::objectGfx(const baba::ObjectSpec* spec) const
       break;
     }
 
-    SDL_Surface* surface = nullptr;
+    Surface surface;
 
     std::vector<rect_t> rects;
 
@@ -173,26 +175,25 @@ const Texture* AssetCache::objectGfx(const baba::ObjectSpec* spec) const
     {
       for (uint32_t f = 0; f < FRAMES; ++f)
       {
-        static char buffer[128];
-        sprintf(buffer, "%s_%d_%d.png", base.c_str(), frames[i], f + 1);
-        SDL_Surface* tmp = IMG_Load(buffer);
+        auto filename = fmt::format("{}_{}_{}.png", base.c_str(), frames[i], f + 1);
+        Surface tmp = _renderer->loadImageAsSurface(filename);
+
         if (!tmp)
-          LOGD("Error: missing graphics file %s", buffer);
+          LOGD("Error: missing graphics file %s", filename.c_str());
         else
         {
-          spriteWidth = tmp->w;
-          spriteHeight = tmp->h;
+          spriteWidth = tmp.width();
+          spriteHeight = tmp.height();
         }
 
         if (!surface)
-          surface = SDL_CreateRGBSurface(0, spriteWidth * 3 * frames.size(), spriteHeight, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+          surface = _renderer->generateSurface(size2d_t(spriteWidth * 3 * frames.size(), spriteHeight));
 
-        SDL_Rect dest = { (i * 3 + f) * spriteWidth, 0, spriteWidth, spriteHeight };
+        rect_t dest = { (i * 3 + f) * spriteWidth, 0, spriteWidth, spriteHeight };
 
         if (tmp)
         {
-          SDL_BlitSurface(tmp, nullptr, surface, &dest);
-          SDL_FreeSurface(tmp);
+          _renderer->blit(&tmp, nullptr, &surface, &dest);
         }
 
         if (f == 0)
@@ -201,16 +202,15 @@ const Texture* AssetCache::objectGfx(const baba::ObjectSpec* spec) const
     }
 
     auto cacheSize = std::accumulate(_objectGfxs.begin(), _objectGfxs.end(), 0ULL, [](uint64_t val, const decltype(_objectGfxs)::value_type& entry) { return entry.second->width() * entry.second->height() * 4 + val; });
-    cacheSize += surface->w * surface->h * 4;
-    LOGD("Caching gfx for %s (%s) in a %dx%d texture, total cache size: %.2f", spec->name.c_str(), spec->sprite.c_str(), surface->w, surface->h, cacheSize / 1024.0f);
+    cacheSize += surface.width() * surface.height() * 4;
+    LOGD("Caching gfx for %s (%s) in a %dx%d texture, total cache size: %.2f", spec->name.c_str(), spec->sprite.c_str(), surface.width(), surface.height(), cacheSize / 1024.0f);
 
-    auto texture = SDL_CreateTextureFromSurface(gfx::Gfx::i.renderer, surface);
-    auto* asset = new Texture(texture, size2d_t(surface->w, surface->h), rects);
-    SDL_FreeSurface(surface);
+    auto texture = _renderer->buildTexture(surface);
+    texture->setRects(rects);
+    
+    auto rit = _objectGfxs.emplace(std::make_pair(spec, texture));
 
-    auto rit = _objectGfxs.emplace(std::make_pair(spec, asset));
-
-    return asset;
+    return texture;
   }
 }
 
@@ -221,42 +221,37 @@ const Texture* AssetCache::imageGfx(const std::string& image) const
   if (it != _imageGfxs.end())
     return it->second.get();
 
-
   //TODO: make it relative to world name
   std::string path = _dataFolder + R"(Worlds\baba\Images\)" + image;
 
-  SDL_Surface* surface = nullptr;
+  Surface surface;
 
   std::vector<rect_t> rects;
 
   for (size_t i = 0; i < 3; ++i)
   {
-    char buffer[128];
-    sprintf(buffer, "%s_%d.png", path.c_str(), i + 1);
-    auto image = IMG_Load(buffer);
+    auto filename = fmt::format("{}_{}.png", path.c_str(), i + 1);
+    Surface image = _renderer->loadImageAsSurface(filename);
     assert(image);
 
     if (!surface)
     {
-      surface = SDL_CreateRGBSurface(0, image->w * 3, image->h, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+      surface = _renderer->generateSurface(size2d_t(image.width() * 3, image.height()));
       assert(surface);
     }
 
-    SDL_Rect dest = { i * image->w, 0, image->w, image->h };
-    SDL_BlitSurface(image, nullptr, surface, &dest);
-
+    rect_t dest = { i * image.width(), 0, image.width(), image.height() };
+    _renderer->blit(&image, nullptr, &surface, &dest);
+   
     rects.push_back(dest);
-
-    SDL_FreeSurface(image);
   }
 
-  auto texture = SDL_CreateTextureFromSurface(gfx::Gfx::i.renderer, surface);
-  auto* asset = new Texture(texture, size2d_t(surface->w, surface->h), rects);
-  SDL_FreeSurface(surface);
+  auto texture = _renderer->buildTexture(surface);
+  texture->setRects(rects);
 
-  auto rit = _imageGfxs.emplace(std::make_pair(image, asset));
+  auto rit = _imageGfxs.emplace(std::make_pair(image, texture));
 
-  return asset;
+  return texture;
 }
 
 const Texture* AssetCache::numberedGfx(const std::string& key)
@@ -271,34 +266,30 @@ const Texture* AssetCache::numberedGfx(const std::string& key)
 
     if (nit != _numberedGfxIndices.end())
     {
-      SDL_Surface* surface = nullptr;
+      Surface surface;
       
       std::vector<rect_t> rects;
       const auto& indices = nit->second;
 
       for (int32_t i = 0; i < indices.size(); ++i)
       {        
-        Surface* image = _loader.loadImage(indices[i]);
+        Surface image = _loader.loadImage(indices[i]);
 
         if (!surface)
         {
-          surface = SDL_CreateRGBSurface(0, image->width() * indices.size(), image->height(), 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+          surface = _renderer->generateSurface(size2d_t(image.width() * indices.size(), image.height()));
           assert(surface);
         }
 
-        SDL_Rect dest = { i * image->width(), 0, image->width(), image->height() };
-        SDL_BlitSurface(image->_surface, nullptr, surface, &dest);
+        rect_t dest = { i * image.width(), 0, image.width(), image.height() };
+        _renderer->blit(&image, nullptr, &surface, &dest);
         rects.push_back(dest);
-
-        delete image;
       }
 
       if (surface)
       {
-        auto texture = SDL_CreateTextureFromSurface(gfx::Gfx::i.renderer, surface);
-        auto* asset = new Texture(texture, size2d_t(surface->w, surface->h), rects);
-        SDL_FreeSurface(surface);
-
+        auto asset = _renderer->buildTexture(surface);
+        asset->setRects(rects);
         _numberedGfxs[key].reset(asset);
         return asset;
       }
@@ -324,13 +315,7 @@ const Texture* AssetCache::iconGfx(const baba::Icon* spec) const
   else /* TODO: use world folder, not hardcoded one */
     path = _dataFolder + R"(Worlds\baba\Sprites\)" + spec->sprite + ".png";
 
-  SDL_Surface* image = IMG_Load(path.c_str());
-  assert(image);
-
-  std::vector<rect_t> rects = { { 0, 0, image->w, image->h } };
-  auto texture = SDL_CreateTextureFromSurface(gfx::Gfx::i.renderer, image);
-  auto* asset = new Texture(texture, size2d_t(image->w, image->h), rects);
-
+  auto asset = _renderer->loadImage(path);
   auto rit = _iconGfxs.emplace(std::make_pair(spec, asset));
 
   return asset;

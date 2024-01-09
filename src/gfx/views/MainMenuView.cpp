@@ -5,10 +5,7 @@ using namespace ui;
 
 void MainMenuView::render()
 {
-  auto r = gvm->renderer();
-
-  SDL_SetRenderDrawColor(r, 0, 0, 0, 255);
-  SDL_RenderClear(r);
+  _renderer->clear(color_t(0, 0, 0));
 }
 
 void MainMenuView::handleKeyboardEvent(const events::KeyEvent& event)
@@ -17,7 +14,8 @@ void MainMenuView::handleKeyboardEvent(const events::KeyEvent& event)
   {
     switch (event.code)
     {
-      case KeyCode::BindExit: gvm->exit(); break;
+      case KeyCode::BindExit:
+        break;
     }
   }
 }

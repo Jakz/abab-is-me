@@ -11,6 +11,8 @@
 
 #include <array>
 
+class SDL;
+using Renderer = SDL;
 using asset_index = int32_t;
 
 struct asset_list : public std::vector<asset_index>
@@ -72,6 +74,8 @@ private:
 
   AssetLoader _loader;
 
+  Renderer* _renderer;
+
 public:
   const Texture* objectGfx(const baba::ObjectSpec* spec) const;
   const Texture* imageGfx(const std::string& image) const;
@@ -89,7 +93,7 @@ public:
 public:
   AssetCache();
 
-  void init(const path& baseFolder);
+  void init(Renderer* renderer, const path& baseFolder);
 };
 
 class AssetMapping

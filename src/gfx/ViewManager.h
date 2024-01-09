@@ -3,16 +3,31 @@
 #include "SdlHelper.h"
 #include "Common.h"
 
+#include "gfx/AssetCache.h"
+
 #include <memory>
+
+using Renderer = SDL;
+
 
 namespace ui
 {
+  class ViewManager;
+
   class View
   {
+  protected:
+    ViewManager* _director;
+    Renderer* _renderer;
+    
   public:
+    View(ViewManager* director, Renderer* renderer) : _director(director), _renderer(renderer) { }
+
     virtual void render() = 0;
     virtual void handleKeyboardEvent(const events::KeyEvent& event) { };
     virtual void handleMouseEvent(const events::MouseEvent& event) { };
+
+    AssetCache* assets();
   };
 
   enum TextAlign
@@ -24,7 +39,7 @@ namespace ui
   class LevelSelectView;
   class MainMenuView;
 
-  class ViewManager : public SDL<ViewManager, ViewManager>
+  class ViewManager : public Director
   {
   public:
     using view_t = View;
@@ -32,36 +47,47 @@ namespace ui
     std::unique_ptr<Texture> _font;
 
   private:
-    LevelSelectView* _levelSelectView;
-    GameView* _gameView;
-    
+    Renderer* _renderer;
+
     struct
     {
-      MainMenuView* _mainMenu;
+      GameView* gameView;
+      LevelSelectView* levelSelectView;
+      MainMenuView* mainMenu;
       
     } _views;
 
     view_t* _view;
+
+    AssetCache _assets;
 
   public:
     ViewManager();
 
     bool loadData();
 
-    void handleKeyboardEvent(const events::KeyEvent& event);
-    void handleMouseEvent(const events::MouseEvent& event);
-    void render();
+    void handle(const events::KeyEvent& event) override;
+    void handle(const events::MouseEvent& event) override;
+    void render() override;
 
+    bool init();
     void deinit();
 
-    Texture* font() { return _font.get(); }
+    void loop();
+
+    virtual size2d_t windowSize() const;
+    AssetCache* assets() { return &_assets; }
+
+    Texture* font() const { return _font.get(); }
 
     //TODO: hacky cast to avoid header inclusion
-    GameView* gameView() { return _gameView; }
+    GameView* gameView() const { return _views.gameView; }
 
     int32_t textWidth(const std::string& text, float scale = 2.0f) const { return text.length() * scale * 4; }
     void text(const std::string& text, int32_t x, int32_t y, SDL_Color color, TextAlign align, float scale = 2.0f);
     void text(const std::string& text, int32_t x, int32_t y);
   };
+
+  inline AssetCache* View::assets() { return _director->assets(); }
 }
 

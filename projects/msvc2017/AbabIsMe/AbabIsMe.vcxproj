@@ -179,6 +179,7 @@
     <ClCompile Include="..\..\..\src\game\Tile.cpp" />
     <ClCompile Include="..\..\..\src\gfx\AssetCache.cpp" />
     <ClCompile Include="..\..\..\src\gfx\Gfx.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\SdlHelper.cpp" />
     <ClCompile Include="..\..\..\src\gfx\ViewManager.cpp" />
     <ClCompile Include="..\..\..\src\gfx\views\GameView.cpp" />
     <ClCompile Include="..\..\..\src\gfx\views\LevelSelectView.cpp" />

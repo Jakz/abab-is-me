@@ -152,6 +152,9 @@
     <ClCompile Include="..\..\..\src\utils\format\format.cpp">
       <Filter>src\utils\format</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\SdlHelper.cpp">
+      <Filter>src\gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="Natvis.natvis" />

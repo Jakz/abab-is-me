@@ -132,7 +132,7 @@ bool AssetLoader::tryExtractImage(uint32_t offset, const std::string& folder, si
   return false;
 }
 
-Surface* AssetLoader::loadImage(uint32_t index)
+Surface AssetLoader::loadImage(uint32_t index)
 {
   if (index >= offsets.size())
     return nullptr;
@@ -271,7 +271,7 @@ Surface* AssetLoader::loadImage(uint32_t index)
   file = nullptr;
 
 
-  return new Surface(surface);
+  return Surface(surface);
 }
 
 bool AssetLoader::tryExtractSound(uint32_t offset, const string& outPath)

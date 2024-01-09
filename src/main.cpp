@@ -55,7 +55,8 @@ void prevLevel()
 
 void enterLevel(std::string filename)
 {  
-  levelStack.push_back(level->info().filename);
+  if (level)
+    levelStack.push_back(level->info().filename);
 
   delete level;
   level = nullptr;
@@ -88,37 +89,19 @@ void exitLevel()
 #include "gfx/Gfx.h"
 
 int main(int argc, char* argv[])
-{
-  //AssetLoader aloader;
-  //aloader.decode(R"(E:\Games\Steam\SteamApps\common\Baba Is You\Assets.dat)", "assets");
-  
-  gfx::Gfx::i.cache()->init(R"(E:\Games\Steam\SteamApps\common\Baba Is You)");
-  
+{  
   loader.setDataFolder(R"(E:\Games\Steam\SteamApps\common\Baba Is You\Data\)");
 
   data = loader.loadGameData();
-  sprintf(buffer, "%dlevel", levelIndex);
-  level = loader.load(buffer, data);
-  level->computeTiling();
+
+
   
   if (!vm.init())
     return -1;
 
-
-
-  gfx::Gfx::i.renderer = vm.renderer();
-
-  if (!vm.loadData())
-  {
-    printf("Error while loading and initializing data.\n");
-    vm.deinit();
-    return -1;
-  }
-
-  vm.gameView()->levelLoaded();
+  enterLevel(fmt::format("{}level", levelIndex));
 
   vm.loop();
-  vm.deinit();
 
   //loader.load("1level.l");
 

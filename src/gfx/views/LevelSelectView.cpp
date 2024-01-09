@@ -5,10 +5,7 @@ using namespace ui;
 
 void LevelSelectView::render()
 {
-  auto r = gvm->renderer();
-
-  SDL_SetRenderDrawColor(r, 0, 0, 0, 255);
-  SDL_RenderClear(r);
+  _renderer->clear(color_t(0, 0, 0));
 }
 
 void LevelSelectView::handleKeyboardEvent(const events::KeyEvent& event)
@@ -17,7 +14,8 @@ void LevelSelectView::handleKeyboardEvent(const events::KeyEvent& event)
   {
     switch (event.code)
     {
-      case KeyCode::BindExit: gvm->exit(); break;
+      case KeyCode::BindExit: 
+        break;
     }
   }
 }

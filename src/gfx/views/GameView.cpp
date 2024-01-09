@@ -22,14 +22,14 @@ extern void exitLevel();
 
 History history;
 
-GameView::GameView(ViewManager* gvm) : gvm(gvm), colors({ nullptr }), scaler(Scaler::SCALE_TO_ATMOST_NATIVE)
+GameView::GameView(ViewManager* director, Renderer* renderer) : View(director, renderer), colors({ nullptr }), scaler(Scaler::SCALE_TO_ATMOST_NATIVE)
 { 
   colors.grid.a = 0;
 }
 
 void GameView::levelLoaded()
 {
-  auto* palette = gfx::Gfx::i.cache()->palette(level->palette());
+  auto* palette = assets()->palette(level->palette());
 
   if (palette)
   {
@@ -46,14 +46,14 @@ void GameView::render()
   //TODO: particles
   //TODO BEST property
 
-  auto cache = gfx::Gfx::i.cache();
+  auto cache = assets();
   
   int32_t tick = (SDL_GetTicks() / 180) % 3;
   constexpr int32_t fspan = 2, fcount = 1 + fspan * 4;
   int32_t ftick = ((SDL_GetTicks() / 300) % fspan);
   
   //point_t offset = this->offset;
-  size = gvm->getWindowSize();
+  size = _director->windowSize();
 
   float bestWidth = size.w / level->width();
   float bestHeight = size.h / level->height();
@@ -85,13 +85,13 @@ void GameView::render()
   SDL_Rect bb = { 0,0, size.w, size.h };
 
   /* TODO: on level 106 (main world) outside and inside are swapped */
-  gvm->fillRect(bb, colors.outside);
+  _renderer->fillRect(bb, colors.outside);
 
   const auto& images = level->images();
 
   {
     const rect_t insideRect = { offset.x + tileSize, offset.y + tileSize, (level->width() - 2)* tileSize, (level->height() - 2)* tileSize };
-    gvm->fillRect(insideRect, colors.inside);
+    _renderer->fillRect(insideRect, colors.inside);
   }
 
   for (const auto& image : images)
@@ -101,7 +101,7 @@ void GameView::render()
     //SDL_Rect dest = { offset.x + level->width()*tileSize / 2 - gfx.sprites[tick].w / 2, offset.y + level->height()*tileSize / 2 - gfx.sprites[tick].h / 2, gfx.sprites[tick].w, gfx.sprites[tick].h };
     SDL_Rect dest = { offset.x + tileSize, offset.y + tileSize, (level->width() - 2) * tileSize, (level->height() - 2) * tileSize };
 
-    gvm->blit(asset, asset->rect(tick), dest);
+    _renderer->blit(asset, asset->rect(tick), dest);
   }
 
   for (int y = 0; y < size.h / tileSize; ++y)
@@ -143,7 +143,7 @@ void GameView::render()
 
             src.x += tick * src.w;
 
-            gvm->blit(asset, color, src, dest);
+            _renderer->blit(asset, color, src, dest);
           }
         }
       }
@@ -160,7 +160,7 @@ void GameView::render()
     const rect_t dest = { offset.x + x * tileSize + tileSize / 2 - (src.w * ratio) / 2, fy, src.w * ratio, src.h * ratio };
     const auto& ocolor = levelLink.color;
     color_t color = colors.palette->at(ocolor.x, ocolor.y);
-    gvm->blit(bgAsset, color, src, dest);
+    _renderer->blit(bgAsset, color, src, dest);
 
 
     const Texture* asset = nullptr;
@@ -207,25 +207,27 @@ void GameView::render()
 
       const auto& ocolor = levelLink.color;
       color_t color = colors.palette->at(ocolor.x, ocolor.y);
-      gvm->blit(asset, color, src, dest);
+      _renderer->blit(asset, color, src, dest);
     }
   }
 
   drawGrid(offset, { tileSize, tileSize }, { level->width() + 1, level->height() + 1 });
 
+  _director->text(level->info().filename, 5, 5, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
   const auto& rulesList = level->rules().rules();
   for (coord_t i = 0; i < rulesList.size(); ++i)
-    gvm->text(rulesList[i].name(), 5, 5 + i * 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
+    _director->text(rulesList[i].name(), 5, 5 + (i + 1) * 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
+
 
   if (level->isVictory())
-    gvm->text("Victory!", size.w - 5, 5, { 255, 255, 0 }, ui::TextAlign::RIGHT, 1.0f);
+    _director->text("Victory!", size.w - 5, 5, { 255, 255, 0 }, ui::TextAlign::RIGHT, 1.0f);
   else if (level->isDefeat())
-    gvm->text("Defeat!", size.w - 5, 5, { 255, 0, 0 }, ui::TextAlign::RIGHT, 1.0f);
+    _director->text("Defeat!", size.w - 5, 5, { 255, 0, 0 }, ui::TextAlign::RIGHT, 1.0f);
 
-  gvm->text(level->filename() + " - " + level->name(), size.w / 2, size.h - 20, { 255, 255, 255 }, ui::TextAlign::CENTER, 1.0f);
+  _director->text(level->filename() + " - " + level->name(), size.w / 2, size.h - 20, { 255, 255, 255 }, ui::TextAlign::CENTER, 1.0f);
 
 #if MOUSE_ENABLED
-  gvm->text(hoverInfo, 5, size.h - 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
+  _director->text(hoverInfo, 5, size.h - 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
 #endif
 }
 
@@ -234,10 +236,10 @@ void GameView::drawGrid(point_t b, size2d_t size, size2d_t count)
   if (colors.grid.a)
   {
     for (int i = 0; i < count.h; ++i)
-      gvm->line(b.x, b.y + size.h * i, b.x + size.w * count.w, b.y + size.h * i, colors.grid);
+      _renderer->line(b.x, b.y + size.h * i, b.x + size.w * count.w, b.y + size.h * i, colors.grid);
 
     for (int i = 0; i < count.w; ++i)
-      gvm->line(b.x + size.w * i, b.y, b.x + size.w * i, b.y + size.h * count.h, colors.grid);
+      _renderer->line(b.x + size.w * i, b.y, b.x + size.w * i, b.y + size.h * count.h, colors.grid);
   }
 }
 
@@ -289,12 +291,12 @@ bool isMovementAllowed(MoveInfo info, D d)
   return true;
 }
 
-bool movement(MoveInfo info, D d)
+bool GameView::movement(MoveInfo info, D d)
 {
   Tile* tile = info.tile;
   Tile* next = level->get(tile, d);
 
-  auto it = info.it;
+  const auto& it = info.it;
 
   bool isStopped = false;
   bool updateVariant = false;
@@ -320,7 +322,7 @@ bool movement(MoveInfo info, D d)
     {
       if (it->spec && ObjectProperty::YOU && next->has(ObjectProperty::DEFEAT))
       {
-        const auto& data = gfx::Gfx::i.cache()->sound(AssetMapping::DEFEAT_SOUND.random());
+        const auto& data = assets()->sound(AssetMapping::DEFEAT_SOUND.random());
         Mix_PlayChannel(-1, data.nativeData.chunk(), 0);
 
         tile->objects.erase(it);
@@ -413,7 +415,7 @@ bool movement(MoveInfo info, D d)
   return false;
 }
 
-void movement(D d)
+void GameView::movement(D d)
 {  
   //const auto& data = gfx::Gfx::i.cache()->sound(AssetMapping::BABA_STEP_SOUND.random());
   //Mix_PlayChannel(-1, data.nativeData.chunk(), 0);
@@ -537,14 +539,14 @@ void GameView::handleKeyboardEvent(const events::KeyEvent& event)
       case KeyCode::KeyR:
       case KeyCode::KeyKpPlus:
       { 
-        gfx::Gfx::i.cache()->flushCache();
+        assets()->flushCache();
         nextLevel();
         break;
       }
       case KeyCode::KeyL:
       case KeyCode::KeyKpMinus:
       { 
-        gfx::Gfx::i.cache()->flushCache();
+        assets()->flushCache();
         prevLevel();
         break;
       }

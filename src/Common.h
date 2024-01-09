@@ -95,10 +95,6 @@ namespace io
 
 bool operator&&(const baba::ObjectSpec* spec, baba::ObjectProperty prop);
 
-
-constexpr int32_t WIDTH = 1024;
-constexpr int32_t HEIGHT = 768;
-
 #if USE_SDL
 
 #include "SDL.h"
@@ -116,16 +112,33 @@ public:
   coord_t _width, _height;
 
 public:
+  Surface() : _surface(nullptr), _width(0), _height(0) { }
   Surface(SDL_Surface* surface) : _surface(surface), _width(surface->w), _height(surface->h)
   {
 
+  }
+
+  Surface(Surface&& other) noexcept
+  {
+    _width = other._width;
+    _height = other._height;
+    std::swap(_surface, other._surface);
+  }
+
+  Surface& operator=(Surface&& other) noexcept
+  {
+    _width = other._width;
+    _height = other._height;
+    std::swap(_surface, other._surface);
+    return *this;
   }
 
   ~Surface()
   {
     destroy();
   }
-
+  
+  operator bool() const { return _surface != nullptr; }
   coord_t height() const { return _height; }
   coord_t width() const { return _width; }
 
@@ -146,6 +159,7 @@ public:
   coord_t _width, _height;
 
 public:
+  Texture(SDL_Texture* texture, coord_t w, coord_t h) : Texture(texture, size2d_t(w, h), { { 0, 0, w, h } }) { }
   Texture(SDL_Texture* texture, size2d_t size, const std::vector<rect_t>& rects) :
     _texture(texture), _width(size.w), _height(size.h), _rects(rects)
   {
@@ -164,6 +178,9 @@ public:
   const rect_t& rect(size_t index) const { return index < _rects.size() ? _rects[index] : _rects[0]; }
 
   SDL_Texture* texture() const { return _texture; }
+
+  void setRects(const std::vector<rect_t>& rects) { _rects = rects; }
+  void enableAlphaBlending() { SDL_SetTextureBlendMode(_texture, SDL_BLENDMODE_BLEND); }
 
   void destroy()
   {

@@ -6,6 +6,12 @@
 #include <memory>
 
 class AssetCache;
+struct MoveInfo;
+
+namespace baba
+{
+  enum class D;
+}
 
 namespace ui
 {
@@ -19,9 +25,6 @@ namespace ui
   
   class GameView : public View
   {
-  private:
-    ViewManager* gvm;
-
     void render();
 
     Scaler scaler;
@@ -47,8 +50,11 @@ namespace ui
 
     void drawGrid(point_t b, size2d_t size, size2d_t count);
 
+    void movement(baba::D d);
+    bool movement(MoveInfo info, baba::D d);
+    
   public:
-    GameView(ViewManager* gvm);
+    GameView(ViewManager* director, Renderer* renderer);
     ~GameView();
 
     void handleKeyboardEvent(const events::KeyEvent& event);
@@ -59,11 +65,8 @@ namespace ui
 
   class LevelSelectView : public View
   {
-  private:
-    ViewManager* gvm;
-
   public:
-    LevelSelectView(ViewManager* gvm) : gvm(gvm) { }
+    using View::View;
 
     void render() override;
     void handleKeyboardEvent(const events::KeyEvent& event);
@@ -72,11 +75,8 @@ namespace ui
 
   class MainMenuView : public View
   {
-  private:
-    ViewManager* gvm;
-
   public:
-    MainMenuView(ViewManager* gvm) : gvm(gvm) { }
+    using View::View;
 
     void render() override;
     void handleKeyboardEvent(const events::KeyEvent& event);
