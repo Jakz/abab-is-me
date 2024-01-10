@@ -27,6 +27,7 @@ namespace baba
     MORE      = 0x00010000ULL,
     TELE      = 0x00020000ULL,
     SELECT    = 0x00040000ULL,
+    PULL      = 0x00080000ULL,
   };
 
   using ObjectProperties = bit_mask<ObjectProperty>;

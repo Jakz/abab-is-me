@@ -9,12 +9,17 @@
 
 struct Surface;
 
+class SDL;
+using Renderer = SDL;
+
 class AssetLoader
 {
 protected:
   FILE* file;
 
+  Renderer* _renderer;
   std::string _path;
+  
   std::vector<uint32_t> offsets;
 
   template<typename T> T read() { T v; fread(&v, sizeof(T), 1, file); return v; }
@@ -29,7 +34,7 @@ protected:
   bool decode(const std::string& assets, const std::string& outFolder);
 
 public:
-  void setPath(const std::string& path) { _path = path; }
+  void init(Renderer* renderer, const std::string& path);
   
   void cacheOffsets();
   std::vector<uint8_t> loadSound(uint32_t index);

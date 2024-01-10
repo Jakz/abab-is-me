@@ -189,6 +189,8 @@ void Rules::apply(baba::Level* level)
       _state[object].properties.set(ObjectProperty::MORE);
     else if (property->spec->name == "text_tele")
       _state[object].properties.set(ObjectProperty::TELE);
+    else if (property->spec->name == "text_pull")
+      _state[object].properties.set(ObjectProperty::PULL);
     else
       assert(false);
 

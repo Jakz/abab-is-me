@@ -10,13 +10,19 @@
 #include <filesystem>
 #include <fstream>
 
-#include "SDL.h"
-#include "SDL_image.h"
+#include "Common.h"
+#include "gfx/SdlHelper.h"
 
 using namespace std;
 
 bool verbose = false;
 auto out = std::fstream("output.txt", std::ios_base::out);//std::cout;
+
+void AssetLoader::init(Renderer* renderer, const std::string& path)
+{
+  _path = path;
+  _renderer = renderer;
+}
 
 bool AssetLoader::decode(const std::string& assets, const std::string& outFolder)
 {
@@ -135,7 +141,7 @@ bool AssetLoader::tryExtractImage(uint32_t offset, const std::string& folder, si
 Surface AssetLoader::loadImage(uint32_t index)
 {
   if (index >= offsets.size())
-    return nullptr;
+    return Surface();
   
   auto offset = offsets[index];
   
@@ -262,8 +268,9 @@ Surface AssetLoader::loadImage(uint32_t index)
   std::filesystem::create_directory(outFolder);
   std::string outPath = outFolder + "/" + std::to_string(index) + ".png";*/
 
-  SDL_Surface* surface = SDL_CreateRGBSurface(0, width, height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
-  memcpy(surface->pixels, &uncompressed[0], uncompressed.size());
+  Surface surface = _renderer->generateSurface(size2d_t(width, height));
+
+  memcpy(surface._surface->pixels, &uncompressed[0], uncompressed.size());
   /*IMG_SavePNG(surface, outPath.c_str());
   SDL_FreeSurface(surface);*/
   
@@ -271,7 +278,7 @@ Surface AssetLoader::loadImage(uint32_t index)
   file = nullptr;
 
 
-  return Surface(surface);
+  return surface;
 }
 
 bool AssetLoader::tryExtractSound(uint32_t offset, const string& outPath)

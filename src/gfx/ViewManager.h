@@ -86,6 +86,8 @@ namespace ui
     int32_t textWidth(const std::string& text, float scale = 2.0f) const { return text.length() * scale * 4; }
     void text(const std::string& text, int32_t x, int32_t y, SDL_Color color, TextAlign align, float scale = 2.0f);
     void text(const std::string& text, int32_t x, int32_t y);
+
+    void text(const Texture* font, const std::string& text, int32_t x, int32_t y);
   };
 
   inline AssetCache* View::assets() { return _director->assets(); }

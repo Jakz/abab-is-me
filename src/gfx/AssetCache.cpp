@@ -28,7 +28,7 @@ void AssetCache::init(Renderer* renderer, const path& baseFolder)
   _dataFolder = baseFolder + "/Data/";
   loadPalettes();
 
-  _loader.setPath(baseFolder + "/Assets.dat");
+  _loader.init(renderer, baseFolder + "/Assets.dat");
   _loader.cacheOffsets();
 
   _numberedGfxIndices["level_link_number_00"] = { 10 };
@@ -59,6 +59,75 @@ void AssetCache::init(Renderer* renderer, const path& baseFolder)
 
   _numberedGfxIndices["level_link_box"] = { 49, 239, 240 };
   _numberedGfxIndices["level_link_box_bg"] = { 38 };
+
+  auto& smallFont = _numberedGfxIndices["small_font"];
+  smallFont.resize(256, -1);
+
+  smallFont[u'!'] = 436;
+  smallFont[u'"'] = 3111;
+  smallFont[u'%'] = 602;
+  smallFont[u'&'] = 601;
+  smallFont[u'\''] = 438;
+  smallFont[u'('] = 637;
+  smallFont[u')'] = 713;
+  smallFont[u'*'] = 3181;
+  smallFont[u'+'] = 1605;
+  smallFont[u','] = 437;
+  smallFont[u'-'] = 434;
+  smallFont[u'.'] = 433;
+
+  smallFont[u'0'] = 58;
+  smallFont[u'1'] = 423;
+  smallFont[u'2'] = 424;
+  smallFont[u'3'] = 425;
+  smallFont[u'4'] = 427;
+  smallFont[u'5'] = 428;
+  smallFont[u'6'] = 429;
+  smallFont[u'7'] = 430;
+  smallFont[u'8'] = 431;
+  smallFont[u'9'] = 432;
+
+  smallFont[u':'] = 439;
+  smallFont[u';'] = 581;
+  smallFont[u'<'] = 226;
+  smallFont[u'>'] = 50;
+  smallFont[u'?'] = 435;
+  smallFont[u'_'] = 41;
+  
+  smallFont[u'a'] = 2270;
+  smallFont[u'b'] = 1488;
+  smallFont[u'c'] = 1490;
+  smallFont[u'd'] = 1491;
+  smallFont[u'e'] = 18;
+  smallFont[u'f'] = 403;
+  smallFont[u'g'] = 404;
+  smallFont[u'h'] = 141;
+  smallFont[u'i'] = 109;
+  smallFont[u'j'] = 405;
+  smallFont[u'l'] = 407;
+  smallFont[u'm'] = 409;
+  smallFont[u'n'] = 408;
+  smallFont[u'o'] = 410;
+  smallFont[u'p'] = 411;
+  smallFont[u'q'] = 412;
+  smallFont[u'r'] = 413;
+  smallFont[u's'] = 414;
+  smallFont[u't'] = 415;
+  smallFont[u'u'] = 416;
+  smallFont[u'v'] = 417;
+  smallFont[u'w'] = 418;
+  smallFont[u'x'] = 419;
+  smallFont[u'y'] = 420;
+  smallFont[u'z'] = 421;
+
+  smallFont[u'à'] = 2120;
+
+  smallFont[u'è'] = 2119;
+  smallFont[u'é'] = 2123;
+
+  smallFont[u'ß'] = 34;
+  
+  
 
 }
 
@@ -273,17 +342,22 @@ const Texture* AssetCache::numberedGfx(const std::string& key)
 
       for (int32_t i = 0; i < indices.size(); ++i)
       {        
-        Surface image = _loader.loadImage(indices[i]);
-
-        if (!surface)
+        if (indices[i] >= 0)
         {
-          surface = _renderer->generateSurface(size2d_t(image.width() * indices.size(), image.height()));
-          assert(surface);
-        }
+          Surface image = _loader.loadImage(indices[i]);
 
-        rect_t dest = { i * image.width(), 0, image.width(), image.height() };
-        _renderer->blit(&image, nullptr, &surface, &dest);
-        rects.push_back(dest);
+          if (!surface)
+          {
+            surface = _renderer->generateSurface(size2d_t(image.width() * indices.size(), image.height()));
+            assert(surface);
+          }
+
+          rect_t dest = { i * image.width(), 0, image.width(), image.height() };
+          _renderer->blit(&image, nullptr, &surface, &dest);
+          rects.push_back(dest);
+        }
+        else
+          rects.push_back(rect_t(0, 0, 0, 0));
       }
 
       if (surface)

@@ -1,5 +1,6 @@
 #include "SdlHelper.h"
 
+#include "Common.h"
 
 bool SDL::init()
 {

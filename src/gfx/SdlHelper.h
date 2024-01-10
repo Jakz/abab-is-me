@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Common.h"
+//#include "Common.h"
 
 #include "SDL.h"
 #include "SDL_image.h"
@@ -9,8 +9,16 @@
 #include <cstdint>
 #include <cstdio>
 #include <cassert>
+#include <string>
 
 using u32 = uint32_t;
+struct size2d_t;
+
+namespace events
+{
+  struct KeyEvent;
+  struct MouseEvent;
+}
 
 class Director
 {
@@ -20,6 +28,17 @@ public:
   virtual void handle(const events::MouseEvent& event) = 0;
   virtual size2d_t windowSize() const = 0;
 };
+
+class Texture;
+class Surface;
+
+struct SDL_Rect;
+using rect_t = SDL_Rect;
+
+struct SDL_Color;
+using color_t = SDL_Color;
+
+using path = std::string;
 
 class SDL
 {
@@ -57,13 +76,6 @@ public:
 
   void loop();
   void handleEvents();
-
-  size2d_t getWindowSize()
-  {
-    int w, h;
-    SDL_GetWindowSize(_window, &w, &h);
-    return { w, h };
-  }
 
   void exit() { willQuit = true; }
 

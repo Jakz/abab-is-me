@@ -226,6 +226,8 @@ void GameView::render()
 
   _director->text(level->filename() + " - " + level->name(), size.w / 2, size.h - 20, { 255, 255, 255 }, ui::TextAlign::CENTER, 1.0f);
 
+  _director->text(cache->numberedGfx("small_font"), "la penna è sul tavolo", 50, 50);
+
 #if MOUSE_ENABLED
   _director->text(hoverInfo, 5, size.h - 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
 #endif
@@ -477,7 +479,7 @@ void GameView::movement(D d)
     level->forEachObject([](Object& object) { object.active = false; });
     level->updateRules();
 
-    for (auto& tile : *level)
+    for (baba::Tile& tile : *level)
     {
       bool hasHot = tile.any_of([](const Object& o) { return o.spec && ObjectProperty::HOT; });
 

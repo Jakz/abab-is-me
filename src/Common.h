@@ -73,6 +73,8 @@ struct point_t
 struct size2d_t
 {
   coord_t w, h;
+  size2d_t() : size2d_t(0, 0) { }
+  size2d_t(coord_t w, coord_t h) : w(w), h(h) { }
 };
 
 namespace baba
@@ -101,8 +103,12 @@ bool operator&&(const baba::ObjectSpec* spec, baba::ObjectProperty prop);
 #include "SDL_image.h"
 #include "SDL_mixer.h"
 
+#include "gfx/SdlHelper.h"
+
 using color_t = SDL_Color;
 using rect_t = SDL_Rect;
+
+using Renderer = SDL;
 
 struct Surface
 {
@@ -120,6 +126,7 @@ public:
 
   Surface(Surface&& other) noexcept
   {
+    _surface = nullptr;
     _width = other._width;
     _height = other._height;
     std::swap(_surface, other._surface);
@@ -157,11 +164,12 @@ public:
 
   std::vector<rect_t> _rects;
   coord_t _width, _height;
+  coord_t _rows;
 
 public:
   Texture(SDL_Texture* texture, coord_t w, coord_t h) : Texture(texture, size2d_t(w, h), { { 0, 0, w, h } }) { }
   Texture(SDL_Texture* texture, size2d_t size, const std::vector<rect_t>& rects) :
-    _texture(texture), _width(size.w), _height(size.h), _rects(rects)
+    _texture(texture), _width(size.w), _height(size.h), _rects(rects), _rows(1)
   {
 
   }
@@ -174,11 +182,20 @@ public:
   coord_t height() const { return _height; }
   coord_t width() const { return _width; }
 
+  coord_t rows() const { return _rows; }
+  coord_t cols() const { return _rects.size() / rows(); }
+
   size_t count() const { return _rects.size(); }
   const rect_t& rect(size_t index) const { return index < _rects.size() ? _rects[index] : _rects[0]; }
+  const rect_t& rect(size_t x, size_t y) const
+  {
+    size_t index = y * cols() + x;
+    return rect(index);
+  }
 
   SDL_Texture* texture() const { return _texture; }
 
+  void setRows(coord_t rows) { _rows = rows; }
   void setRects(const std::vector<rect_t>& rects) { _rects = rects; }
   void enableAlphaBlending() { SDL_SetTextureBlendMode(_texture, SDL_BLENDMODE_BLEND); }
 
@@ -269,6 +286,8 @@ enum class KeyCode
 struct color_t
 {
   uint8_t r, g, b, a;
+
+  color_t() : r(0), g(0), b(0), a(255) { }
 };
 
 struct rect_t

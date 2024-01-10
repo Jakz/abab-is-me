@@ -70,6 +70,22 @@ void ui::ViewManager::render()
   _view->render();
 }
 
+void ui::ViewManager::text(const Texture* texture, const std::string& text, int32_t x, int32_t y)
+{
+  rect_t dest = rect_t(x, y, 0, 0);
+  
+  for (size_t i = 0; i < text.length(); ++i)
+  {
+    rect_t src = texture->rect(text[i]);
+
+    dest.w = src.w;
+    dest.h = src.h;
+   
+    _renderer->blit(texture, color_t{ .r = 255, .g = 255, .b = 255, .a = 255 }, src, dest);
+    dest.x += dest.w + 2;
+  }
+}
+
 void ui::ViewManager::text(const std::string& text, int32_t x, int32_t y)
 {
   constexpr float scale = 2.0;

@@ -10,20 +10,10 @@
 #define TARGET_PLATFORM PLATFORM_OPENDINGUX
 #endif
 
-#include <SDL.h>
 #include <string>
-
-static constexpr auto KEY_LEFT = SDLK_LEFT;
-static constexpr auto KEY_RIGHT = SDLK_RIGHT;
-static constexpr auto KEY_UP = SDLK_UP;
-static constexpr auto KEY_DOWN = SDLK_DOWN;
-static constexpr auto KEY_WAIT = SDLK_SPACE;
 
 #if TARGET_PLATFORM == PLATFORM_DESKTOP
   
-  constexpr int32_t WIDTH = 1024;
-  constexpr int32_t HEIGHT = 768;
-
   static const std::string DATA_FOLDER = R"(E:\Games\Steam\steamapps\common\Baba Is You\Data\)";
 
   #define MOUSE_ENABLED true
