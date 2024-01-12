@@ -505,7 +505,11 @@ baba::Level* Loader::load(const std::string& name, const GameData& baseData)
   for (const auto& path : tempData.paths)
   {
     Tile* tile = level->get(path.second.x, path.second.y);
-    tile->add(Object(data->objectsByKey.find(path.second.objectID)->second));
+
+    auto pathObject = Object(data->objectsByKey.find(path.second.objectID)->second);
+    pathObject.path = true;
+
+    tile->add(pathObject);
   }
   assert((level->info().isMetalevel ^ level->info().selectorPosition == point_t{-1, -1}) != 0);
 

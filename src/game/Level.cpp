@@ -52,7 +52,11 @@ const Tile* Level::get(const Tile* t, D d) const
 }
 
 void Level::computeTiling()
-{
+{  
+  /* set links on tiles */
+  for (const auto& link : _metalevel._levels)
+    get(link.coord)->link = &link;
+  
   for (coord_t y = 0; y < height(); ++y)
   {
     for (coord_t x = 0; x < width(); ++x)
@@ -68,10 +72,10 @@ void Level::computeTiling()
           auto up = get(tile, D::UP), down = get(tile, D::DOWN);
           auto left = get(tile, D::LEFT), right = get(tile, D::RIGHT);
 
-          if (right->has(object.spec)) object.variant |= 1;
-          if (up->has(object.spec)) object.variant |= 2;
-          if (left->has(object.spec)) object.variant |= 4;
-          if (down->has(object.spec)) object.variant |= 8;
+          if (right->has(object.spec) || right->link) object.variant |= 1;
+          if (up->has(object.spec) || up->link) object.variant |= 2;
+          if (left->has(object.spec) || left->link) object.variant |= 4;
+          if (down->has(object.spec) || down->link) object.variant |= 8;
         }
       }
     }

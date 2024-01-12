@@ -12,10 +12,11 @@ namespace baba
     const Level* level;
     point_t coord;
 
+    const LevelLink* link;
     std::vector<Object> objects;
 
     Tile() = default;
-    Tile(const Level* level, point_t coord) : level(level), coord(coord) { }
+    Tile(const Level* level, point_t coord) : level(level), coord(coord), link(nullptr) { }
 
     void add(Object object) { objects.push_back(object); }
     const Object* object() const { return !objects.empty() ? &objects[0] : nullptr; }
@@ -33,6 +34,7 @@ namespace baba
     Object* find(const std::function<bool(const Object&)>& predicate);
     Object* find(const ObjectSpec* spec) { return find([spec](const Object& obj) { return obj.spec == spec; }); }
 
+    bool isAllowedForCursorMovement() const { return link || any_of([] (const Object& o) { return o.path; }); }
 
 
     decltype(objects)::const_iterator begin() const { return objects.begin(); }

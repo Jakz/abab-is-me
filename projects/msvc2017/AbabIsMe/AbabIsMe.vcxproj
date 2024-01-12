@@ -153,6 +153,7 @@
     <ClInclude Include="..\..\..\src\game\Rules.h" />
     <ClInclude Include="..\..\..\src\game\Tile.h" />
     <ClInclude Include="..\..\..\src\game\Types.h" />
+    <ClInclude Include="..\..\..\src\game\World.h" />
     <ClInclude Include="..\..\..\src\gfx\AssetCache.h" />
     <ClInclude Include="..\..\..\src\gfx\Gfx.h" />
     <ClInclude Include="..\..\..\src\gfx\SdlHelper.h" />
@@ -177,6 +178,7 @@
     <ClCompile Include="..\..\..\src\game\Level.cpp" />
     <ClCompile Include="..\..\..\src\game\Rules.cpp" />
     <ClCompile Include="..\..\..\src\game\Tile.cpp" />
+    <ClCompile Include="..\..\..\src\game\World.cpp" />
     <ClCompile Include="..\..\..\src\gfx\AssetCache.cpp" />
     <ClCompile Include="..\..\..\src\gfx\Gfx.cpp" />
     <ClCompile Include="..\..\..\src\gfx\SdlHelper.cpp" />

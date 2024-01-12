@@ -28,6 +28,9 @@
     <Filter Include="src\utils\format">
       <UniqueIdentifier>{dce27e1d-f514-4d5b-a60f-f20e8c7cc660}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\gfx\backend">
+      <UniqueIdentifier>{029f322c-74cf-4ec3-8353-ceff69bb3c5d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\io\Loader.h">
@@ -105,6 +108,9 @@
     <ClInclude Include="..\..\..\src\utils\format\format-inl.h">
       <Filter>src\utils\format</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\game\World.h">
+      <Filter>src\game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp">
@@ -154,6 +160,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\SdlHelper.cpp">
       <Filter>src\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\game\World.cpp">
+      <Filter>src\game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

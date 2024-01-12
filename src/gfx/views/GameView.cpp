@@ -1,8 +1,9 @@
-#include "Views.h"
+﻿#include "Views.h"
 
 #include "game/Types.h"
 #include "game/Tile.h"
 #include "game/Level.h"
+#include "game/World.h"
 #include "game/Rules.h"
 
 #include "gfx/Gfx.h"
@@ -14,11 +15,9 @@ constexpr coord_t GFX_TILE_SIZE = 24;
 using namespace ui;
 using namespace baba;
 
-extern Level* level;
-extern void prevLevel();
-extern void nextLevel();
-extern void enterLevel(std::string file);
-extern void exitLevel();
+extern World* world;
+//extern void prevLevel();
+//extern void nextLevel();
 
 History history;
 
@@ -29,7 +28,7 @@ GameView::GameView(ViewManager* director, Renderer* renderer) : View(director, r
 
 void GameView::levelLoaded()
 {
-  auto* palette = assets()->palette(level->palette());
+  auto* palette = assets()->palette(world->level()->palette());
 
   if (palette)
   {
@@ -38,7 +37,7 @@ void GameView::levelLoaded()
     colors.inside = palette->at(0, 4);
   }
   
-  level->updateRules();
+  world->level()->updateRules();
 }
 
 void GameView::render()
@@ -46,6 +45,7 @@ void GameView::render()
   //TODO: particles
   //TODO BEST property
 
+  auto level = world->level();
   auto cache = assets();
   
   int32_t tick = (SDL_GetTicks() / 180) % 3;
@@ -226,7 +226,7 @@ void GameView::render()
 
   _director->text(level->filename() + " - " + level->name(), size.w / 2, size.h - 20, { 255, 255, 255 }, ui::TextAlign::CENTER, 1.0f);
 
-  _director->text(cache->numberedGfx("small_font"), "la penna � sul tavolo", 50, 50);
+  //_director->text(cache->numberedGfx("small_font"), "la penna è sul tavolo", 50, 50);
 
 #if MOUSE_ENABLED
   _director->text(hoverInfo, 5, size.h - 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
@@ -247,7 +247,7 @@ void GameView::drawGrid(point_t b, size2d_t size, size2d_t count)
 
 void GameView::updateMoveBounds()
 {
-  level->forEachTile([this](Tile& tile) {
+  world->level()->forEachTile([this] (Tile& tile) {
     if (tile.has(ObjectProperty::YOU))
     {
       moveBounds[0].x = std::min(moveBounds[0].x, tile.x());
@@ -262,7 +262,7 @@ void GameView::updateMoveBounds()
 
 bool operator&&(const ObjectSpec* spec, ObjectProperty prop)
 {
-  return level->rules().hasProperty(spec, prop);
+  return world->level()->rules().hasProperty(spec, prop);
 }
 
 struct MoveInfo
@@ -278,7 +278,7 @@ bool isMovementAllowed(MoveInfo info, D d)
   bool allowed = true;
   bool finished = false;
 
-  Tile* next = level->get(info.tile, d);
+  Tile* next = world->level()->get(info.tile, d);
 
   while (next)
   {    
@@ -287,7 +287,7 @@ bool isMovementAllowed(MoveInfo info, D d)
     else if (!next->has(ObjectProperty::PUSH))
       return true;
 
-    next = level->get(next, d);
+    next = world->level()->get(next, d);
   }
 
   return true;
@@ -296,6 +296,7 @@ bool isMovementAllowed(MoveInfo info, D d)
 bool GameView::movement(MoveInfo info, D d)
 {
   Tile* tile = info.tile;
+  auto level = world->level();
   Tile* next = level->get(tile, d);
 
   const auto& it = info.it;
@@ -422,6 +423,7 @@ void GameView::movement(D d)
   //const auto& data = gfx::Gfx::i.cache()->sound(AssetMapping::BABA_STEP_SOUND.random());
   //Mix_PlayChannel(-1, data.nativeData.chunk(), 0);
   
+  auto level = world->level();
   level->forEachObject([](Object& object) { object.alreadyMoved = false; });
 
   std::vector<MoveInfo> you;
@@ -462,7 +464,8 @@ void GameView::movement(D d)
 
         if (it != levels.end())
         {
-          enterLevel(it->file);
+          world->pushLevel(it->file);
+          levelLoaded();
           return;
         }
       }
@@ -515,7 +518,8 @@ void GameView::handleKeyboardEvent(const events::KeyEvent& event)
     switch (event.code)
     {
       case KeyCode::BindExit: 
-        exitLevel();
+        world->popLevel();
+        levelLoaded();
         //gvm->exit(); 
       break;
 
@@ -542,22 +546,22 @@ void GameView::handleKeyboardEvent(const events::KeyEvent& event)
       case KeyCode::KeyKpPlus:
       { 
         assets()->flushCache();
-        nextLevel();
+        //nextLevel();
         break;
       }
       case KeyCode::KeyL:
       case KeyCode::KeyKpMinus:
       { 
         assets()->flushCache();
-        prevLevel();
+        //prevLevel();
         break;
       }
 
       case KeyCode::BindUndo:
         if (!history.empty())
         {
-          level->restore(history.pop());
-          level->updateRules();
+          world->level()->restore(history.pop());
+          world->level()->updateRules();
         }
       
         break;

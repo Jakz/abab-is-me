@@ -108,9 +108,10 @@ namespace baba
     D direction;
     uint32_t variant;
     bool alreadyMoved;
+    bool path;
     mutable bool active;
 
-    Object(const ObjectSpec* spec) : spec(spec), variant(0), alreadyMoved(false), active(false) { }
+    Object(const ObjectSpec* spec) : spec(spec), variant(0), alreadyMoved(false), path(false), active(false) { }
   };
 
   struct Icon
