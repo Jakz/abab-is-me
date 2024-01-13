@@ -95,8 +95,6 @@ namespace io
   class Loader;
 }
 
-bool operator&&(const baba::ObjectSpec* spec, baba::ObjectProperty prop);
-
 #if USE_SDL
 
 #include "SDL.h"

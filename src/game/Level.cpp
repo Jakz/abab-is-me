@@ -131,10 +131,10 @@ void Level::updateRules()
 
 #include "game/World.h"
 extern baba::World* world;
-bool operator&&(const ObjectSpec* spec, ObjectProperty prop)
+/*bool operator&&(const ObjectSpec* spec, ObjectProperty prop)
 {
   return world->level()->rules().hasProperty(spec, prop);
-}
+}*/
 
 struct MoveInfo
 {
@@ -162,6 +162,11 @@ bool Level::isMovementAllowed(MoveInfo info, D d)
   }
 
   return true;
+}
+
+bool Level::hasProperty(const ObjectSpec* object, ObjectProperty property) const
+{
+  return rules().hasProperty(object, property);
 }
 
 bool Level::movement(MoveInfo info, D d)
@@ -193,7 +198,7 @@ bool Level::movement(MoveInfo info, D d)
   {
     for (auto nit = next->begin(); nit != next->end(); ++nit)
     {
-      if (it->spec && ObjectProperty::YOU && next->has(ObjectProperty::DEFEAT))
+      if (hasProperty(it->spec, ObjectProperty::YOU) && next->has(ObjectProperty::DEFEAT))
       {
         //const auto& data = assets()->sound(AssetMapping::DEFEAT_SOUND.random());
         //Mix_PlayChannel(-1, data.nativeData.chunk(), 0);
@@ -213,7 +218,7 @@ bool Level::movement(MoveInfo info, D d)
       }
 
       /* next is stop, just break from the cycle, we can't move */
-      if (nit->spec && ObjectProperty::STOP)
+      if (hasProperty(nit->spec, ObjectProperty::STOP))
       {
         if (info.type == MoveInfo::Type::MOVE)
         {
@@ -226,7 +231,7 @@ bool Level::movement(MoveInfo info, D d)
         break;
       }
       /* it's push, it could move must we must see if it can be moved too*/
-      else if (nit->spec && ObjectProperty::PUSH)
+      else if (hasProperty(nit->spec, ObjectProperty::PUSH))
       {
         /* if current can be moved we check next, otherwise we can stop */
         isStopped |= !movement(MoveInfo(info.type, next, nit), d);
@@ -305,11 +310,11 @@ MoveResult Level::movement(D d)
 
       for (auto it = tile->begin(); it != tile->end(); ++it)
       {
-        if (it->spec && ObjectProperty::YOU)
+        if (hasProperty(it->spec, ObjectProperty::YOU))
           you.emplace_back(MoveInfo::Type::YOU, tile, it);
-        if (it->spec && ObjectProperty::SELECT)
+        if (hasProperty(it->spec, ObjectProperty::SELECT))
           you.emplace_back(MoveInfo::Type::CURSOR, tile, it);
-        if (it->spec && ObjectProperty::MOVE)
+        if (hasProperty(it->spec, ObjectProperty::MOVE))
           move.emplace_back(MoveInfo(MoveInfo::Type::MOVE, tile, it), it->direction);
       }
     }
@@ -350,7 +355,7 @@ MoveResult Level::movement(D d)
 
     for (baba::Tile& tile : *this)
     {
-      bool hasHot = tile.any_of([] (const Object& o) { return o.spec && ObjectProperty::HOT; });
+      bool hasHot = tile.any_of([this] (const Object& o) { return hasProperty(o.spec, ObjectProperty::HOT); });
 
       if (hasHot)
       {

@@ -36,8 +36,6 @@ void GameView::levelLoaded()
     colors.outside = palette->at(1, 0);
     colors.inside = palette->at(0, 4);
   }
-  
-  world->level()->updateRules();
 }
 
 int32_t GameView::tick() const
@@ -210,7 +208,7 @@ void GameView::render()
             if (obj.spec->tiling == ObjectSpec::Tiling::None)
               variant = 0;
 
-            bool isFloat = obj.spec && ObjectProperty::FLOAT;
+            bool isFloat = level->hasProperty(obj.spec, ObjectProperty::FLOAT);
             float dy = ratio * ftick;
 
             rect_t src = asset->rect(variant);

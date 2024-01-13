@@ -79,7 +79,7 @@ void Rules::generate(baba::Level* level)
   {
     Rule rule = Rule();
     rule.terms = sentence;
-    printf("Rule: %s\n", rule.name().c_str());
+    //printf("Rule: %s\n", rule.name().c_str());
   }
 
   /* search trivial rules NOUN IS PROPERTY */

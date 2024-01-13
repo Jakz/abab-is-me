@@ -14,12 +14,12 @@ bool Tile::has(const ObjectSpec* spec) const
 
 bool Tile::has(ObjectProperty property) const
 {
-  return any_of([this, property](const Object& object) { return level->rules().hasProperty(object.spec, property); });
+  return any_of([this, property](const Object& object) { return level->hasProperty(object.spec, property); });
 }
 
 Object* Tile::find(ObjectProperty property)
 {
-  auto object = find([this, property](const Object& object) { return level->rules().hasProperty(object.spec, property); });
+  auto object = find([this, property](const Object& object) { return level->hasProperty(object.spec, property); });
   return object;
 }
 

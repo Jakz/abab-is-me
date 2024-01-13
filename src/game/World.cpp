@@ -21,6 +21,7 @@ void World::loadLevel(const std::string& name, bool updateStack)
   _level = nullptr;
 
   _level = _loader.load(name, _data);
+  _level->updateRules();
   _level->computeTiling();
 }
 

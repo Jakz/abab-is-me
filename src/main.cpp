@@ -58,10 +58,14 @@ void prevLevel()
 
 #include "gfx/Gfx.h"
 
+#include "test/LevelTester.h"
+
 int main(int argc, char* argv[])
 {  
   world = new baba::World();
 
+  baba::test::LevelTester tester;
+  tester.test("0level", baba::test::MoveSequence("rrrrrdrrru"));
   
   if (!vm.init())
     return -1;

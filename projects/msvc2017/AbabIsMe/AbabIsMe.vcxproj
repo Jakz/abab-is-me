@@ -163,6 +163,7 @@
     <ClInclude Include="..\..\..\src\io\Loader.h" />
     <ClInclude Include="..\..\..\src\io\Zip.h" />
     <ClInclude Include="..\..\..\src\io\zip\miniz.h" />
+    <ClInclude Include="..\..\..\src\test\LevelTester.h" />
     <ClInclude Include="..\..\..\src\utils\format\chrono.h" />
     <ClInclude Include="..\..\..\src\utils\format\color.h" />
     <ClInclude Include="..\..\..\src\utils\format\compile.h" />
@@ -191,6 +192,7 @@
     <ClCompile Include="..\..\..\src\io\Zips.cpp" />
     <ClCompile Include="..\..\..\src\io\zip\miniz.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
+    <ClCompile Include="..\..\..\src\test\LevelTester.cpp" />
     <ClCompile Include="..\..\..\src\utils\format\format.cpp" />
   </ItemGroup>
   <ItemGroup>

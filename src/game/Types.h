@@ -8,6 +8,9 @@
 
 namespace baba
 {
+  class World;
+  class Level;
+  
   enum class D { UP, DOWN, LEFT, RIGHT, NONE };
 
   static inline D operator~(D d)

@@ -53,6 +53,7 @@ namespace baba
     std::string _palette;
     std::vector<std::string> _images;
 
+
   public:
     Level(const GameData& data);
 
@@ -72,6 +73,8 @@ namespace baba
     const Rules& rules() const { return _rules; }
 
     void resize(coord_t width, coord_t height);
+
+    bool hasProperty(const ObjectSpec* object, ObjectProperty property) const;
 
     decltype(_tiles)::const_iterator begin() const { return _tiles.begin(); }
     decltype(_tiles)::const_iterator end() const { return _tiles.end(); }

@@ -32,6 +32,8 @@ namespace baba
     void popLevel();
     void pushLevel(std::string name);
 
+    const auto& data() { return _data; }
+
     Level* level() { return _level; }
   };
 }
