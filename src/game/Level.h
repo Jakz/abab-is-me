@@ -6,6 +6,19 @@
 #include "Rules.h"
 #include "Common.h"
 
+struct MoveInfo;
+
+struct MoveResult
+{
+  enum Type { Ok, Defeat, LevelEnter };
+  Type type;
+  std::string levelName;
+
+  MoveResult(Type type) : type(type) { }
+  MoveResult(Type type, const std::string& levelName) : type(type), levelName(levelName) { }
+
+};
+
 namespace baba
 {
   using LevelState = std::vector<Tile>;
@@ -92,6 +105,12 @@ namespace baba
     bool isDefeat();
 
     void updateRules();
+
+    bool isMovementAllowed(MoveInfo info, D d);
+    bool movement(MoveInfo info, D d);
+    
+    
+    MoveResult movement(D d);
 
     friend class io::Loader;
   };

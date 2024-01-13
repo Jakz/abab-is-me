@@ -425,6 +425,10 @@ void Loader::loadLD(const path& path, baba::Level* level, TempData& tempData, bo
             else
               assert(false);
           }
+          else if (field == "state")
+          {
+            llevel.state = (LevelLink::State)std::stoi(p.second);
+          }
           else if (field == "number")
             llevel.number = std::stoi(p.second);
           else if (field == "colour")

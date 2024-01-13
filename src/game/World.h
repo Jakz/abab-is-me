@@ -13,7 +13,8 @@ namespace baba
   class World
   {
   protected:
-    std::unordered_set<std::string> _unlocked;
+    std::unordered_set<std::string> _won;
+
     
     io::Loader _loader;
     GameData _data;
@@ -24,7 +25,7 @@ namespace baba
   public:
     World();
     
-    bool isUnlocked(const std::string& levelName) { return _unlocked.contains(levelName); }
+    bool isWon(const std::string& levelName) { return _won.contains(levelName); }
 
     void loadLevel(const std::string& name, bool updateStack = false);
 

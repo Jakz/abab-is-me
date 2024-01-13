@@ -126,12 +126,14 @@ namespace baba
   struct LevelLink
   {
     enum class Style { Number, Icon, Letter, Dot };
-    
+    enum class State { Hidden = 0, Normal = 1, Opened = 2 };
+
     point_t coord;
     coord_t z;
     int32_t number;
     point_t color;
     Style style;
+    State state;
     std::string file;
 
     coord_t x() const { return coord.x; }

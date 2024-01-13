@@ -57,8 +57,7 @@ void AssetCache::init(Renderer* renderer, const path& baseFolder)
   _numberedGfxIndices["level_link_dot"] = { 462, 463, 464, 465, 466, 470, 471 };
 
 
-  _numberedGfxIndices["level_link_box"] = { 49, 239, 240 };
-  _numberedGfxIndices["level_link_box_bg"] = { 38 };
+  _numberedGfxIndices["level_link_box_with_background"] = { 24, 590, 591 };
 
   auto& smallFont = _numberedGfxIndices["small_font"];
   smallFont.resize(256, -1);

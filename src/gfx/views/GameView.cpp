@@ -40,20 +40,17 @@ void GameView::levelLoaded()
   world->level()->updateRules();
 }
 
-void GameView::render()
+int32_t GameView::tick() const
 {
-  //TODO: particles
-  //TODO BEST property
-
-  auto level = world->level();
-  auto cache = assets();
-  
   int32_t tick = (SDL_GetTicks() / 180) % 3;
-  constexpr int32_t fspan = 2, fcount = 1 + fspan * 4;
-  int32_t ftick = ((SDL_GetTicks() / 300) % fspan);
-  
+  return tick;
+}
+
+float GameView::ratio() const
+{
   //point_t offset = this->offset;
-  size = _director->windowSize();
+  auto size = _director->windowSize();
+  auto level = world->level();
 
   float bestWidth = size.w / level->width();
   float bestHeight = size.h / level->height();
@@ -80,6 +77,88 @@ void GameView::render()
   tileSize = bestScale;
 
   const float ratio = bestScale / GFX_TILE_SIZE;
+  return ratio;
+}
+
+void GameView::renderLevelLink(coord_t x, coord_t y)
+{
+  auto tile = world->level()->get(x, y);
+  auto link = tile->link;
+
+  auto cache = assets();
+  auto ratio = this->ratio();
+  auto* bgAsset = cache->numberedGfx("level_link_box_with_background");
+  const auto& src = bgAsset->rect(tick());
+
+  int fy = offset.y + y * tileSize + tileSize / 2 - (src.h * ratio) / 2;
+  const rect_t dest = { offset.x + x * tileSize + tileSize / 2 - (src.w * ratio) / 2, fy, src.w * ratio, src.h * ratio };
+  const auto& ocolor = link->color;
+  color_t color = colors.palette->at(ocolor.x, ocolor.y);
+  _renderer->blit(bgAsset, color, src, dest);
+
+
+  const Texture* asset = nullptr;
+  size_t rectIndex = 0;
+
+  switch (link->style)
+  {
+    case LevelLink::Style::Icon:
+    {
+      const baba::Icon* icon = &world->level()->metalevel()._icons[link->number];
+      asset = cache->iconGfx(icon);
+      break;
+    }
+
+    case LevelLink::Style::Number:
+    {
+      std::string key = fmt::format("level_link_number_{:02}", link->number);
+      asset = cache->numberedGfx(key);
+      break;
+    }
+
+    case LevelLink::Style::Letter:
+    {
+      std::string key = fmt::format("level_link_letter_{}", (char)('a' + link->number));
+      asset = cache->numberedGfx(key);
+      break;
+    }
+
+    case LevelLink::Style::Dot:
+    {
+      asset = cache->numberedGfx("level_link_dot");
+      rectIndex = link->number;
+      break;
+    }
+  }
+
+  if (asset /* && link->state == LevelLink::State::Opened*/)
+  {
+    const rect_t& src = asset->rect(rectIndex);
+
+    int fy = offset.y + y * tileSize + tileSize / 2 - (src.h * ratio) / 2;
+    const rect_t dest = { offset.x + x * tileSize + tileSize / 2 - (src.w * ratio) / 2, fy, src.w * ratio, src.h * ratio };
+
+    const auto& ocolor = link->color;
+    color_t color = colors.palette->at(ocolor.x, ocolor.y);
+    _renderer->blit(asset, color, src, dest);
+  }
+}
+
+void GameView::render()
+{
+  //TODO: particles
+  //TODO BEST property
+
+  auto level = world->level();
+  auto cache = assets();
+  
+  int32_t tick = this->tick();
+  constexpr int32_t fspan = 2, fcount = 1 + fspan * 4;
+  int32_t ftick = ((SDL_GetTicks() / 300) % fspan);
+  
+  //point_t offset = this->offset;
+  size = _director->windowSize();
+  auto ratio = this->ratio();
 
 
   SDL_Rect bb = { 0,0, size.w, size.h };
@@ -146,68 +225,10 @@ void GameView::render()
             _renderer->blit(asset, color, src, dest);
           }
         }
+
+        if (tile->link)
+          renderLevelLink(x, y);
       }
-    }
-  }
-
-  for (const baba::LevelLink& levelLink : level->metalevel()._levels)
-  {
-    auto x = levelLink.x(), y = levelLink.y();
-    
-    auto* bgAsset = cache->numberedGfx("level_link_box");
-    const auto& src = bgAsset->rect(tick);
-    int fy = offset.y + y * tileSize + tileSize / 2 - (src.h * ratio) / 2;
-    const rect_t dest = { offset.x + x * tileSize + tileSize / 2 - (src.w * ratio) / 2, fy, src.w * ratio, src.h * ratio };
-    const auto& ocolor = levelLink.color;
-    color_t color = colors.palette->at(ocolor.x, ocolor.y);
-    _renderer->blit(bgAsset, color, src, dest);
-
-
-    const Texture* asset = nullptr;
-    size_t rectIndex = 0;
-
-    switch (levelLink.style)
-    {
-      case LevelLink::Style::Icon:
-      {
-        const baba::Icon* icon = &level->metalevel()._icons[levelLink.number];
-        asset = cache->iconGfx(icon);
-        break;
-      }
-
-      case LevelLink::Style::Number:
-      {
-        std::string key = fmt::format("level_link_number_{:02}", levelLink.number);
-        asset = cache->numberedGfx(key);
-        break;
-      }
-
-      case LevelLink::Style::Letter:
-      {
-        std::string key = fmt::format("level_link_letter_{}", (char)('a' + levelLink.number));
-        asset = cache->numberedGfx(key);
-        break;
-      }
-
-      case LevelLink::Style::Dot:
-      {
-        asset = cache->numberedGfx("level_link_dot");
-        rectIndex = levelLink.number;
-        break;
-      }
-    }
-
-    if (asset)
-    {
-
-      const rect_t& src = asset->rect(rectIndex);
-
-      int fy = offset.y + y * tileSize + tileSize / 2 - (src.h * ratio) / 2;
-      const rect_t dest = { offset.x + x * tileSize + tileSize / 2 - (src.w * ratio) / 2, fy, src.w * ratio, src.h * ratio };
-
-      const auto& ocolor = levelLink.color;
-      color_t color = colors.palette->at(ocolor.x, ocolor.y);
-      _renderer->blit(asset, color, src, dest);
     }
   }
 
@@ -260,256 +281,20 @@ void GameView::updateMoveBounds()
 }
 
 
-bool operator&&(const ObjectSpec* spec, ObjectProperty prop)
-{
-  return world->level()->rules().hasProperty(spec, prop);
-}
-
-struct MoveInfo
-{
-  enum class Type { YOU, MOVE, CURSOR } type;
-  Tile* tile;
-  decltype(Tile::objects)::iterator it;
-  MoveInfo(Type type, Tile* tile, decltype(it) it) : type(type), tile(tile), it(it) { }
-};
-
-bool isMovementAllowed(MoveInfo info, D d)
-{
-  bool allowed = true;
-  bool finished = false;
-
-  Tile* next = world->level()->get(info.tile, d);
-
-  while (next)
-  {    
-    if (next->has(ObjectProperty::STOP))
-      return false;
-    else if (!next->has(ObjectProperty::PUSH))
-      return true;
-
-    next = world->level()->get(next, d);
-  }
-
-  return true;
-}
-
-bool GameView::movement(MoveInfo info, D d)
-{
-  Tile* tile = info.tile;
-  auto level = world->level();
-  Tile* next = level->get(tile, d);
-
-  const auto& it = info.it;
-
-  bool isStopped = false;
-  bool updateVariant = false;
-
-  //TODO: move in its own method
-  if (info.type == MoveInfo::Type::CURSOR)
-  {
-    Object object = *info.it;
-    Tile* tile = info.tile;
-
-    tile->objects.erase(info.it);
-    level->get(tile, d)->objects.push_back(object);
-
-    return true;
-  }
-  
-  if (next->empty())
-  {
-  }
-  else
-  {
-    for (auto nit = next->begin(); nit != next->end(); ++nit)
-    {
-      if (it->spec && ObjectProperty::YOU && next->has(ObjectProperty::DEFEAT))
-      {
-        const auto& data = assets()->sound(AssetMapping::DEFEAT_SOUND.random());
-        Mix_PlayChannel(-1, data.nativeData.chunk(), 0);
-
-        tile->objects.erase(it);
-        return false;
-      }
-
-      //TODO: if it has SINK this should be done too
-      auto sink = next->find(ObjectProperty::SINK);
-      if (sink) //TODO: only on same float level
-      {
-        tile->objects.erase(it);
-        next->remove(sink);
-        level->computeTiling(); //TODO: expensive, just do it around affected tile
-        return false;
-      }
-      
-      /* next is stop, just break from the cycle, we can't move */
-      if (nit->spec && ObjectProperty::STOP)
-      {
-        if (info.type == MoveInfo::Type::MOVE)
-        {
-          it->direction = ~it->direction;
-          updateVariant = true;
-        }
-        
-        isStopped = true;
-
-        break;
-      }
-      /* it's push, it could move must we must see if it can be moved too*/
-      else if (nit->spec && ObjectProperty::PUSH)
-      {
-        /* if current can be moved we check next, otherwise we can stop */
-        isStopped |= !movement(MoveInfo(info.type, next, nit), d);
-        if (!isStopped && next->begin() != next->end())
-          nit = next->begin(); // restart
-        else
-        {
-          if (isStopped && info.type == MoveInfo::Type::MOVE)
-            it->direction = ~it->direction;
-
-          break;
-        }
-      }
-    }
-  }
-
-  if (!isStopped || updateVariant)
-  {
-    if (info.it->spec->tiling == ObjectSpec::Tiling::Character)
-    {
-      uint32_t variantBase = 0;
-      if (d == D::RIGHT) variantBase = 0;
-      else if (d == D::UP) variantBase = 4;
-      else if (d == D::LEFT) variantBase = 8;
-      else if (d == D::DOWN) variantBase = 12;
-
-      info.it->variant = variantBase + (info.it->variant + 1) % 4;
-    }
-  }
-
-  // TODO: shift
-  /* for each object which has SHIFT move all object on it according to the direction */
-
-  if (!isStopped)
-  {
-    Object object = *info.it;
-    Tile* tile = info.tile;
-
-    tile->objects.erase(info.it);
-    level->get(tile, d)->objects.push_back(object);
-
-    return true;
-  }
-
-  if (!isStopped || updateVariant)
-  {
-    if (info.it->spec->tiling == ObjectSpec::Tiling::Character)
-    {
-      uint32_t variantBase = 0;
-      if (d == D::RIGHT) variantBase = 0;
-      else if (d == D::UP) variantBase = 4;
-      else if (d == D::LEFT) variantBase = 8;
-      else if (d == D::DOWN) variantBase = 12;
-
-      info.it->variant = variantBase + (info.it->variant + 1) % 4;
-    }
-  }
-
-  return false;
-}
+#include "io/Assets.h"
 
 void GameView::movement(D d)
-{  
-  //const auto& data = gfx::Gfx::i.cache()->sound(AssetMapping::BABA_STEP_SOUND.random());
-  //Mix_PlayChannel(-1, data.nativeData.chunk(), 0);
-  
-  auto level = world->level();
-  level->forEachObject([](Object& object) { object.alreadyMoved = false; });
+{
+  history.push(world->level()->state());
 
-  std::vector<MoveInfo> you;
-  std::vector<std::pair<MoveInfo, D>> move;
+  auto result = world->level()->movement(d);
 
-  for (coord_t y = 0; y < level->height(); ++y)
-    for (coord_t x = 0; x < level->width(); ++x)
-    {
-      Tile* tile = level->get(x, y);
-
-      for (auto it = tile->begin(); it != tile->end(); ++it)
-      {
-        if (it->spec && ObjectProperty::YOU)
-          you.emplace_back(MoveInfo::Type::YOU, tile, it);
-        if (it->spec && ObjectProperty::SELECT)
-          you.emplace_back(MoveInfo::Type::CURSOR, tile, it);
-        if (it->spec && ObjectProperty::MOVE)
-          move.emplace_back(MoveInfo(MoveInfo::Type::MOVE, tile, it), it->direction);
-      }
-    }
-
-  if (!you.empty())
+  if (result.type == MoveResult::Type::LevelEnter)
   {
-    history.push(level->state());
-
-    if (d != D::NONE)
-      for (const auto& pair : you)
-        movement(pair, d);
-    /* wait you is select -> enter level */
-    else if (d == D::NONE && !you.empty() && you[0].type == MoveInfo::Type::CURSOR)
-    {
-      if (level->isMeta() && !level->metalevel()._levels.empty())
-      {
-        const auto& levels = level->metalevel()._levels;
-        auto it = std::find_if(levels.begin(), levels.end(), [coord = you[0].tile->coord] (const baba::LevelLink& link) {
-          return coord == link.coord;
-        });
-
-        if (it != levels.end())
-        {
-          world->pushLevel(it->file);
-          levelLoaded();
-          return;
-        }
-      }
-      
-      
-    }
-
-    for (const auto& pair : move)
-      movement(pair.first, pair.second);
-
-    for (auto& tile : *level)
-      std::sort(tile.begin(), tile.end(), [](const Object& o1, const Object& o2) { return o1.spec->layer < o2.spec->layer; });
-
-    level->forEachObject([](Object& object) { object.active = false; });
-    level->updateRules();
-
-    for (baba::Tile& tile : *level)
-    {
-      bool hasHot = tile.any_of([](const Object& o) { return o.spec && ObjectProperty::HOT; });
-
-      if (hasHot)
-      {
-        const Object* o = nullptr;
-        while ((o = tile.find(ObjectProperty::MELT)))
-        {
-          tile.remove(o);
-          /* burn particle + sound */
-        }
-      }
-    }
-
-    for (const auto& props : level->rules())
-    {
-      auto* spec = props.first;
-
-      if (props.second.properties.isSet(ObjectProperty::WIN))
-        level->forEachObject([spec](Object& object) { if (object.spec == spec) object.active = true; });
-    }
+    world->pushLevel(result.levelName);
+    levelLoaded();
   }
-
-  
 }
-
-#include "io/Assets.h"
 
 void GameView::handleKeyboardEvent(const events::KeyEvent& event)
 {

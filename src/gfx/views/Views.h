@@ -28,9 +28,9 @@ namespace ui
     void render();
 
     Scaler scaler;
-    point_t offset;
+    mutable point_t offset;
     size2d_t size;
-    coord_t tileSize;
+    mutable coord_t tileSize;
 
     struct
     {
@@ -51,8 +51,12 @@ namespace ui
     void drawGrid(point_t b, size2d_t size, size2d_t count);
 
     void movement(baba::D d);
-    bool movement(MoveInfo info, baba::D d);
     
+    void renderLevelLink(coord_t x, coord_t y);
+
+    float ratio() const;
+    int32_t tick() const;
+
   public:
     GameView(ViewManager* director, Renderer* renderer);
     ~GameView();
