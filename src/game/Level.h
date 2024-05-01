@@ -143,6 +143,8 @@ namespace baba
       return state;
     }
 
+    void clear() { history.clear(); }
+
     bool empty() const { return history.empty(); }
     size_t size() const { return history.size(); }
   };

@@ -291,6 +291,7 @@ void GameView::movement(D d)
   {
     world->pushLevel(result.levelName);
     levelLoaded();
+    history.clear();
   }
 }
 
@@ -303,6 +304,7 @@ void GameView::handleKeyboardEvent(const events::KeyEvent& event)
       case KeyCode::BindExit: 
         world->popLevel();
         levelLoaded();
+        history.clear();
         //gvm->exit(); 
       break;
 

@@ -141,7 +141,7 @@ namespace sutils
       ++i;
     }
 
-    return std::make_pair(std::stoi(number), v.substr(i));
+    return std::make_pair(number.empty() ? 0 : std::stoi(number), v.substr(i));
   }
 
   static std::pair<std::string, int32_t> parseKeyNumberValue(const std::string& v)
@@ -228,7 +228,7 @@ size_t flength(FILE* in) { fseek(in, 0, SEEK_END); size_t ot = ftell(in); fseek(
 
 void Loader::loadLD(const path& path, baba::Level* level, TempData& tempData, bool headerOnly)
 {
-  enum class S { NONE, GENERAL, IMAGES, SPECIALS, ICONS, PATHS, TILES, LEVELS };
+  enum class S { NONE, GENERAL, IMAGES, SPECIALS, ICONS, PATHS, TILES, LEVELS, HOTBAR, CURROBJLIST };
   S s = S::NONE;
 
   auto lines = sutils::readFileToLines(path);
@@ -256,7 +256,9 @@ void Loader::loadLD(const path& path, baba::Level* level, TempData& tempData, bo
       else if (l == "[levels]")
         s = S::LEVELS;
       else if (l == "[currobjlist]")
-        ; //TODO
+        s = S::CURROBJLIST;
+      else if (l == "[hotbar]")
+        s = S::HOTBAR; //TODO
       else
         assert(false);
     }
@@ -364,6 +366,10 @@ void Loader::loadLD(const path& path, baba::Level* level, TempData& tempData, bo
           ; //TODO
         else if (nv.second == "requirement")
           ; //TODO
+        else if (nv.second == "unlock")
+          ; //TODO
+        else if (nv.second == "id")
+          ; //TODO
         else
           assert(false);
 
@@ -382,7 +388,7 @@ void Loader::loadLD(const path& path, baba::Level* level, TempData& tempData, bo
 
         if (nv.second == "root")
         {
-          assert(p.second == "1" || p.second == "0");
+          assert(p.second == "1" || p.second == "0" || p.second == "");
           icons[index].spriteInRoot = p.second == "1";
         }
         else if (nv.second == "file")
@@ -433,6 +439,8 @@ void Loader::loadLD(const path& path, baba::Level* level, TempData& tempData, bo
             llevel.number = std::stoi(p.second);
           else if (field == "colour")
             llevel.color = sutils::parseCoordinate(p.second);
+          else if (field == "clearcolour")
+            llevel.clearcolour = sutils::parseCoordinate(p.second);
           else if (field == "file")
             llevel.file = p.second;
         }

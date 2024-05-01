@@ -135,6 +135,7 @@ namespace baba
     coord_t z;
     int32_t number;
     point_t color;
+    point_t clearcolour;
     Style style;
     State state;
     std::string file;

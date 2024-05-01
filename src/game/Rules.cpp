@@ -7,6 +7,22 @@
 
 using namespace baba;
 
+namespace baba::parser
+{
+  bool RuleParser::accept(SymbolType type)
+  {
+    auto* spec = (*_it)->spec;
+    const auto& name = spec->name.substr(5);
+
+    switch (type)
+    {
+      case SymbolType::Verb: return spec == _data->IS;
+      case SymbolType::Noun: return name == "text_rock" || name == "text_flag" || name == "text_baba";
+      case SymbolType::Property: return name == "text_you" || name == "text_stop" || name == "text_push" || name == "text_win";
+    }
+  }
+}
+
 std::string Rule::name() const
 {
   std::string text = "";
@@ -79,11 +95,12 @@ void Rules::generate(baba::Level* level)
   {
     Rule rule = Rule();
     rule.terms = sentence;
+    _rules.push_back(rule);
     //printf("Rule: %s\n", rule.name().c_str());
   }
 
   /* search trivial rules NOUN IS PROPERTY */
-
+  return;
   for (coord_t y = 0; y < level->height(); ++y)
   {
     for (coord_t x = 0; x < level->width(); ++x)
@@ -154,43 +171,46 @@ void Rules::apply(baba::Level* level)
     auto it = _data->objectsByGrid.find({ noun->spec->grid.x - 1, noun->spec->grid.y });
     assert(it != _data->objectsByGrid.end());
     const ObjectSpec* object = it->second;
+    const auto& name = property->spec->name;
 
-    if (property->spec->name == "text_you")
+    if (name == "text_you")
       _state[object].properties.set(ObjectProperty::YOU);
-    else if (property->spec->name == "text_stop")
+    else if (name == "text_stop")
       _state[object].properties.set(ObjectProperty::STOP);
-    else if (property->spec->name == "text_push")
+    else if (name == "text_push")
       _state[object].properties.set(ObjectProperty::PUSH);
-    else if (property->spec->name == "text_win")
+    else if (name == "text_win")
       _state[object].properties.set(ObjectProperty::WIN);
-    else if (property->spec->name == "text_defeat")
+    else if (name == "text_defeat")
       _state[object].properties.set(ObjectProperty::DEFEAT);
-    else if (property->spec->name == "text_move")
+    else if (name == "text_move")
       _state[object].properties.set(ObjectProperty::MOVE);
-    else if (property->spec->name == "text_sink")
+    else if (name == "text_sink")
       _state[object].properties.set(ObjectProperty::SINK);
-    else if (property->spec->name == "text_shift")
+    else if (name == "text_shift")
       _state[object].properties.set(ObjectProperty::SHIFT);
-    else if (property->spec->name == "text_best")
+    else if (name == "text_best")
       _state[object].properties.set(ObjectProperty::BEST);
-    else if (property->spec->name == "text_hot")
+    else if (name == "text_hot")
       _state[object].properties.set(ObjectProperty::HOT);
-    else if (property->spec->name == "text_melt")
+    else if (name == "text_melt")
       _state[object].properties.set(ObjectProperty::MELT);
-    else if (property->spec->name == "text_float")
+    else if (name == "text_float")
       _state[object].properties.set(ObjectProperty::FLOAT);
-    else if (property->spec->name == "text_shut")
+    else if (name == "text_shut")
       _state[object].properties.set(ObjectProperty::SHUT);
-    else if (property->spec->name == "text_open")
+    else if (name == "text_open")
       _state[object].properties.set(ObjectProperty::OPEN);
-    else if (property->spec->name == "text_weak")
+    else if (name == "text_weak")
       _state[object].properties.set(ObjectProperty::WEAK);
-    else if (property->spec->name == "text_more")
+    else if (name == "text_more")
       _state[object].properties.set(ObjectProperty::MORE);
-    else if (property->spec->name == "text_tele")
+    else if (name == "text_tele")
       _state[object].properties.set(ObjectProperty::TELE);
-    else if (property->spec->name == "text_pull")
+    else if (name == "text_pull")
       _state[object].properties.set(ObjectProperty::PULL);
+    else if (name == "text_word")
+      _state[object].properties.set(ObjectProperty::Word);
     else
       assert(false);
 
@@ -211,28 +231,3 @@ void Rules::resolve(baba::Level* level)
     const bool hasDefeat = tile.any_of([this](const Object& object) { return hasProperty(object.spec, ObjectProperty::DEFEAT); });
   });
 }
-
-namespace baba
-{
-  using Noun = Object;
-}
-
-struct RuleParser
-{
-private:
-  using token_sequence = std::vector<const Object*>;
-  using token_t = const Object*;
-
-
-  token_sequence tokens;
-  token_sequence::const_iterator token;
-
-public:
-
-public:
-  RuleParser(const token_sequence& tokens) : tokens(tokens), token(tokens.begin()) { }
-
-  const Noun* noun();
-};
-
-const Noun* RuleParser::noun() { return token != tokens.end() && (*token)->spec->type == ObjectSpec::Type::Noun ? *token : nullptr; }
