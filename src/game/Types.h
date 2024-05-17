@@ -11,7 +11,7 @@ namespace baba
   class World;
   class Level;
   
-  enum class D { UP, DOWN, LEFT, RIGHT, NONE };
+  enum class D { UP, DOWN, LEFT, RIGHT, NONE, INVALID };
 
   static inline D operator~(D d)
   {
@@ -22,6 +22,7 @@ namespace baba
       case D::LEFT: return D::RIGHT; 
       case D::RIGHT: return D::LEFT;
       case D::NONE: return D::NONE;
+      case D::INVALID: return D::INVALID;
     }
   }
 

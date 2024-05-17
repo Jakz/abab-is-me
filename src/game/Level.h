@@ -128,19 +128,68 @@ namespace baba
   private:
     static constexpr size_t MAX_SIZE = 16;
     std::deque<LevelState> history;
+    std::deque<D> moves;
+
   public:
-    void push(LevelState&& state)
+    void push(LevelState&& state, D dir)
     {
       history.push_back(state);
       if (history.size() > MAX_SIZE)
         history.pop_front();
+
+      moves.push_back(dir);
     }
 
     LevelState pop()
     {
+      moves.pop_back();
+      
       LevelState state = history.back();
       history.pop_back();
       return state;
+    }
+
+    std::string moveString() const
+    {
+      std::string result;
+      
+      int32_t counter = 0;
+      D d = D::INVALID;
+
+      for (auto it = moves.begin(); true; ++it)
+      {
+        /* move is different from previous, emit previous */
+        if (it == moves.end() || d != *it)
+        {
+          if (d != D::INVALID)
+          {
+            if (counter > 1)
+              result += std::to_string(counter);
+
+            switch (d)
+            {
+              case D::DOWN: result += 'd'; break;
+              case D::LEFT: result += 'l'; break;
+              case D::RIGHT: result += 'r'; break;
+              case D::UP: result += 'u'; break;
+              case D::NONE: result += 'w'; break;
+              default: break;
+            }
+          }
+
+          if (it == moves.end())
+            break;
+          
+          d = *it;
+          counter = 1;
+        }
+        else
+        {
+          ++counter;
+        }
+      }
+
+      return result;
     }
 
     void clear() { history.clear(); }
@@ -149,4 +198,3 @@ namespace baba
     size_t size() const { return history.size(); }
   };
 }
-

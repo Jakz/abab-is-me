@@ -75,6 +75,8 @@ struct size2d_t
   coord_t w, h;
   size2d_t() : size2d_t(0, 0) { }
   size2d_t(coord_t w, coord_t h) : w(w), h(h) { }
+
+  size2d_t operator/(coord_t v) const { return size2d_t(w / v, h / v); }
 };
 
 namespace baba

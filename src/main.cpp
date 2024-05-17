@@ -64,9 +64,11 @@ int main(int argc, char* argv[])
 {  
   world = new baba::World();
 
-  //baba::test::LevelTester tester;
-  //tester.test("0level", baba::test::MoveSequence("rrrrrdrrru"));
-  
+  baba::test::LevelTester tester;
+  tester.test("0level", baba::test::MoveSequence("5rdrrru"));
+  tester.test("1level", baba::test::MoveSequence("3lr10ul2dld2r6l3dr2ulu5r2d"));
+  tester.test("3level", baba::test::MoveSequence("4d"), false);
+
   if (!vm.init())
     return -1;
 
