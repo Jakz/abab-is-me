@@ -12,7 +12,11 @@
 
 #include <string>
 
-#if TARGET_PLATFORM == PLATFORM_DESKTOP
+#if TARGET_PLATFORM == PLATFORM_PORTMASTER
+
+  static const std::string DATA_FOLDER = R"(data/Data/)";
+
+#elif TARGET_PLATFORM == PLATFORM_DESKTOP
   
   static const std::string DATA_FOLDER = R"(E:\Games\Steam\steamapps\common\Baba Is You\Data\)";
 

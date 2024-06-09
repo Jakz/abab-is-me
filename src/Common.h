@@ -5,6 +5,8 @@
 #include <vector>
 #include "utils/format/format.h"
 
+static const char* DATA_PATH = "data/";
+
 #define LOGD(x, ...) printf(x "\n", __VA_ARGS__)
 #define LOGDD(x) printf(x "\n")
 
@@ -103,10 +105,10 @@ namespace io
 #include "SDL_image.h"
 #include "SDL_mixer.h"
 
-#include "gfx/SdlHelper.h"
-
 using color_t = SDL_Color;
 using rect_t = SDL_Rect;
+
+#include "gfx/SdlHelper.h"
 
 using Renderer = SDL;
 

@@ -8,7 +8,7 @@ using namespace baba;
 
 World::World() : _level(nullptr)
 {
-  _loader.setDataFolder(R"(E:\Games\Steam\SteamApps\common\Baba Is You\Data\)");
+  _loader.setDataFolder(path(DATA_PATH).append("Data/"));
   _data = _loader.loadGameData();
 }
 

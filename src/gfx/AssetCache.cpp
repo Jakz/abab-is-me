@@ -25,10 +25,10 @@ void AssetCache::init(Renderer* renderer, const path& baseFolder)
 {
   _renderer = renderer;
   
-  _dataFolder = baseFolder + "/Data/";
+  _dataFolder = baseFolder + "Data/";
   loadPalettes();
 
-  _loader.init(renderer, baseFolder + "/Assets.dat");
+  _loader.init(renderer, baseFolder + "Assets.dat");
   _loader.cacheOffsets();
 
   _numberedGfxIndices["level_link_number_00"] = { 10 };
@@ -119,12 +119,12 @@ void AssetCache::init(Renderer* renderer, const path& baseFolder)
   smallFont[u'y'] = 420;
   smallFont[u'z'] = 421;
 
-  smallFont[u'à'] = 2120;
+  smallFont[u'Ã '] = 2120;
 
-  smallFont[u'è'] = 2119;
-  smallFont[u'é'] = 2123;
+  smallFont[u'Ã¨'] = 2119;
+  smallFont[u'Ã©'] = 2123;
 
-  smallFont[u'ß'] = 34;
+  smallFont[u'ÃŸ'] = 34;
   
   
 
@@ -290,7 +290,7 @@ const Texture* AssetCache::imageGfx(const std::string& image) const
     return it->second.get();
 
   //TODO: make it relative to world name
-  std::string path = _dataFolder + R"(Worlds\baba\Images\)" + image;
+  std::string path = _dataFolder + R"(Worlds/baba/Images/)" + image;
 
   Surface surface;
 
@@ -356,7 +356,7 @@ const Texture* AssetCache::numberedGfx(const std::string& key)
           rects.push_back(dest);
         }
         else
-          rects.push_back(rect_t(0, 0, 0, 0));
+          rects.push_back({0, 0, 0, 0});
       }
 
       if (surface)

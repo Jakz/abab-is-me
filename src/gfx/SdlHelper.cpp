@@ -190,7 +190,12 @@ void SDL::blit(const Surface* src, const rect_t* srcRect, const Surface* dest, c
 Texture* SDL::loadImage(const path& path)
 {
   auto* surface = IMG_Load(path.c_str());
-  assert(surface);
+  
+  if (!surface)
+  {
+    LOGD("Failed to load image file %s", path.c_str());
+    abort();
+  }
 
   auto texture = SDL_CreateTextureFromSurface(_renderer, surface);
   SDL_FreeSurface(surface);
@@ -207,7 +212,13 @@ Texture* SDL::buildTexture(const Surface& surface)
 Surface SDL::loadImageAsSurface(const path& path)
 {
   auto* surface = IMG_Load(path.c_str());
-  assert(surface);
+
+  if (!surface)
+  {
+    LOGD("Failed to load image file %s", path.c_str());
+    abort();
+  }
+
 
   return Surface(surface);
 }

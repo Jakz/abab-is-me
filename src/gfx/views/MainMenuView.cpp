@@ -5,7 +5,7 @@ using namespace ui;
 
 void MainMenuView::render()
 {
-  _renderer->clear(color_t(0, 0, 0));
+  _renderer->clear({0, 0, 0});
 }
 
 void MainMenuView::handleKeyboardEvent(const events::KeyEvent& event)

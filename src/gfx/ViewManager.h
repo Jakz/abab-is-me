@@ -1,7 +1,7 @@
 #pragma once
 
-#include "SdlHelper.h"
 #include "Common.h"
+#include "SdlHelper.h"
 
 #include "gfx/AssetCache.h"
 

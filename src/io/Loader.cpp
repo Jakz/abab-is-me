@@ -11,15 +11,8 @@
 #include <string>
 #include <filesystem>
 
-#if !_WIN32
-namespace std
-{
-  int stoi(const std::string& str) { return atoi(str.c_str()); }
-}
-#else
 #include <filesystem>
 #include <regex>
-#endif
 
 #include "game/Types.h"
 
@@ -71,6 +64,8 @@ namespace sutils
 
       file.close();
     }
+    else
+      LOGD("Error opening file: %s", path.c_str());
 
     return lines;
   }
@@ -753,7 +748,7 @@ void ValuesParser::init(const path& dataFolder)
 
   if (count == 0)
   {
-    LOGDD("Unable to load values.lua from data folder, aborting.");
+    LOGD("Unable to load values.lua from data folder (%s), aborting.", dataFolder.c_str());
     abort();
   }
 }

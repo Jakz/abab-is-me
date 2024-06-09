@@ -1,6 +1,6 @@
 #pragma once
 
-//#include "Common.h"
+//include "Common.h"
 
 #include "SDL.h"
 #include "SDL_image.h"
@@ -13,6 +13,11 @@
 
 using u32 = uint32_t;
 struct size2d_t;
+
+struct SDL_Color;
+using color_t = SDL_Color;
+struct SDL_Rect;
+using rect_t = SDL_Rect;
 
 namespace events
 {

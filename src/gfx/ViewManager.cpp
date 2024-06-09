@@ -23,7 +23,7 @@ bool ui::ViewManager::init()
   if (!_renderer->init())
     return false;
 
-  _assets.init(_renderer, R"(E:\Games\Steam\SteamApps\common\Baba Is You)");
+  _assets.init(_renderer, DATA_PATH);
 
   if (!loadData())
     return false;
@@ -74,7 +74,7 @@ void ui::ViewManager::render()
 
 void ui::ViewManager::text(const Texture* texture, const std::string& text, int32_t x, int32_t y)
 {
-  rect_t dest = rect_t(x, y, 0, 0);
+  rect_t dest = {x, y, 0, 0};
   
   for (size_t i = 0; i < text.length(); ++i)
   {

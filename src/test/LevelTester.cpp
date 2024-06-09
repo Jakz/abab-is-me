@@ -14,31 +14,32 @@ baba::test::MoveSequence::MoveSequence(const std::string& string)
   for (size_t i = 0; i < string.size(); ++i)
   {
     char c = string[i];
+    auto max = std::max((int)count, (int)1ull);
 
     switch (c)
     {
       case 'r':
-        for (size_t i = 0; i < std::max(count, 1ull); ++i)
+        for (size_t i = 0; i < max; ++i)
           moves.push_back(D::RIGHT);
         count = 0;
         break;
       case 'l':
-        for (size_t i = 0; i < std::max(count, 1ull); ++i)
+        for (size_t i = 0; i < max; ++i)
           moves.push_back(D::LEFT);
         count = 0;
         break;
       case 'u':
-        for (size_t i = 0; i < std::max(count, 1ull); ++i)
+        for (size_t i = 0; i < max; ++i)
           moves.push_back(D::UP);
         count = 0;
         break;
       case 'd':
-        for (size_t i = 0; i < std::max(count, 1ull); ++i)
+        for (size_t i = 0; i < max; ++i)
           moves.push_back(D::DOWN);
         count = 0;
         break;
       case 'w':
-        for (size_t i = 0; i < std::max(count, 1ull); ++i)
+        for (size_t i = 0; i < max; ++i)
           moves.push_back(D::NONE);
         count = 0;
         break;
