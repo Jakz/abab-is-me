@@ -326,13 +326,13 @@ enum class KeyCode
 
 enum class KeyBind
 {
-  Left = KeyCode::KeyA,
-  Right = KeyCode::KeyD,
-  Up = KeyCode::KeyW,
-  Down = KeyCode::KeyS,
+  Left = (int)KeyCode::KeyA,
+  Right = (int)KeyCode::KeyD,
+  Up = (int)KeyCode::KeyW,
+  Down = (int)KeyCode::KeyS,
 
-  Wait = KeyCode::KeySpace,
-  Exit = KeyCode::KeyEsc,
+  Wait = (int)KeyCode::KeySpace,
+  Exit = (int)KeyCode::KeyEsc,
 };
 
 

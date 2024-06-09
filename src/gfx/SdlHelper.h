@@ -35,9 +35,6 @@ class Surface;
 struct SDL_Rect;
 using rect_t = SDL_Rect;
 
-struct SDL_Color;
-using color_t = SDL_Color;
-
 using path = std::string;
 
 class SDL

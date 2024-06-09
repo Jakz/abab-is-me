@@ -27,6 +27,8 @@ bool ui::ViewManager::init()
 
   if (!loadData())
     return false;
+  
+  return true;
 }
 
 void ui::ViewManager::deinit()
