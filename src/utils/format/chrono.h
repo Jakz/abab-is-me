@@ -277,7 +277,7 @@ To safe_duration_cast(std::chrono::duration<FromRep, FromPeriod> from,
 }  // namespace safe_duration_cast
 #endif
 
-// Prevents expansion of a preceding token as a function-style macro.
+// Prevents expansion of a preceding token_t as a function-style macro.
 // Usage: f FMT_NOMACRO()
 #define FMT_NOMACRO
 

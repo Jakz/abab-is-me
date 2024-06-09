@@ -237,6 +237,7 @@ void GameView::render()
   for (coord_t i = 0; i < rulesList.size(); ++i)
     _director->text(rulesList[i].name(), 5, 5 + (i + 1) * 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
 
+  _director->text(history.moveString(), 5, 5 + (rulesList.size() + 1) * 10, { 255, 255, 255 }, ui::TextAlign::LEFT, 1.0f);
 
   if (level->isVictory())
     _director->text("Victory!", size.w - 5, 5, { 255, 255, 0 }, ui::TextAlign::RIGHT, 1.0f);
@@ -283,7 +284,7 @@ void GameView::updateMoveBounds()
 
 void GameView::movement(D d)
 {
-  history.push(world->level()->state());
+  history.push(world->level()->state(), d);
 
   auto result = world->level()->movement(d);
 
@@ -291,6 +292,7 @@ void GameView::movement(D d)
   {
     world->pushLevel(result.levelName);
     levelLoaded();
+    history.clear();
   }
 }
 
@@ -303,6 +305,7 @@ void GameView::handleKeyboardEvent(const events::KeyEvent& event)
       case KeyCode::BindExit: 
         world->popLevel();
         levelLoaded();
+        history.clear();
         //gvm->exit(); 
       break;
 

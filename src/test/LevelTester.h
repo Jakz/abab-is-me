@@ -20,6 +20,6 @@ namespace baba::test
 
   public:
     LevelTester();
-    void test(const std::string levelName, const MoveSequence& moves);
+    void test(const std::string levelName, const MoveSequence& moves, bool victory = true);
   };
 }

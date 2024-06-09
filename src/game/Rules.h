@@ -28,6 +28,7 @@ namespace baba
     TELE      = 0x00020000ULL,
     SELECT    = 0x00040000ULL,
     PULL      = 0x00080000ULL,
+    Word      = 0x00100000ULL,
   };
 
   using ObjectProperties = bit_mask<ObjectProperty>;
@@ -40,14 +41,80 @@ namespace baba
     void clear() { properties.clear(); }
   };
 
-
   struct Rule
   {
     std::vector<const Object*> terms;
     std::string name() const;
 
     const Object* operator[](size_t i) const { return terms[i]; }
+    auto begin() const { return terms.begin(); }
   };
+
+  
+
+  namespace parser
+  {
+    enum class SymbolType { Noun, Property, Verb };
+
+    using token_t = const Object*;
+    using token_sequence = std::vector<token_t>;
+
+    class RuleParser
+    {
+      const GameData* _data;
+      const Rule* _rule;
+      token_sequence _tokens;
+
+      token_sequence::const_iterator _it;
+
+      void advance() { ++_it; }
+      void rewind() { --_it; }
+
+      const token_t& peek() const { return *_it; }
+      decltype(_it) previous() { return std::prev(_it); }
+
+      bool accept(SymbolType type);
+
+      bool match(SymbolType type)
+      {
+        bool matched = accept(type);
+
+        if (matched)
+          advance();
+
+        return matched;
+      }
+
+    public:
+      struct Subject { Subject(const Object* object) : object(object) { } const Object* object; };
+      
+
+    public:
+      RuleParser(const GameData* data) : _data(data), _rule(nullptr)
+      {
+
+      }
+
+      Subject* subject()
+      {
+        if (match(SymbolType::Noun))
+        {
+          return new Subject(*previous());
+        }
+      }
+
+      Rule* rule()
+      {
+        auto subj = subject();
+      }
+
+      void parse(const token_sequence& tokens)
+      {
+        _tokens = tokens;
+        _it = _tokens.begin();
+      }
+    };
+  }
 
   struct Rules
   {
@@ -57,6 +124,8 @@ namespace baba
     std::vector<Rule> _rules;
 
     void generateBaseRules(baba::Level* level);
+
+    
 
   public:
     Rules(const GameData* data) : _data(data) { }
