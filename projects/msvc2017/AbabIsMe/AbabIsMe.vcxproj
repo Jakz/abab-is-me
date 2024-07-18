@@ -150,6 +150,7 @@
     <ClInclude Include="..\..\..\src\Common.h" />
     <ClInclude Include="..\..\..\src\Config.h" />
     <ClInclude Include="..\..\..\src\game\Level.h" />
+    <ClInclude Include="..\..\..\src\game\LuaBridge.h" />
     <ClInclude Include="..\..\..\src\game\Rules.h" />
     <ClInclude Include="..\..\..\src\game\Tile.h" />
     <ClInclude Include="..\..\..\src\game\Types.h" />
@@ -163,6 +164,34 @@
     <ClInclude Include="..\..\..\src\io\Loader.h" />
     <ClInclude Include="..\..\..\src\io\Zip.h" />
     <ClInclude Include="..\..\..\src\io\zip\miniz.h" />
+    <ClInclude Include="..\..\..\src\lua\lapi.h" />
+    <ClInclude Include="..\..\..\src\lua\lauxlib.h" />
+    <ClInclude Include="..\..\..\src\lua\lcode.h" />
+    <ClInclude Include="..\..\..\src\lua\lctype.h" />
+    <ClInclude Include="..\..\..\src\lua\ldebug.h" />
+    <ClInclude Include="..\..\..\src\lua\ldo.h" />
+    <ClInclude Include="..\..\..\src\lua\lfunc.h" />
+    <ClInclude Include="..\..\..\src\lua\lgc.h" />
+    <ClInclude Include="..\..\..\src\lua\ljumptab.h" />
+    <ClInclude Include="..\..\..\src\lua\llex.h" />
+    <ClInclude Include="..\..\..\src\lua\llimits.h" />
+    <ClInclude Include="..\..\..\src\lua\lmem.h" />
+    <ClInclude Include="..\..\..\src\lua\lobject.h" />
+    <ClInclude Include="..\..\..\src\lua\lopcodes.h" />
+    <ClInclude Include="..\..\..\src\lua\lopnames.h" />
+    <ClInclude Include="..\..\..\src\lua\lparser.h" />
+    <ClInclude Include="..\..\..\src\lua\lprefix.h" />
+    <ClInclude Include="..\..\..\src\lua\lstate.h" />
+    <ClInclude Include="..\..\..\src\lua\lstring.h" />
+    <ClInclude Include="..\..\..\src\lua\ltable.h" />
+    <ClInclude Include="..\..\..\src\lua\ltm.h" />
+    <ClInclude Include="..\..\..\src\lua\lua.h" />
+    <ClInclude Include="..\..\..\src\lua\lua.hpp" />
+    <ClInclude Include="..\..\..\src\lua\luaconf.h" />
+    <ClInclude Include="..\..\..\src\lua\lualib.h" />
+    <ClInclude Include="..\..\..\src\lua\lundump.h" />
+    <ClInclude Include="..\..\..\src\lua\lvm.h" />
+    <ClInclude Include="..\..\..\src\lua\lzio.h" />
     <ClInclude Include="..\..\..\src\test\LevelTester.h" />
     <ClInclude Include="..\..\..\src\utils\format\chrono.h" />
     <ClInclude Include="..\..\..\src\utils\format\color.h" />
@@ -177,6 +206,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\game\Level.cpp" />
+    <ClCompile Include="..\..\..\src\game\LuaBridge.cpp" />
     <ClCompile Include="..\..\..\src\game\Rules.cpp" />
     <ClCompile Include="..\..\..\src\game\Tile.cpp" />
     <ClCompile Include="..\..\..\src\game\World.cpp" />
@@ -191,6 +221,39 @@
     <ClCompile Include="..\..\..\src\io\Loader.cpp" />
     <ClCompile Include="..\..\..\src\io\Zips.cpp" />
     <ClCompile Include="..\..\..\src\io\zip\miniz.cpp" />
+    <ClCompile Include="..\..\..\src\lua\lapi.c" />
+    <ClCompile Include="..\..\..\src\lua\lauxlib.c" />
+    <ClCompile Include="..\..\..\src\lua\lbaselib.c" />
+    <ClCompile Include="..\..\..\src\lua\lcode.c" />
+    <ClCompile Include="..\..\..\src\lua\lcorolib.c" />
+    <ClCompile Include="..\..\..\src\lua\lctype.c" />
+    <ClCompile Include="..\..\..\src\lua\ldblib.c" />
+    <ClCompile Include="..\..\..\src\lua\ldebug.c" />
+    <ClCompile Include="..\..\..\src\lua\ldo.c" />
+    <ClCompile Include="..\..\..\src\lua\ldump.c" />
+    <ClCompile Include="..\..\..\src\lua\lfunc.c" />
+    <ClCompile Include="..\..\..\src\lua\lgc.c" />
+    <ClCompile Include="..\..\..\src\lua\linit.c" />
+    <ClCompile Include="..\..\..\src\lua\liolib.c" />
+    <ClCompile Include="..\..\..\src\lua\llex.c" />
+    <ClCompile Include="..\..\..\src\lua\lmathlib.c" />
+    <ClCompile Include="..\..\..\src\lua\lmem.c" />
+    <ClCompile Include="..\..\..\src\lua\loadlib.c" />
+    <ClCompile Include="..\..\..\src\lua\lobject.c" />
+    <ClCompile Include="..\..\..\src\lua\lopcodes.c" />
+    <ClCompile Include="..\..\..\src\lua\loslib.c" />
+    <ClCompile Include="..\..\..\src\lua\lparser.c" />
+    <ClCompile Include="..\..\..\src\lua\lstate.c" />
+    <ClCompile Include="..\..\..\src\lua\lstring.c" />
+    <ClCompile Include="..\..\..\src\lua\lstrlib.c" />
+    <ClCompile Include="..\..\..\src\lua\ltable.c" />
+    <ClCompile Include="..\..\..\src\lua\ltablib.c" />
+    <ClCompile Include="..\..\..\src\lua\ltm.c" />
+    <ClCompile Include="..\..\..\src\lua\luac.c" />
+    <ClCompile Include="..\..\..\src\lua\lundump.c" />
+    <ClCompile Include="..\..\..\src\lua\lutf8lib.c" />
+    <ClCompile Include="..\..\..\src\lua\lvm.c" />
+    <ClCompile Include="..\..\..\src\lua\lzio.c" />
     <ClCompile Include="..\..\..\src\main.cpp" />
     <ClCompile Include="..\..\..\src\test\LevelTester.cpp" />
     <ClCompile Include="..\..\..\src\utils\format\format.cpp" />
@@ -202,6 +265,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </Natvis>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\src\lua\Makefile" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

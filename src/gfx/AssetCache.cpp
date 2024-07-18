@@ -6,6 +6,8 @@
 
 #include "ViewManager.h"
 
+#include "game/LuaBridge.h"
+
 #include <filesystem>
 
 AssetCache::AssetCache()
@@ -27,6 +29,9 @@ void AssetCache::init(Renderer* renderer, const path& baseFolder)
   
   _dataFolder = baseFolder + "Data/";
   loadPalettes();
+
+  lua::LuaBridge lua;
+  lua.init(_dataFolder);
 
   _loader.init(renderer, baseFolder + "Assets.dat");
   _loader.cacheOffsets();
@@ -119,13 +124,14 @@ void AssetCache::init(Renderer* renderer, const path& baseFolder)
   smallFont[u'y'] = 420;
   smallFont[u'z'] = 421;
 
+  /*
   smallFont[u'à'] = 2120;
 
   smallFont[u'è'] = 2119;
   smallFont[u'é'] = 2123;
 
   smallFont[u'ß'] = 34;
-  
+  */
   
 
 }
@@ -384,9 +390,9 @@ const Texture* AssetCache::iconGfx(const baba::Icon* spec) const
   std::string path;
 
   if (spec->spriteInRoot)
-    path = _dataFolder + R"(Sprites\)" + spec->sprite + ".png";
+    path = _dataFolder + R"(Sprites/)" + spec->sprite + ".png";
   else /* TODO: use world folder, not hardcoded one */
-    path = _dataFolder + R"(Worlds\baba\Sprites\)" + spec->sprite + ".png";
+    path = _dataFolder + R"(Worlds/baba/Sprites/)" + spec->sprite + ".png";
 
   auto asset = _renderer->loadImage(path);
   auto rit = _iconGfxs.emplace(std::make_pair(spec, asset));
